@@ -46,22 +46,24 @@ if (await backend.has(assetname)) {
 }
 
 // Find the two most correlated columns
-const columns: number[][] = xs[0].map((_: Row, i: number) => xs.map((r: Row) => r[i]));
-const out: number[] = ys.map((r: Row) => r[0]);
-const correlations: number[] = columns.map((c) => correlation(c, out));
+const columns: Array<Col> = xs[0].map((_: Row, i: number) =>
+  xs.map((r: Row) => r[i])
+);
+const out: Col = ys.map((r: Row) => r[0]);
+const correlations: Col = columns.map((c) => correlation(c, out));
 type CS = [number, number];
-const sorted_index: number[] = correlations
+const sorted_index: Col = correlations
   .map((c: number, i: number) => [i, Math.abs(c)] as CS)
   .sort((a: CS, b: CS) => b[1] - a[1])
   .map((x: CS) => x[0]);
-[0, 1].forEach((s) => {
+[0, 1].forEach((s: number) => {
   const index: number = sorted_index[s];
   const label: string = input_labels[index];
   console.log("Correlation for label", index, label, "is", correlations[index]);
 });
 
 // Callback to model from dashboard
-const means: Input = columns.map((c) => avg(c)) as Input;
+const means: Input = columns.map((c: Col) => avg(c)) as Input;
 const xi = sorted_index[0];
 const yi = sorted_index[1];
 function predict(a: number, b: number): number {
