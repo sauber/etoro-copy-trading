@@ -75,10 +75,16 @@ function outlierFilter(data: Dataset): Dataset {
   const skipy: Col = outlierIndex(data.outputs);
   const skip: Col = uniq([...skipx, ...skipy]);
 
-  return {
+  // No outliers found
+  if (skip.length == 0) return data;
+
+  // Filter as long as outliers are found
+  console.log(`Removed ${skip.length} outliers`);
+
+  return outlierFilter({
     inputs: data.inputs.filter((_, i: number) => !skip.includes(i)),
     outputs: data.outputs.filter((_, i: number) => !skip.includes(i)),
-  };
+  });
 }
 
 // Load model
@@ -176,12 +182,7 @@ const loaded: Dataset = await loadTrainingdata(backend);
 console.log("Loaded samples:", loaded.inputs.length);
 
 // Filtering
-let prev: Dataset = loaded;
-let data: Dataset = loaded;
-do {
-  [prev, data] = [data, outlierFilter(data)];
-  console.log(`Outlier trimmed ${prev.inputs.length} => ${prev.inputs.length}`);
-} while (prev.inputs.length > data.inputs.length);
+const data = outlierFilter(loaded);
 console.log("Sanitized samples:", data.inputs.length);
 
 // Load model
@@ -211,7 +212,7 @@ function dashboard(iteration: number, loss: number[]): void {
 // Training
 console.log("Training...");
 const iterations = 2000;
-const learning_rate = 0.0001;
+const learning_rate = 0.001;
 const batch_size = 64;
 const results = model.train(
   data.inputs,
@@ -221,6 +222,7 @@ const results = model.train(
   batch_size,
   dashboard,
 );
+console.log(d.finish());
 console.log(results);
 validation(model, data, 5);
 
