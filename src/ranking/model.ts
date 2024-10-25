@@ -42,11 +42,13 @@ export class Model {
     outputs: Outputs,
     max_iterations: number = 20000,
     learning_rate: number = 0.001,
+    batch_size: number = 64,
     callback?: Dashboard
   ): TrainResults {
     this.network.adapt(inputs);
     const train = new Train(this.network, inputs, outputs);
     if ( callback ) train.callback = callback;
+    train.batchSize = batch_size;
     const iterations: number = train.run(max_iterations, learning_rate);
     return { iterations, loss: train.loss };
   }
