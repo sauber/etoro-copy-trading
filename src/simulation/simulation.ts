@@ -38,6 +38,13 @@ export class Simulation {
   //   return strategy;
   // }
 
+  /** Identify which investors are active on any given day */
+  private on(date: DateFormat): Investors {
+    return this.investors.filter((i) =>
+      i.chart.start >= date && i.chart.end <= date
+    );
+  }
+
   /** Open all positions suggested by strategy */
   private open(date: DateFormat): void {
     const order: Order = this.strategy.order(this.portfolio, date);
@@ -94,10 +101,10 @@ export class Simulation {
 
   /** Run a trading session on a particlar date */
   private step(date: DateFormat): void {
+    this.valuate(date);
     this.expire(date);
     this.close(date);
     this.open(date);
-    this.valuate(date);
   }
 
   /** Run a trading sesssion each day in period */
