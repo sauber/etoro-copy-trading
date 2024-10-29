@@ -6,14 +6,20 @@ import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 
 export type Names = Array<string>;
 export type Investors = Array<Investor>;
+type Dates = Array<DateFormat>;
 
 /** Handle Community I/O requests to local repository */
 export class Community {
   constructor(private readonly repo: Backend) {}
 
+  /** List of all dates in repo */
+  private dates(): Promise<Dates> {
+    return this.repo.dirs();
+  }
+
   /** Unique set of names across all dates */
   public async allNames(): Promise<Names> {
-    const dates: DateFormat[] = await this.repo.dirs();
+    const dates: Dates = await this.dates();
     const allNames: Names[] = await Promise.all(
       dates.map((date) => this.namesByDate(date)),
     );
@@ -39,7 +45,7 @@ export class Community {
 
   /** The first directory where names exists */
   public async start(): Promise<DateFormat | null> {
-    const dates: DateFormat[] = await this.repo.dirs();
+    const dates: Dates = await this.dates();
     for (const date of [...dates]) {
       if ((await this.namesByDate(date)).length) return date;
     }
@@ -48,9 +54,9 @@ export class Community {
 
   /** The last directory where names exists */
   public async end(): Promise<DateFormat | null> {
-    const dates: DateFormat[] = await this.repo.dirs();
+    const dates: Dates = await this.dates();
     for (const date of [...dates].reverse()) {
-      if ((await this.namesByDate(date)).length) return date;
+      if ((await this.on(date)).length) return date;
     }
     return null;
   }
@@ -144,9 +150,9 @@ export class Community {
 
   /** Investors on latest date */
   public async latest(): Promise<Investors> {
-    const end: DateFormat | null = await this.end();
-    if (!end) return [];
-    return this.on(end);
+    const end = await this.end();
+    if (end) return await this.on(end);
+    return [];
   }
 
   /** Load a list of investor charts from list of names */
