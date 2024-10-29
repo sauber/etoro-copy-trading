@@ -1,9 +1,9 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { community } from "./testdata.ts";
-import type { Investors } from "./testdata.ts";
-import { Simulation } from "./simulation.ts";
-import { NullStrategy, RandomStrategy } from "./strategy.ts";
 import { DateFormat, diffDate } from "📚/time/mod.ts";
+import { community } from "📚/simulation/testdata.ts";
+import type { Investors } from "📚/simulation/testdata.ts";
+import { Simulation } from "📚/simulation/simulation.ts";
+import { NullStrategy, RandomStrategy } from "📚/simulation/strategy.ts";
 
 const [start, end] = (await Promise.all([
   community.start(),
@@ -17,16 +17,16 @@ Deno.test("Instance", () => {
   assertInstanceOf(sim, Simulation);
 });
 
-Deno.test("Null Strategy", async () => {
+Deno.test("Null Strategy", () => {
   const sim = new Simulation(start, end, investors, new NullStrategy([]));
-  await sim.run();
+  sim.run();
   const chart = sim.chart;
   const days = 1 + diffDate(start, end);
   assertEquals(chart.gain(start, end), 0);
   assertEquals(chart.length, days);
 });
 
-Deno.test.ignore("Random Strategy", async () => {
+Deno.test.ignore("Random Strategy", () => {
   const stop = "2022-04-27";
   const sim = new Simulation(
     start,
@@ -34,7 +34,7 @@ Deno.test.ignore("Random Strategy", async () => {
     investors,
     new RandomStrategy(investors, 1000),
   );
-  await sim.run();
+  sim.run();
   sim.book.export.digits(2).print("Random Strategy");
   const positions: number = sim.book.portfolio.length;
   assertEquals(positions, 0);
