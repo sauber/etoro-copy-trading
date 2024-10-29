@@ -1,97 +1,61 @@
 /** Train ranking model */
 
-import { avg, correlation, std } from "jsr:@sauber/statistics";
-import { Dashboard, type Predict } from "jsr:@sauber/ml-cli-dashboard";
+import { avg } from "jsr:@sauber/statistics";
+import { Dashboard, type Predict } from "@sauber/ml-cli-dashboard";
 import type { NetworkData } from "@sauber/neurons";
-import { shuffleArray } from "@hugoalh/shuffle-array";
+import { DataFrame } from "@sauber/dataframe";
 
 import { Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
-import { Community } from "📚/repository/community.ts";
+import { Community, type Investors } from "📚/repository/mod.ts";
 
 import { Model } from "📚/ranking/model.ts";
-import { input_labels } from "📚/ranking/mod.ts";
-import type { Input, Inputs, Output, Outputs } from "📚/ranking/mod.ts";
-import { TrainingData } from "📚/ranking/trainingdata.ts";
+import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
+import { type Samples, TrainingData } from "📚/ranking/trainingdata.ts";
 
-// Type for column of data
-type Col = Array<number>;
-type Row = Array<number>;
+const modelAssetName = "ranking.network";
 
-// Input and Output training data
-type Dataset = { inputs: Inputs; outputs: Outputs };
+// Bind to Repo
+function setupRepo(path: string): Backend {
+  if (!Deno.statSync(path)) throw new Error(`${path} does not exist.`);
+  const disk = new DiskBackend(path);
+  const backend = new CachingBackend(disk);
+  return backend;
+}
 
-const modelAsset = "ranking.network";
+// Load all investors
+async function loadInvestors(repo: Backend): Promise<Investors> {
+  const community = new Community(repo);
+  const investors: Investors = await community.all();
+  return investors;
+}
 
 // Load training data
-async function loadTrainingdata(repo: Backend): Promise<Dataset> {
-  const community = new Community(repo);
-  const data = new TrainingData(community, 30);
-  await data.load();
-  const xs: Inputs = data.inputs;
-  const ys: Outputs = data.outputs;
-  return { inputs: xs, outputs: ys };
+function trainingdata(investors: Investors, window: number = 30): DataFrame {
+  const td = new TrainingData(window);
+  const samples: Samples = [];
+
+  for (const investor of investors) {
+    samples.push(...td.features(investor));
+  }
+  const records = samples.map((s) => Object.assign(s.input, s.output));
+  return DataFrame.fromRecords(records);
 }
 
-// Transpose rows to columns
-function transpose(rows: Array<Row>): Array<Col> {
-  return rows[0].map((_: number, i: number) => rows.map((r: Row) => r[i]));
-}
-
-// Indices of outliers
-function outlierIndex(rows: Array<Row>, factor: number = 10): Array<number> {
-  const index: Array<number> = [];
-
-  // Mean and standard deviation for each column
-  const columns = transpose(rows);
-  const means: Row = columns.map((c: Col) => avg(c));
-  const stds: Row = columns.map((c: Col) => std(c));
-
-  // Record indices of rows having an outlier
-  rows.forEach((row: Row, rownum: number) => {
-    row.every((v: number, colnum: number) => {
-      const mean = means[colnum];
-      const std = stds[colnum];
-      const outlie = Math.abs(mean - v) / std;
-      if (outlie < factor) return true;
-
-      // console.log("skip", { v, mean, std, outlie, rownum, colnum });
-      index.push(rownum);
-      return false;
-    });
-  });
-
-  return index;
-}
-
-// Return only each number once
-function uniq(list: Row): Row {
-  return list.filter((x, i, a) => a.indexOf(x) == i);
-}
-
-// Remove outliers from data
-function outlierFilter(data: Dataset): Dataset {
-  // Identifify indices outliers in input and output data
-  const skipx: Col = outlierIndex(data.inputs);
-  const skipy: Col = outlierIndex(data.outputs);
-  const skip: Col = uniq([...skipx, ...skipy]);
-
-  // No outliers found
-  if (skip.length == 0) return data;
-
-  // Filter as long as outliers are found
-  console.log(`Removed ${skip.length} outliers`);
-
-  return outlierFilter({
-    inputs: data.inputs.filter((_, i: number) => !skip.includes(i)),
-    outputs: data.outputs.filter((_, i: number) => !skip.includes(i)),
-  });
+// Recursively trim training data until no outliers remai0
+function outlierFilter(data: DataFrame, factor: number = 10): DataFrame {
+  const prev: number = data.length;
+  data = data.outlier(factor);
+  if (data.length != prev) {
+    console.log(`Data length trimmed ${prev} to ${data.length}`);
+  }
+  return (data.length == prev) ? data : outlierFilter(data, factor);
 }
 
 // Load model
 async function loadModel(repo: Backend, inputs: number): Promise<Model> {
-  if (await repo.has(modelAsset)) {
+  if (await repo.has(modelAssetName)) {
     console.log("Loading existing model...");
-    const rankingparams = await repo.retrieve(modelAsset) as NetworkData;
+    const rankingparams = await repo.retrieve(modelAssetName) as NetworkData;
     return Model.import(rankingparams);
   } else {
     console.log("Generating new model...");
@@ -100,44 +64,43 @@ async function loadModel(repo: Backend, inputs: number): Promise<Model> {
 }
 
 // Save model to repository
-function saveModel(model: Model): Promise<void> {
-  return backend.store(modelAsset, model.export());
+function saveModel(repo: Backend, model: Model): Promise<void> {
+  return repo.store(modelAssetName, model.export());
 }
 
 // Identify top two input columns correlated to output
-function correlations(data: Dataset): [number, number] {
-  // Correlate all inputs columns to output column
-  const columns = transpose(data.inputs);
-  const out: Col = data.outputs.map((r: Output) => r[0]);
-  const cor: Col = columns.map((c) => correlation(c, out));
-
-  // Sort columns by highest correlation
-  type CS = [number, number];
-  const sorted_index: Col = cor
-    .map((c: number, i: number) => [i, Math.abs(c)] as CS)
-    .sort((a: CS, b: CS) => b[1] - a[1])
-    .map((x: CS) => x[0]);
-
-  // Return indices of the two highest correlation columns
-  return [0, 1].map((i) => sorted_index[i]) as [number, number];
+function correlations(inputs: DataFrame, outputs: DataFrame): [string, string] {
+  const correlations: DataFrame = inputs
+    .correlationMatrix(outputs)
+    .amend("abs", (r) => Math.abs(r.SharpeRatio as number))
+    .sort("abs")
+    .reverse;
+  const names = correlations.values<string>("Name").slice(0, 2) as [
+    string,
+    string,
+  ];
+  return names;
 }
 
 // Create dashboard
 function createDashboard(
-  data: Dataset,
+  data: DataFrame,
   predict: Predict,
-  columns: [number, number],
-  labels: [string, string],
+  xlabel: keyof Input,
+  ylabel: keyof Input,
 ): Dashboard {
   const epochs = 2000;
   const width = 78;
   const height = 12;
   type Point = [number, number];
-  const [xi, yi] = columns;
-  const overlay: Array<Point> = shuffleArray(
-    data.inputs.map((r: Input) => [r[xi], r[yi]] as Point),
-  ).slice(0, 200);
-  const out = data.outputs.map((r: Row) => r[0]);
+
+  // Pick max 200 samples for overlay
+  const samples: DataFrame = data.shuffle.slice(0, 200);
+  const overlay: Array<Point> = samples.records.map((r) =>
+    [r[xlabel], r[ylabel]] as Point
+  );
+  const out: number[] = samples.records.map((r) => r.SharpeRatio as number);
+
   return new Dashboard(
     width,
     height,
@@ -145,23 +108,22 @@ function createDashboard(
     out,
     predict,
     epochs,
-    labels[0],
-    labels[1],
+    xlabel,
+    ylabel,
   );
 }
 
 // Validation of random inputs
-function validation(model: Model, data: Dataset, count: number = 5): void {
+function validation(model: Model, data: DataFrame, count: number = 5): void {
   console.log("Validation");
-  const samples = shuffleArray(Array.from(Array(data.inputs.length).keys()))
-    .slice(0, count)
-    .sort((a: number, b: number) => a - b);
+  const samples = data.shuffle.slice(0, count);
+  const inputs: Inputs = samples.exclude(["SharpeRatio"]).records as Inputs;
+  const outputs: Outputs = samples.include(["SharpeRatio"]).records as Outputs;
   // Compare training output with predicted output
-  samples.forEach((sample: number) => {
-    const input: Input = data.inputs[sample];
-    console.log("sample n:", sample);
+  inputs.forEach((input: Input, sample: number) => {
+    console.log("sample");
     console.log("  xs:", input);
-    console.log("  ys:", data.outputs[sample]);
+    console.log("  ys:", outputs[sample]);
     console.log("  yp:", model.predict(input));
   });
 }
@@ -170,39 +132,43 @@ function validation(model: Model, data: Dataset, count: number = 5): void {
 // Main
 ////////////////////////////////////////////////////////////////////////
 
-// Repo
-if (!Deno.args[0]) throw new Error("Path missing");
-const path: string = Deno.args[0];
-const disk = new DiskBackend(path);
-const backend = new CachingBackend(disk);
-
-// Load training data
+// Load investors
+const repo: Backend = setupRepo(Deno.args[0]);
 console.log("Loading...");
-const loaded: Dataset = await loadTrainingdata(backend);
-console.log("Loaded samples:", loaded.inputs.length);
+const investors: Investors = await loadInvestors(repo);
+
+// Extract training data
+console.log("Load features...");
+const loaded: DataFrame = trainingdata(investors);
+console.log("Loaded samples:", loaded.length);
 
 // Filtering
-const data = outlierFilter(loaded);
-console.log("Sanitized samples:", data.inputs.length);
+const data = outlierFilter(loaded, 10);
+const inputs = data.exclude(["SharpeRatio"]);
+const outputs = data.include(["SharpeRatio"]);
+console.log("Sanitized samples:", data.length);
 
 // Load model
-const model = await loadModel(backend, data.inputs[0].length);
+const model = await loadModel(repo, inputs.names.length);
 
 // Get top two correlated columns
-const cor = correlations(data) as [number, number];
-// const [xi, yi] = cor;
-const labels = cor.map((i) => input_labels[i]) as [string, string];
-console.log("Correlations:", { cor, labels });
+const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
+console.log("Correlations:", { labels });
 
 // Callback to model from dashboard
-const means: Input = transpose(data.inputs).map((c: Col) => avg(c)) as Input;
+const colNames = inputs.names as Array<keyof Input>;
+const means: Input = Object.fromEntries(
+  colNames.map((
+    name: keyof Input,
+  ) => [name, avg(data.values(name) as number[])]),
+) as Input;
 function predict(a: number, b: number): number {
-  means[cor[0]] = a;
-  means[cor[1]] = b;
-  return model.predict(means)[0];
+  means[labels[0]] = a;
+  means[labels[1]] = b;
+  return model.predict(means).SharpeRatio;
 }
 
-const d = createDashboard(data, predict, cor, labels);
+const d = createDashboard(data, predict, ...labels);
 
 // Callback to dashboard from training
 function dashboard(iteration: number, loss: number[]): void {
@@ -215,8 +181,8 @@ const iterations = 2000;
 const learning_rate = 0.001;
 const batch_size = 64;
 const results = model.train(
-  data.inputs,
-  data.outputs,
+  inputs.records as Inputs,
+  outputs.records as Outputs,
   iterations,
   learning_rate,
   batch_size,
@@ -228,4 +194,4 @@ validation(model, data, 5);
 
 // Store Model
 console.log("Saving...");
-await saveModel(model);
+await saveModel(repo, model);

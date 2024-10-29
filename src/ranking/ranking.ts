@@ -1,8 +1,9 @@
 import { Investor } from "📚/investor/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
+
 import { Model } from "📚/ranking/model.ts";
 import { Features } from "📚/ranking/features.ts";
-import type { Input, Output } from "./mod.ts";
+import type { Input, Output } from "📚/ranking/types.ts";
 
 export class Ranking {
   constructor(private readonly model: Model) {}
@@ -14,6 +15,6 @@ export class Ranking {
   ): number {
     const input: Input = new Features(investor).input(date);
     const prediction: Output = this.model.predict(input);
-    return prediction[0];
+    return prediction.SharpeRatio;
   }
 }

@@ -13,7 +13,7 @@
   "imports": {
     "@debut/indicators": "npm:@debut/indicators@^1.3.21",
     "@hugoalh/shuffle-array": "jsr:@hugoalh/shuffle-array@^2.0.4",
-    "@sauber/dataframe": "jsr:@sauber/dataframe@^0.0.5",
+    "@sauber/dataframe": "jsr:@sauber/dataframe@^0.3.0",
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.4.1",
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
     "@sauber/table": "jsr:@sauber/table@^0.1.0",
