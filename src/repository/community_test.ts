@@ -42,7 +42,7 @@ Deno.test("Heap repo", async (t) => {
         },
       }),
       new Asset(`${name}.stats`, repo).store({ Data: { CustomerId: name } }),
-      new Asset(`${name}.portfolio`, repo).store({AggregatedMirrors: []}),
+      new Asset(`${name}.portfolio`, repo).store({ AggregatedMirrors: [] }),
     ]);
     const names: string[] = await community.namesByDate(date);
     assertEquals(names, [name]);

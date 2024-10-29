@@ -135,14 +135,13 @@ export class InvestorAssembly {
     return stats.value;
   }
 
-  /** Extract stats for all available dates within chart range */
+  /** Extract stats for all available dates within or after chart range */
   public async stats(): Promise<StatsByDate> {
     // Dates
     const start: DateFormat = await this.start();
-    const end: DateFormat = await this.end();
     const dates: DateFormat[] = await this.statsAsset.dates();
     const range: DateFormat[] = dates.filter(
-      (date) => date >= start && date <= end,
+      (date) => date >= start,
     );
 
     // Load Stats axports for eachd date in range
