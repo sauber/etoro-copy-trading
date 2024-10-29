@@ -3,7 +3,7 @@ import { type Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import type { Investors } from "📚/repository/mod.ts";
 import type { Chart } from "📚/chart/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { Random } from "📚/timing/strategy.ts";
+import { Random, RSI } from "📚/timing/strategy.ts";
 import { simulation } from "📚/timing/simulation.ts";
 
 type Charts = Array<Chart>;
@@ -38,7 +38,7 @@ console.log("Charts loaded:", data.length);
 
 // Strategy
 const chart: Chart = data[0];
-const strategy = new Random(chart);
+const strategy = new RSI(chart, 21, 45, 55);
 // console.log(strategy);
 const results = simulation(chart, strategy);
 console.log(results);
