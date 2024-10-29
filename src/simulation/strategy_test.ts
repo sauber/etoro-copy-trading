@@ -4,10 +4,10 @@ import {
   NullStrategy,
   RandomStrategy,
   Strategy,
-} from "./strategy.ts";
-import { Order } from "../portfolio/order.ts";
-import { Portfolio } from "../portfolio/portfolio.ts";
-import { investor, community, position } from "../portfolio/testdata.ts";
+} from "📚/simulation/strategy.ts";
+import { Order } from "📚/portfolio/order.ts";
+import { Portfolio } from "📚/portfolio/portfolio.ts";
+import { investor, community, position } from "📚/portfolio/testdata.ts";
 
 const investors = await community.all();
 const date = investor.chart.start;
