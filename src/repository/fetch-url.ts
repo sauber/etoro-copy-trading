@@ -1,5 +1,5 @@
 import { sprintf } from "@std/fmt/printf";
-import type { DiscoverFilter, InvestorId } from "./mod.ts";
+import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
 
 type URL = string;
 

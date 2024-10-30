@@ -1,10 +1,10 @@
-import { DiskBackend, Asset, CachingBackend } from "../storage/mod.ts";
-import type { InvestorId, DiscoverFilter } from "./mod.ts";
-import type { DiscoverData } from "./discover.ts";
-import type { ChartData } from "./chart.ts";
-import type { PortfolioData } from "./portfolio.ts";
-import type { StatsData } from "./stats.ts";
-import { Community } from "./community.ts";
+import { Asset, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
+import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
+import type { DiscoverData } from "📚/repository/discover.ts";
+import type { ChartData } from "📚/repository/chart.ts";
+import type { PortfolioData } from "📚/repository/portfolio.ts";
+import type { StatsData } from "📚/repository/stats.ts";
+import { Community } from "📚/repository/community.ts";
 
 const path = "testdata";
 export const repo = new CachingBackend(new DiskBackend(path));

@@ -1,4 +1,4 @@
-import { InvestorId } from "./mod.ts";
+import { InvestorId } from "📚/repository/types.ts";
 
 type Position = {
   InstrumentID: number;

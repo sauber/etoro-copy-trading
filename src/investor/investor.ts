@@ -40,27 +40,27 @@ export class Investor {
   }
 
   // Export raw data
-  public get export(): InvestorExport {
-    return {
-      UserName: this.UserName,
-      CustomerID: this.CustomerID,
-      FullName: this.FullName,
-      end: this.chart.end,
-      chart: this.chart.values,
-      mirrors: this.mirrors.export,
-      stats: this.stats.export,
-    };
-  }
+  // public get export(): InvestorExport {
+  //   return {
+  //     UserName: this.UserName,
+  //     CustomerID: this.CustomerID,
+  //     FullName: this.FullName,
+  //     end: this.chart.end,
+  //     chart: this.chart.values,
+  //     mirrors: this.mirrors.export,
+  //     stats: this.stats.export,
+  //   };
+  // }
 
   // Generate new object from raw data
-  static import(data: InvestorExport): Investor {
-    return new Investor(
-      data.UserName,
-      data.CustomerID,
-      data.FullName,
-      new Chart(data.chart, data.end),
-      new Diary<InvestorId[]>(data.mirrors),
-      new Diary<StatsExport>(data.stats),
-    )
-  }
+  // static import(data: InvestorExport): Investor {
+  //   return new Investor(
+  //     data.UserName,
+  //     data.CustomerID,
+  //     data.FullName,
+  //     new Chart(data.chart, data.end),
+  //     new Diary<InvestorId[]>(data.mirrors),
+  //     new Diary<StatsExport>(data.stats),
+  //   )
+  // }
 }

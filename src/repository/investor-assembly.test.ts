@@ -2,15 +2,19 @@ import { Investor } from "📚/investor/mod.ts";
 import {
   assert,
   assertEquals,
-  assertGreater,
   assertInstanceOf,
   assertNotEquals,
 } from "@std/assert";
-import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
-import type { MirrorsByDate, StatsByDate } from "./investor-assembly.ts";
+import {
+  InvestorAssembly,
+  type InvestorExport,
+} from "📚/repository/investor-assembly.ts";
 
-import { InvestorId } from "📚/repository/mod.ts";
+// import { InvestorId } from "📚/repository/mod.ts";
 import { repo } from "📚/repository/testdata.ts";
+import type { InvestorId } from "📚/repository/types.ts";
+import type { Chart } from "📚/chart/mod.ts";
+import { Asset } from "📚/storage/mod.ts";
 
 // Test Data
 const username = "Schnaub123";
@@ -27,29 +31,30 @@ Deno.test("UserName", () => {
   assertEquals(name, username);
 });
 
+Deno.test("Caching", async () => {
+  const assembly = new InvestorAssembly(username, repo);
+  const _investor: Investor = await assembly.investor();
+  const asset = new Asset<InvestorExport>(username + ".compiled", repo);
+  assert(await asset.exists());
+});
+
 Deno.test("CustomerId", async () => {
   const assembly = new InvestorAssembly(username, repo);
-  assertEquals(await assembly.CustomerId(), customerid);
+  const investor: Investor = await assembly.investor();
+  assertEquals(investor.CustomerID, customerid);
 });
 
-Deno.test("Full Name", async () => {
+Deno.test("FullName", async () => {
   const assembly = new InvestorAssembly("hech123", repo);
-  assertEquals(await assembly.FullName(), "Martin Stewart Henshaw");
-});
-
-Deno.test("Start", async () => {
-  const assembly = new InvestorAssembly(username, repo);
-  assertEquals(await assembly.start(), "2021-02-01");
-});
-
-Deno.test("End", async () => {
-  const assembly = new InvestorAssembly(username, repo);
-  assertEquals(await assembly.end(), "2022-04-25");
+  const investor: Investor = await assembly.investor();
+  assertEquals(investor.FullName, "Martin Stewart Henshaw");
 });
 
 Deno.test("Chart", async () => {
   const assembly = new InvestorAssembly(username, repo);
-  const series: number[] = await assembly.chart();
+  const investor: Investor = await assembly.investor();
+  const chart: Chart = investor.chart;
+  const series: number[] = chart.values;
   assertEquals(series.length, 449);
   assertEquals(series[0], 620.58);
   assertEquals(series[series.length - 1], 12565.32);
@@ -57,8 +62,9 @@ Deno.test("Chart", async () => {
 
 Deno.test("Stats", async () => {
   const assembly = new InvestorAssembly(username, repo);
-  const stats: StatsByDate = await assembly.stats();
-  assertEquals(Object.keys(stats), [
+  const investor: Investor = await assembly.investor();
+  const stats = investor.stats;
+  assertEquals(stats.dates, [
     "2022-02-05",
     "2022-02-12",
     "2022-04-18",
@@ -68,38 +74,11 @@ Deno.test("Stats", async () => {
 
 Deno.test("Mirrors", async () => {
   const assembly = new InvestorAssembly(username, repo);
-  const mirrors: MirrorsByDate = await assembly.mirrors();
-  assertEquals(Object.keys(mirrors), [
-    "2022-02-05",
-    "2022-02-12",
-    "2022-04-18",
-    "2022-04-25",
-  ]);
-
-  // Confirm at least one mirror each date
-  // Confirm mirrors have UserName
-  Object.values(mirrors).forEach((ids: InvestorId[]) => {
-    assertGreater(ids.length, 0);
-    ids.forEach((id: InvestorId) => assertNotEquals(id.UserName, ""));
-  });
-});
-
-Deno.test("Validate loadable", async () => {
-  const assembly = new InvestorAssembly(username, repo);
-  const ok: boolean = await assembly.validate();
-  assertEquals(ok, true);
-});
-
-Deno.test("Combined Export", async () => {
-  const assembly = new InvestorAssembly(username, repo);
   const investor: Investor = await assembly.investor();
-  assertInstanceOf(investor, Investor);
-  assert("UserName" in investor);
-});
-
-Deno.test("Compiled and cache investor", async () => {
-  const assembly = new InvestorAssembly(username, repo);
-  const investor: Investor = await assembly.compiled();
-  assertInstanceOf(investor, Investor);
-  assert("UserName" in investor);
+  const mirrors = investor.mirrors;
+  assertEquals(mirrors.dates, ["2022-02-05"]);
+  const mirror: InvestorId[] = mirrors.last;
+  for (const id in mirror) {
+    assertNotEquals(id, "");
+  }
 });

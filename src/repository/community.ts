@@ -92,18 +92,18 @@ export class Community {
     return names;
   }
 
-  /** Verify if sufficient data files exists to load ivnestor */
-  private validate(username: string): Promise<boolean> {
-    const assembly = new InvestorAssembly(username, this.repo);
-    return assembly.validate();
-  }
+  /** Verify if sufficient data files exists to load investor */
+  // private validate(username: string): Promise<boolean> {
+  //   const assembly = new InvestorAssembly(username, this.repo);
+  //   return assembly.validate();
+  // }
 
   private _loaded: Record<string, Investor> = {};
   /** Create and cache Investor object */
   public async investor(username: string): Promise<Investor> {
     if (!(username in this._loaded)) {
       const assembly = new InvestorAssembly(username, this.repo);
-      this._loaded[username] = await assembly.compiled();
+      this._loaded[username] = await assembly.investor();
     }
     return this._loaded[username];
   }
@@ -118,18 +118,18 @@ export class Community {
   }
 
   /** Identify investor with invalid data */
-  public async invalidNames(): Promise<Names> {
-    const names: Names = await this.allNames();
+  // public async invalidNames(): Promise<Names> {
+  //   const names: Names = await this.allNames();
 
-    // Validate each investor
-    const loadable: boolean[] = await Promise.all(
-      names.map((name) => this.validate(name)),
-    );
+  //   // Validate each investor
+  //   const loadable: boolean[] = await Promise.all(
+  //     names.map((name) => this.validate(name)),
+  //   );
 
-    // Report invalid investors
-    const invalidNames = names.filter((_name, index) => !loadable[index]);
-    return invalidNames;
-  }
+  //   // Report invalid investors
+  //   const invalidNames = names.filter((_name, index) => !loadable[index]);
+  //   return invalidNames;
+  // }
 
   /** Load a list of investors from list of names */
   private load(names: Names): Promise<Investors> {
