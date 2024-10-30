@@ -44,5 +44,5 @@ const df = DataFrame.fromRecords(
   })),
 ).sort("SharpeRatio");
 
-df.reverse.slice(0, 5).print("Desired Investor Ranking");
-df.slice(0, 5).print("Undesired Investor Ranking");
+df.reverse.slice(0, 5).digits(3).print("Desired Investor Ranking");
+df.slice(0, 5).digits(3).print("Undesired Investor Ranking");
