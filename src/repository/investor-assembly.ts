@@ -1,22 +1,24 @@
-import type { DateFormat } from "📚/utils/time/mod.ts";
-import { diffDate, nextDate } from "📚/utils/time/calendar.ts";
-import { Asset, Backend } from "../storage/mod.ts";
+import type { DateFormat } from "📚/time/mod.ts";
+import { diffDate, nextDate } from "📚/time/calendar.ts";
+import { Asset, Backend } from "📚/storage/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Chart as CompiledChart } from "📚/chart/mod.ts";
-import { InvestorId } from "./mod.ts";
+import { InvestorId } from "📚/repository/mod.ts";
 
-import type { ChartData } from "./chart.ts";
-import { Chart } from "./chart.ts";
+import type { ChartData } from "📚/repository/chart.ts";
+import { Chart } from "📚/repository/chart.ts";
 
-import type { PortfolioData } from "./portfolio.ts";
-import { Portfolio } from "./portfolio.ts";
-export type MirrorsByDate = Record<DateFormat, InvestorId[]>;
+import type { PortfolioData } from "📚/repository/portfolio.ts";
+import { Portfolio } from "📚/repository/portfolio.ts";
 
-import type { StatsData, StatsExport } from "./stats.ts";
-import { Stats } from "./stats.ts";
+import type { StatsData, StatsExport } from "📚/repository/stats.ts";
+import { Stats } from "📚/repository/stats.ts";
 import { Diary } from "📚/investor/diary.ts";
 import type { InvestorExport } from "📚/investor/investor.ts";
+
+export type MirrorsByDate = Record<DateFormat, InvestorId[]>;
 export type StatsByDate = Record<DateFormat, StatsExport>;
+type Dates = Array<DateFormat>;
 
 /** Extract scraped data and compile an investor object */
 export class InvestorAssembly {
@@ -92,7 +94,17 @@ export class InvestorAssembly {
       if (i > 0 && dates[i - 1] >= start) continue; // An even older exists and overlaps
 
       // Load older chart
-      const sooner: Chart = new Chart(await this.chartAsset.retrieve(date));
+      const loaded: Chart = new Chart(await this.chartAsset.retrieve(date));
+      const sooner: CompiledChart =
+        new CompiledChart(loaded.values, loaded.end).trim;
+
+      // Confirm even after trimming, there is still overlap
+      if (sooner.end < start) {
+        console.warn(
+          `${this.UserName} sooner chart after trimming no longer overlaps.`,
+        );
+        break;
+      }
 
       // Does newer chart fully overlap older?
       if (sooner.start >= start) break;
@@ -128,15 +140,22 @@ export class InvestorAssembly {
     return stats.value;
   }
 
-  /** Extract stats for all available dates within chart range */
+  /** Extract stats for all available dates within chart range and maximum 1 before and 1 after */
   public async stats(): Promise<StatsByDate> {
     // Dates
-    const start: DateFormat = await this.start();
-    const end: DateFormat = await this.end();
+    // const start: DateFormat = await this.start();
     const dates: DateFormat[] = await this.statsAsset.dates();
-    const range: DateFormat[] = dates.filter(
-      (date) => date >= start && date <= end
+    const start: DateFormat = await this.chart.start;
+    const end: DateFormat = await this.chart.end;
+    // const range: DateFormat[] = dates.filter((date) => date >= start);
+    const within: Dates = dates.filter((date: DateFormat) =>
+      date >= start && date <= end
     );
+    const before: Dates = dates.filter((date: DateFormat) => date < start);
+    const after: Dates = dates.filter((date: DateFormat) => date > end);
+
+    // The first before range
+    const range: Dates = [...before.slice(-1), ...within, ...after.slice(0, 1)];
 
     // Load Stats axports for eachd date in range
     const values: StatsExport[] = await Promise.all(
