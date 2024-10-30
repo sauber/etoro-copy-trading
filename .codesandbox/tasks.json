@@ -4,23 +4,11 @@
     {
       "name": "rm -f deno.lock",
       "command": "rm -f deno.lock"
-    },
-    {
-      "name": "Cache dependencies",
-      "command": "deno cache web/dev.ts"
     }
   ],
 
   // These tasks can be run from CodeSandbox. Running one will open a log in the app.
   "tasks": {
-    "start": {
-      "name": "start",
-      "command": "deno task start",
-      "runAtStart": true,
-      "preview": {
-        "port": 8000
-      }
-    },
     "bash": {
       "name": "bash",
       "command": "bash"

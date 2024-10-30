@@ -1,35 +1,25 @@
-import type { DateFormat } from "📚/utils/time/mod.ts";
-import { Chart } from "📚/chart/mod.ts";
-import { Position } from "./position.ts";
+import type { DateFormat } from "📚/time/mod.ts";
+import { Position } from "📚/portfolio/position.ts";
+import { Investor } from "📚/investor/mod.ts";
 
 /** An exchange is a place where cash and positions are swapped for a fee */
 export class Exchange {
   constructor(private readonly spread: number = 0.001) {}
 
-  /** Nominal price + spread */
-  public buying_price(price: number) {
-    return price * (1 + this.spread);
-  }
-
-  /** Nominal price - spread */
-  public selling_price(price: number) {
-    return price * (1 - this.spread);
-  }
-
-  /** Generate a position from cash */
+  /** Generate a position from cash, subtract spread */
   public buy(
+    investor: Investor,
     date: DateFormat,
-    name: string,
-    chart: Chart,
     amount: number,
   ): Position {
-    const price: number = this.buying_price(chart.value(date));
-    const position: Position = new Position(date, name, chart, price, amount);
-    return position;
+    const fee: number = amount * this.spread;
+    return new Position(investor, date, amount - fee);
   }
 
-  /** Sell a position on a date, return cash */
-  public sell(date: DateFormat, position: Position): number {
-    return this.selling_price(position.value(date));
+  /** Sell a position on a date, subtract spread, return cash */
+  public sell(position: Position, date: DateFormat): number {
+    const value: number = position.value(date);
+    const fee: number = value * this.spread;
+    return value - fee;
   }
 }

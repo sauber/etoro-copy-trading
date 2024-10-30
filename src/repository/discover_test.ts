@@ -3,7 +3,7 @@ import {
   assertEquals,
   assertInstanceOf,
   assertThrows,
-} from "$std/assert/mod.ts";
+} from "@std/assert";
 import { Discover } from "./discover.ts";
 import type { DiscoverData } from "./discover.ts";
 import { testAssets } from "./testdata.ts";

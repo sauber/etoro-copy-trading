@@ -1,18 +1,13 @@
-import { DateFormat, nextDate } from "📚/utils/time/mod.ts";
+import { DateFormat, nextDate } from "📚/time/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
-import { Community } from "📚/repository/mod.ts";
-import { Investor } from "📚/investor/mod.ts";
-import { ObjectSeries } from "📚/utils/series.ts";
-import { Strategy, StrategyClass } from "./strategy.ts";
-import type { Orders } from "./strategy.ts";
+import type { Investors } from "📚/repository/mod.ts";
+import { Order, Portfolio, Position } from "📚/portfolio/mod.ts";
+import type { Positions } from "📚/portfolio/mod.ts";
+import { Strategy } from "./strategy.ts";
 import { Exchange } from "./exchange.ts";
 import { Book } from "./book.ts";
-import { Portfolio } from "./portfolio.ts";
-import type { Positions } from "./portfolio.ts";
-import { DataFrame } from "📚/utils/dataframe.ts";
-import { Position } from "./position.ts";
+import { DataFrame } from "@sauber/dataframe";
 
-type Investors = ObjectSeries<Investor>;
 type Name = Array<string>;
 
 /** Simulate trading over a period */
@@ -24,9 +19,9 @@ export class Simulation {
   constructor(
     private readonly start: DateFormat,
     private readonly end: DateFormat,
-    private readonly community: Community,
-    private readonly strategy: StrategyClass,
-    private cash: number = 100000
+    private readonly investors: Investors,
+    private readonly strategy: Strategy,
+    private cash: number = 100000,
   ) {
     this.exchange = new Exchange();
     this.book = new Book();
@@ -34,51 +29,58 @@ export class Simulation {
     this.portfolio = this.book.portfolio;
   }
 
-  /** Generate a strategy for the current date and current portfolio */
-  private async StrategyInstance(date: DateFormat): Promise<Strategy> {
-    const strategyClass = this.strategy;
-    const objects: Array<Investor> = await this.community.on(date);
-    const investors: Investors = new ObjectSeries(objects);
-    const strategy: Strategy = new strategyClass(this.portfolio, investors);
-    return strategy;
-  }
+  // /** Generate a strategy for the current date and current portfolio */
+  // private async StrategyInstance(date: DateFormat): Promise<Strategy> {
+  //   const Class = this.strategy;
+  //   const objects: Array<Investor> = await this.community.on(date);
+  //   const investors: Investors = new ObjectSeries(objects);
+  //   const strategy: Strategy = new Strategy(investors);
+  //   return strategy;
+  // }
 
   /** Open all positions suggested by strategy */
-  private async open(date: DateFormat): Promise<void> {
-    const strategy: Strategy = await this.StrategyInstance(date);
-    const open: Orders = await strategy.open();
+  private open(date: DateFormat): void {
+    const order: Order = this.strategy.order(this.portfolio, date);
+    const open = order.buyItems;
     for (const order of open) {
-      const name: string = order.name;
-      const investor: Investor = await this.community.investor(name);
-      const chart: Chart = investor.chart;
+      // const name: string = order.name;
+      // const investor: Investor = await this.community.investor(name);
       const position: Position = this.exchange.buy(
+        order.investor,
         date,
-        name,
-        chart,
-        order.amount
+        order.amount,
       );
       this.book.add(date, position);
     }
   }
 
   /** Close all positions suggested by strategy */
-  private async close(date: DateFormat): Promise<void> {
-    const strategy: Strategy = await this.StrategyInstance(date);
-    const close: Positions = await strategy.close();
-    for (const position of close) {
-      const refund: number = this.exchange.sell(date, position);
-      this.book.remove(date, position, "sell", refund);
-    }
+  private close(date: DateFormat): void {
+    const order: Order = this.strategy.order(this.portfolio, date);
+    const close = order.sellItems;
+
+    // TODO!!
+    // Identify all matching positions
+    // const positions: Array<Position> = []
+    // for ( const order of close ) {
+    //   positions = this.book.match(order.investor);
+    // }
+
+    // Close all matching positions
+    // for (const position of close) {
+    //   const refund: number = this.exchange.sell(position, date);
+    //   this.book.remove(date, position, "sell", refund);
+    // }
   }
 
   /** Close any positions with expired underlying data */
   private expire(date: DateFormat): void {
-    const expired: Positions = this.portfolio.expired(date);
+    const expired: Positions = this.portfolio.positions.filter((p) =>
+      p.expired(date)
+    );
     const yesterday: DateFormat = nextDate(date, -1);
     for (const position of expired) {
-      const selling_price: number = this.exchange.selling_price(
-        position.value(yesterday)
-      );
+      const selling_price: number = this.exchange.sell(position, yesterday);
       //console.log('book.remove', date, position, selling_price);
       //throw new Error('Simulation Expire');
       this.book.remove(date, position, "expire", selling_price);
@@ -91,19 +93,19 @@ export class Simulation {
   }
 
   /** Run a trading session on a particlar date */
-  private async step(date: DateFormat): Promise<void> {
+  private step(date: DateFormat): void {
     this.expire(date);
-    await this.close(date);
-    await this.open(date);
+    this.close(date);
+    this.open(date);
     this.valuate(date);
   }
 
   /** Run a trading sesssion each day in period */
-  public async run(): Promise<void> {
+  public run(): void {
     let date = this.start;
     while (date <= this.end) {
       //console.log(date);
-      await this.step(date);
+      this.step(date);
       date = nextDate(date);
     }
   }

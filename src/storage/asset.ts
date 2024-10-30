@@ -1,5 +1,5 @@
-import type { DateFormat } from "/utils/time/mod.ts";
-import { today } from "📚/utils/time/mod.ts";
+import type { DateFormat } from "../time/mod.ts";
+import { today } from "../time/mod.ts";
 import type { AssetName, JSONObject } from "./mod.ts";
 import { Backend } from "./backend.ts";
 

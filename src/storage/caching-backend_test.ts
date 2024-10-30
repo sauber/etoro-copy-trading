@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "$std/assert/mod.ts";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { HeapBackend } from "./heap-backend.ts";
 import { CachingBackend } from "./caching-backend.ts";
 import type { JSONObject } from "./mod.ts";

@@ -4,11 +4,11 @@
  * Measure speed.
  */
 
-import { DiskBackend } from "../storage/disk-backend.ts";
-import { CachingBackend } from "../storage/caching-backend.ts";
-import { Community } from "./community.ts";
-import { Investor } from "/investor/mod.ts";
-import { assertEquals } from "$std/assert/mod.ts";
+import { DiskBackend } from "📚/storage/disk-backend.ts";
+import { CachingBackend } from "📚/storage/caching-backend.ts";
+import { Community } from "📚/repository/community.ts";
+import { Investor } from "📚/investor/mod.ts";
+import { assertEquals } from "@std/assert";
 
 const path: string = Deno.args[0];
 const disk = new DiskBackend(path);

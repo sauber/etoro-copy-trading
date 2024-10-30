@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "$std/assert/mod.ts";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Chart } from "./chart.ts";
 import type { ChartData } from "./chart.ts";
 import { testAssets } from "./testdata.ts";
@@ -12,7 +12,7 @@ Deno.test("Initialization", () => {
 
 Deno.test("Validate", () => {
   const chart: Chart = new Chart(chartData);
-  assertEquals(chart.validate(), true);
+  assertEquals(chart.validate(), false);
 });
 
 Deno.test("Dates", () => {

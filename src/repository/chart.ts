@@ -1,13 +1,9 @@
-import type { DateFormat } from "/utils/time/mod.ts";
-import { today } from "/utils/time/mod.ts";
+import type { DateFormat } from "📚/time/mod.ts";
+import { nextDate, today } from "📚/time/mod.ts";
 
 type ChartEntry = {
   timestamp: string;
-  credit: number;
-  investment: number;
-  pnL: number;
   equity: number;
-  totalDividends: number;
 };
 
 export type ChartData = {
@@ -48,9 +44,24 @@ export class Chart {
   }
 
   public validate(): boolean {
-    const todayDate = today();
-    if (this.count <= 365) throw new Error("Too few dates in chart");
-    if (this.end > todayDate) throw new Error("Last date is in the future");
+    const maxAge = 3;
+    const todayDate: DateFormat = today();
+    const expectedDate: DateFormat = nextDate(todayDate, -maxAge);
+    const active = (12 - 1) * 7 - 1; // 12-1 weeks
+    if (this.count < active) {
+      console.error(`Error: Too few dates in chart: ${this.count}`);
+      return false;
+    }
+    if (this.end > todayDate) {
+      console.error(`Error: Last date ${this.end} is in the future`);
+      return false;
+    }
+    if (this.end < expectedDate) {
+      console.error(
+        `Error: End date ${this.end} is older than ${expectedDate}`,
+      );
+      return false;
+    }
     return true;
   }
 

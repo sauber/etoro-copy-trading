@@ -1,22 +1,23 @@
-* In investor-assembly deal with charts ending with 6000
-* In grid.ts module, square the displacement, to encourage shifting whole row/column instead of moving a single item far away. It's more important that relative rank is maintained, than absolute position.
-* In deno.json remove these lines, except first $std/ line:
+- In investor-assembly deal with charts ending with 6000
+- In grid.ts module, square the displacement, to encourage shifting whole
+  row/column instead of moving a single item far away. It's more important that
+  relative rank is maintained, than absolute position.
+- Change into one-liner:
+
 ```
-     "$std/": "https://deno.land/std@0.211.0/",
-    "base64": "https://deno.land/std@0.206.0/encoding/base64.ts",
-    "dotenv": "https://deno.land/std@0.201.0/dotenv/mod.ts",
-    "difference": "https://deno.land/std@0.200.0/datetime/difference.ts",
-    "format": "https://deno.land/std@0.200.0/datetime/mod.ts",
-    "fs": "https://deno.land/std@0.200.0/fs/mod.ts",
-    "path": "https://deno.land/std@0.200.0/path/mod.ts",
-    "printf": "https://deno.land/std@0.200.0/fmt/printf.ts",
-    "yaml": "https://deno.land/std@0.200.0/yaml/mod.ts",
+const path: string = Deno.args[0];
+const backend = new DiskBackend(path);
+const repo = new CachingBackend(backend);
+export const community = new Community(repo);
 ```
 
-* In deno.json remove this line:
-```
-    "preact/": "https://esm.sh/preact@10.19.2/",
-```
-
-* Write tests for web pages. Checking for return code 200 is good enough.
-* In stats.ts deal with StatsExport vs StastImport
+- Class files should not import modules from other directories. Import should
+  only be from mod.ts
+- Test files should not import modules or data from other directories Import
+  should only be from testdata.ts
+- Strategy, book and simulation should use same Portfolio module.
+- Portfolio strategies and chart indicator strategies are not the same thing
+- Replace chart with older implementation
+- Detect NaN in machine learning input and output. If detected, the model is unusable.
+- For machine learning, remove features the features that are have no variance or are the least correlated to output.
+- Make progressbar an external module. Perhaps use from @sauber/ml-dashboard module.

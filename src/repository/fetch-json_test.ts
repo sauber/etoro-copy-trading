@@ -1,4 +1,4 @@
-import { assertInstanceOf } from "$std/assert/mod.ts";
+import { assertInstanceOf } from "@std/assert";
 import { fetchjson } from "./fetch-json.ts";
 
 Deno.test("Fetching", { ignore: true }, async () => {

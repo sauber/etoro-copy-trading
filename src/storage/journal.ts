@@ -1,5 +1,5 @@
 import { Backend } from "./backend.ts";
-import type { DateFormat } from "📚/utils/time/mod.ts";
+import type { DateFormat } from "../time/mod.ts";
 import type { AssetName, AssetNames } from "./mod.ts";
 import { Asset } from "./asset.ts";
 

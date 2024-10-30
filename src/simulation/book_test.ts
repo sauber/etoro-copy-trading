@@ -2,11 +2,12 @@ import {
   assertAlmostEquals,
   assertEquals,
   assertInstanceOf,
-} from "$std/assert/mod.ts";
-import type { DateFormat } from "📚/utils/time/mod.ts";
+} from "@std/assert";
+import type { DateFormat } from "../time/mod.ts";
 import { Book } from "./book.ts";
-import { chart, position } from "./testdata.ts";
+import { position, investor } from "./testdata.ts";
 
+const chart = investor.chart;
 const start: DateFormat = chart.start;
 const end: DateFormat = chart.end;
 

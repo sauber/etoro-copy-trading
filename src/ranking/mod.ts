@@ -1,1 +1,1 @@
-export * from "./ranking.ts";
+export * from "📚/ranking/ranking.ts";

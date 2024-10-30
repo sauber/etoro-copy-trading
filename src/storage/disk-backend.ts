@@ -1,7 +1,16 @@
-import type { JSONObject, AssetName, AssetNames } from "./mod.ts";
-import { Backend } from "./mod.ts";
-import { exists, read, write, files, dirs, age, mkdir, remove } from "./files.ts";
-import { join, parse } from "path";
+import type { AssetName, AssetNames, JSONObject } from "./mod.ts";
+import { Backend } from "📚/storage/mod.ts";
+import {
+  age,
+  dirs,
+  exists,
+  files,
+  mkdir,
+  read,
+  remove,
+  write,
+} from "📚/storage/files.ts";
+import { join, parse } from "@std/path";
 
 /** Store investor objects on disk */
 export class DiskBackend implements Backend {
@@ -14,11 +23,12 @@ export class DiskBackend implements Backend {
   /** Convert assetname to filename */
   private readonly normalized: Record<string, string> = {};
   protected async filename(assetname: string): Promise<string> {
-    if (!(assetname in this.normalized))
+    if (!(assetname in this.normalized)) {
       this.normalized[assetname] = await join(
         await this.path(),
-        assetname + ".json"
+        assetname + ".json",
       );
+    }
     return this.normalized[assetname];
   }
 

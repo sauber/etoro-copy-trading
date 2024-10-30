@@ -5,7 +5,7 @@ import {
   assertGreater,
   assertInstanceOf,
   assertNotEquals,
-} from "$std/assert/mod.ts";
+} from "@std/assert";
 import { InvestorAssembly } from "./investor-assembly.ts";
 import type { MirrorsByDate, StatsByDate } from "./investor-assembly.ts";
 

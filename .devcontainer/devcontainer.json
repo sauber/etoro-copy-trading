@@ -1,13 +1,9 @@
 {
   "name": "Deno",
-
   "build": {
     "dockerfile": "Dockerfile"
   },
-
   "remoteUser": "vscode",
-  "forwardPorts": [8000],
-
   "customizations": {
     "codespaces": {
       "repositories": {
@@ -20,8 +16,6 @@
     },
     "extensions": [
       "denoland.vscode-deno",
-      "bradlc.vscode-tailwindcss",
-      "ms-vscode.vscode-typescript-next"
     ],
     "vscode": {
       "settings": {
@@ -35,19 +29,13 @@
         "[typescript]": {
           "editor.defaultFormatter": "denoland.vscode-deno"
         },
-        "[javascriptreact]": {
-          "editor.defaultFormatter": "denoland.vscode-deno"
-        },
         "[javascript]": {
           "editor.defaultFormatter": "denoland.vscode-deno"
-        },
-        "[css]": {
-          "editor.defaultFormatter": "vscode.css-language-features"
         },
         "editor.quickSuggestions": {
           "strings": "on"
         }
       }
     }
-	}
+  }
 }

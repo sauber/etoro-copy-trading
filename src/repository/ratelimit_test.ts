@@ -1,4 +1,4 @@
-import { assert, assertInstanceOf, assertLess } from "$std/assert/mod.ts";
+import { assert, assertInstanceOf, assertLess } from "@std/assert";
 import { RateLimit } from "./ratelimit.ts";
 const rate = 1000;
 

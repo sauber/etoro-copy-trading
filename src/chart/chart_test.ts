@@ -2,10 +2,10 @@ import {
   assertEquals,
   assertInstanceOf,
   assertThrows,
-} from "$std/assert/mod.ts";
+} from "@std/assert";
 import { Chart } from "./chart.ts";
-import type { DateFormat } from "/utils/time/mod.ts";
-import { nextDate } from "/utils/time/mod.ts";
+import type { DateFormat } from "../time/mod.ts";
+import { nextDate } from "../time/mod.ts";
 
 Deno.test("Blank Initialization", () => {
   const chart = new Chart([], "2022-10-10");
@@ -96,7 +96,7 @@ Deno.test("Gain", () => {
   assertEquals(gain, 1);
 });
 
-Deno.test("Average Yearly Profit", () => {
+Deno.test("Annual Percentage Yield", () => {
   const end = "2023-10-31";
   const chart = new Chart([10, 20], end);
   const apy: number = chart.apy;

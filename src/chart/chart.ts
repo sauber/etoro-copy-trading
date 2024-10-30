@@ -1,16 +1,24 @@
-import { diffDate, nextDate } from "/utils/time/mod.ts";
-import type { DateFormat } from "/utils/time/mod.ts";
+import { diffDate, nextDate } from "📚/time/mod.ts";
+import type { DateFormat } from "📚/time/mod.ts";
+import { std } from "📚/math/statistics.ts";
+import { ema, rsi, sma } from "📚/chart/indicators.ts";
+
+type Numbers = number[];
 
 /** Numbers by date */
 export class Chart {
   public readonly start: DateFormat;
 
   constructor(
-    public readonly values: number[],
-    public readonly end: DateFormat
+    public readonly values: Numbers,
+    public readonly end: DateFormat,
   ) {
     this.start = nextDate(this.end, -this.values.length + 1);
   }
+
+  //////////////////////////////////////////////////////////////////////
+  /// Lookup values
+  //////////////////////////////////////////////////////////////////////
 
   /** List of all dates */
   public get dates(): DateFormat[] {
@@ -28,7 +36,7 @@ export class Chart {
     const index: number = diffDate(this.start, date);
     if (index < 0 || index >= this.values.length) {
       throw new Error(
-        `Date not in range: ${this.start} < ${date} < ${this.end}`
+        `Date not in range: ${this.start} < ${date} < ${this.end}`,
       );
     }
     return this.values[index];
@@ -42,23 +50,13 @@ export class Chart {
     return this.values[this.values.length - 1];
   }
 
-  /** Sub chart with entries starting on date */
-  public from(date: DateFormat): Chart {
-    const offset = diffDate(this.start, date);
-    const trimmed = this.values.slice(offset);
-    return new Chart(trimmed, this.end);
-  }
-
-  /** Sub chart with entries until and including date */
-  public until(date: DateFormat): Chart {
-    const count = diffDate(this.start, date);
-    const trimmed = this.values.slice(0, count + 1);
-    return new Chart(trimmed, this.start);
-  }
-
   public get length(): number {
     return this.values.length;
   }
+
+  //////////////////////////////////////////////////////////////////////
+  /// Aggregate statistics
+  //////////////////////////////////////////////////////////////////////
 
   /** Add all values together */
   public get sum(): number {
@@ -70,78 +68,26 @@ export class Chart {
     return this.sum / this.length;
   }
 
-  /** Add same number to each value */
-  public add(a: number): Chart {
-    return new Chart(
-      this.values.map((x) => x + a),
-      this.start
-    );
-  }
-
-  /** Raise each value to the power of a */
-  public pow(a: number): Chart {
-    return new Chart(
-      this.values.map((x) => Math.pow(x, a)),
-      this.start
-    );
-  }
-
-  /** max(0,a) */
-  public get relu(): Chart {
-    return new Chart(
-      this.values.map((x) => Math.max(0, x)),
-      this.start
-    );
-  }
-
   /** Standard Deviation */
   public get std(): number {
-    const avg = this.avg;
-    const diff = this.add(-avg);
-    const d2 = diff.pow(2);
-    const std = Math.sqrt(d2.sum / (this.length-1));
-    return std;
+    return std(this.values);
   }
 
-  /** Value as ratio above previous value */
-  public get win(): Chart {
-    const v = this.values;
-    return new Chart(
-      v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),
-      nextDate(this.start, -1)
-    );
-  }
-
-  /**
-   * Sharpe Ratio, riskfree is annual riskfree return, for example 0.05
-   * TODO: Research if other similar indicator are better for this project
-   */
+  /** Sharpe Ratio, riskfree is annual riskfree return, for example 0.05 */
   public sharpeRatio(riskfree: number): number {
-    // Daily benchmark and daily average profit
+    // Daily average profit and daily benchmark
     const profit = (this.last / this.first - 1) / (this.length - 1);
     const benchmark = riskfree / 365;
 
-    // std of incrementals
+    // Incrementals are wins > 0
     const incrementals = this.win.values.filter((x) => x > 0);
-    if (incrementals.length == 0) return -riskfree;
 
-    const volatility = new Chart(incrementals, this.start).std;
+    // No wins, only losses
+    if (incrementals.length < 2) return (profit - benchmark) * this.length;
 
     // Sharpe Ratio
+    const volatility = std(incrementals);
     const sharpe = (profit - benchmark) / volatility;
-
-    if (!Number.isFinite(sharpe)) {
-      console.log({
-        riskfree,
-        profit,
-        benchmark,
-        incrementals,
-        volatility,
-        sharpe,
-      });
-      throw new Error("Invalid SharpeRatio");
-    }
-
     return sharpe;
   }
 
@@ -153,10 +99,101 @@ export class Chart {
     return ratio;
   }
 
-  /** Average yearly Profit */
+  /** Annual Percentage Yield */
   public get apy(): number {
     const profit: number = this.last / this.first - 1;
     const apy: number = (365 / (this.length - 1)) * profit;
     return apy;
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  /// Derived Charts
+  //////////////////////////////////////////////////////////////////////
+
+  /** Create a derived chart, cache for future use */
+  private readonly subcharts: Record<string, Chart> = {};
+  private derive(
+    values: Numbers,
+    id: string,
+    enddate: DateFormat = this.end,
+  ): Chart {
+    if (!(id in this.subcharts)) {
+      this.subcharts[id] = new Chart(values, enddate);
+    }
+    return this.subcharts[id];
+  }
+
+  /** Sub chart with entries starting on date */
+  public from(start: DateFormat): Chart {
+    const offset: number = diffDate(this.start, start);
+    const trimmed: Numbers = this.values.slice(offset);
+    return this.derive(trimmed, "from" + start);
+  }
+
+  /** Sub chart with entries until and including date */
+  public until(end: DateFormat): Chart {
+    const count: number = diffDate(this.start, end);
+    const trimmed: Numbers = this.values.slice(0, count + 1);
+    return this.derive(trimmed, "until" + end, end);
+  }
+
+  /** Value as ratio above previous value */
+  private get win(): Chart {
+    const v: Numbers = this.values;
+    return this.derive(
+      v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),
+      "win",
+    );
+  }
+
+  /** Simple Moving Average */
+  public sma(window: number): Chart {
+    return this.derive(sma(this.values, window), "sma" + window);
+  }
+
+  /** Exponential Moving Average */
+  public ema(window: number): Chart {
+    return this.derive(ema(this.values, window), "ema" + window);
+  }
+
+  /** Relative Strength Index */
+  public rsi(window: number): Chart {
+    return this.derive(rsi(this.values, window), "rsi" + window);
+  }
+
+  /** this chart - other chart */
+  public subtract(other: Chart): Chart {
+    const start: DateFormat = this.start > other.start
+      ? this.start
+      : other.start;
+    const end: DateFormat = this.end < other.end ? this.end : other.end;
+
+    const parent = this.from(start).until(end).values;
+    const child = other.from(start).until(end).values;
+    const diff = parent.map((n, i) => n - child[i]);
+    return new Chart(diff, end);
+  }
+
+  /** Trim leading 10000 (means not started) and trailing 6000 (means copy stopped) */
+  public get trim(): Chart {
+    // No trimming required
+    if (
+      this.value(nextDate(this.start)) != 10000 &&
+      this.value(nextDate(this.end, -1)) != 6000
+    ) return this;
+
+    // Search for start
+    let next: DateFormat = nextDate(this.start);
+    while (this.value(next) == 10000) next = nextDate(next);
+    const start = nextDate(next, -1);
+
+    // Seach for end
+    let prev: DateFormat = nextDate(this.end, -1);
+    while (this.value(prev) == 6000) prev = nextDate(prev, -1);
+    const end = nextDate(prev);
+
+    const values = this.from(start).until(end).values;
+
+    return this.derive(values, "trim", end);
   }
 }

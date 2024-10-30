@@ -1,6 +1,6 @@
 import { HeapBackend } from "./heap-backend.ts";
 import type { JSONObject, AssetName, AssetNames } from "./mod.ts";
-import { assertEquals, assertInstanceOf, assertLess } from "$std/assert/mod.ts";
+import { assertEquals, assertInstanceOf, assertLess } from "@std/assert";
 
 const name: AssetName = "foo";
 const data: JSONObject = { name: "bar" };

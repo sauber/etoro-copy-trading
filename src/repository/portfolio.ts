@@ -47,10 +47,8 @@ export class Portfolio {
   constructor(private readonly raw: PortfolioData) {}
 
   public validate(): boolean {
-    if (this.raw.CreditByRealizedEquity < 0) {
-      throw new Error(
-        `Portfolio CreditByRealizedEquity is negative (${this.raw.CreditByRealizedEquity})`
-      );
+    if (!("CreditByRealizedEquity" in this.raw)) {
+      throw new Error(`Portfolio CreditByRealizedEquity missing)`);
     }
     return true;
   }

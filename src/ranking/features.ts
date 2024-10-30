@@ -1,79 +1,36 @@
-import { DateFormat } from "/utils/time/mod.ts";
-import { Investor } from "/investor/mod.ts";
+import { DateFormat } from "📚/time/mod.ts";
+import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
-
-export type Input = {
-  PopularInvestor: number;
-  Gain: number;
-  RiskScore: number;
-  MaxDailyRiskScore: number;
-  MaxMonthlyRiskScore: number;
-  Copiers: number;
-  CopiersGain: number;
-  AUMTier: number;
-  AUMTierV2: number;
-  VirtualCopiers: number;
-  Trades: number;
-  WinRatio: number;
-  DailyDD: number;
-  WeeklyDD: number;
-  ProfitableWeeksPct: number;
-  ProfitableMonthsPct: number;
-  Velocity: number;
-  Exposure: number;
-  AvgPosSize: number;
-  HighLeveragePct: number;
-  MediumLeveragePct: number;
-  LowLeveragePct: number;
-  PeakToValley: number;
-  LongPosPct: number;
-  ActiveWeeks: number;
-  ActiveWeeksPct: number;
-  WeeksSinceRegistration: number;
-};
-
-/** Names of fields from stats that are suitable for training */
-const props = [
-  "PopularInvestor", "Gain", "RiskScore", "MaxDailyRiskScore",
-  "MaxMonthlyRiskScore", "Copiers", "CopiersGain", "AUMTier",
-  "AUMTierV2", "Trades", "WinRatio", "DailyDD", "WeeklyDD",
-  "ProfitableWeeksPct", "ProfitableMonthsPct", "Velocity",
-  "Exposure", "AvgPosSize", "HighLeveragePct", "MediumLeveragePct",
-  "LowLeveragePct", "PeakToValley", "LongPosPct", "ActiveWeeks",
-  "ActiveWeeksPct", "WeeksSinceRegistration"
-] as const;
-
-export type Output = {
-  SharpeRatio: number;
-  Profit: number;
-};
+import { input_labels } from "📚/ranking/types.ts";
+import type { Input, Output } from "📚/ranking/types.ts";
 
 export class Features {
   constructor(private readonly investor: Investor) {}
 
   /** Prediction input parameters */
-  public get input(): Input {
-    const v: StatsExport = this.investor.stats.first;
-    const extract = Object.fromEntries(props.map(key => [key, Number(v[key])])) as Input;
-    return extract;
+  public input(date?: DateFormat): Input {
+    if ( this.investor.stats.dates.length < 1 ) throw new Error(`Investor ${this.investor.UserName} has no stats`);
+    const values: StatsExport = date
+      ? this.investor.stats.before(date)
+      : this.investor.stats.first;
+
+    return Object.fromEntries(
+      input_labels.map((key: keyof StatsExport) => [key, Number(values[key])]),
+    ) as Input;
   }
 
   /** Prediction output parameters */
-  public get output(): Output {
-    const start: DateFormat = this.investor.stats.start;
+  public output(start: DateFormat = this.investor.stats.start): Output {
     const chart: Chart = this.investor.chart.from(start);
-    const apy: number = chart.apy;
-    // 5% is annual money market return. TODO: Load from config
-    const sr: number = chart.sharpeRatio(0.05);
+    // 5% is annual money market return.
+    // TODO: Load from config
+    const sr: number = chart.sharpeRatio(0.0);
     if (!Number.isFinite(sr)) {
-      console.log({ chart, start, apy, sr });
+      const name = this.investor.UserName;
+      console.log({ chart, name, start, sr });
       throw new Error("Invalid SharpeRatio");
     }
-    const features: Output = {
-      Profit: apy,
-      SharpeRatio: sr,
-    };
-    return features;
+    return { SharpeRatio: sr };
   }
 }

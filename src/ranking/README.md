@@ -1,1 +1,1 @@
-Sort level of investors by level of desirement
+Train a neural network on future SharpeRatio based on investors numerical stats.

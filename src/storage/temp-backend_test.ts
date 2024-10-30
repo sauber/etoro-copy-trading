@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "$std/assert/mod.ts";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { TempBackend } from "./temp-backend.ts";
 import type { JSONObject } from "./mod.ts";
 import { Backend } from "./backend.ts";

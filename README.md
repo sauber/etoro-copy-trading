@@ -1,6 +1,6 @@
 # Etoro-Fresh
 
-Displaying investor profile data on a webpage. Using Deno fresh as web frame work.
+Download and analyze profiles of investors
 
 ## Profiling
 

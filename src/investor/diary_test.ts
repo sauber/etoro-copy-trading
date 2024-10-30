@@ -2,8 +2,8 @@ import {
   assertEquals,
   assertInstanceOf,
   assertThrows,
-} from "$std/assert/mod.ts";
-import { DateFormat } from "📚/utils/time/mod.ts";
+} from "@std/assert";
+import { DateFormat } from "../time/mod.ts";
 import { Diary } from "./diary.ts";
 
 type TestData = {

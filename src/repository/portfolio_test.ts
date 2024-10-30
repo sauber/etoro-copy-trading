@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertInstanceOf } from "$std/assert/mod.ts";
+import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { Portfolio } from "./portfolio.ts";
 import { testAssets } from "./testdata.ts";
 import { InvestorId } from "./mod.ts";

@@ -36,6 +36,12 @@ export class Config {
     return null;
   }
 
+  /** Find most recent config file and store in new folder */
+  public async renew(): Promise<void> {
+    const data: JSONObject = await this.last();
+    return this.asset.store(data);
+  }
+
   /** Set or overwrite a single value */
   public async set(key: string, value: JSONValue): Promise<void> {
     const data: JSONObject = await this.last();

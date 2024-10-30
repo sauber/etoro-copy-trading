@@ -1,4 +1,4 @@
-import { assertInstanceOf, assertStringIncludes } from "$std/assert/mod.ts";
+import { assertInstanceOf, assertStringIncludes } from "@std/assert";
 import { FetchURL } from "./fetch-url.ts";
 import { discoverFilter, investorId } from "./testdata.ts";
 
@@ -18,7 +18,7 @@ Deno.test("discover", () => {
 Deno.test("chart", () => {
   const f: FetchURL = new FetchURL();
   const url = f.chart(investorId);
-  assertStringIncludes(url, "/CopySim/Username/" + investorId.UserName);
+  assertStringIncludes(url, "/chart/public/" + investorId.UserName);
 });
 
 Deno.test("portfolio", () => {

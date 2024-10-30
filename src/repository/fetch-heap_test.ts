@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "$std/assert/mod.ts";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { FetchHeapBackend } from "./fetch-heap.ts";
 import { testAssets, investorId } from "./testdata.ts";
 
