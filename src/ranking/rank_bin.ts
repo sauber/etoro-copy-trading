@@ -27,7 +27,6 @@ const model: Model = Model.import(rankingparams);
 const ranking = new Ranking(model);
 
 // Load list of investors
-// TODO: Somehow this triggers loading ALL! investors. It should only load from latest dir.
 console.log("Loading latest investors...");
 const community = new Community(backend);
 const latest = await community.latest();

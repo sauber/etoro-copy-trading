@@ -56,7 +56,7 @@ export class Community {
   public async end(): Promise<DateFormat | null> {
     const dates: Dates = await this.dates();
     for (const date of [...dates].reverse()) {
-      if ((await this.on(date)).length) return date;
+      if ((await this.namesByDate(date)).length) return date;
     }
     return null;
   }
@@ -65,10 +65,10 @@ export class Community {
    * Confirm that investor has all required properties
    * TODO
    */
-  private validName(_username: string): Promise<boolean> {
-    //return this.investor(username).isValid();
-    return Promise.resolve(true);
-  }
+  // private validName(_username: string): Promise<boolean> {
+  //   //return this.investor(username).isValid();
+  //   return Promise.resolve(true);
+  // }
 
   /** Test if investor is active at date */
   private async activeName(
@@ -92,12 +92,6 @@ export class Community {
     return names;
   }
 
-  /** Verify if sufficient data files exists to load investor */
-  // private validate(username: string): Promise<boolean> {
-  //   const assembly = new InvestorAssembly(username, this.repo);
-  //   return assembly.validate();
-  // }
-
   private _loaded: Record<string, Investor> = {};
   /** Create and cache Investor object */
   public async investor(username: string): Promise<Investor> {
@@ -117,20 +111,6 @@ export class Community {
     return this.investor(name);
   }
 
-  /** Identify investor with invalid data */
-  // public async invalidNames(): Promise<Names> {
-  //   const names: Names = await this.allNames();
-
-  //   // Validate each investor
-  //   const loadable: boolean[] = await Promise.all(
-  //     names.map((name) => this.validate(name)),
-  //   );
-
-  //   // Report invalid investors
-  //   const invalidNames = names.filter((_name, index) => !loadable[index]);
-  //   return invalidNames;
-  // }
-
   /** Load a list of investors from list of names */
   private load(names: Names): Promise<Investors> {
     return Promise.all(names.map((name) => this.investor(name)));
@@ -142,17 +122,12 @@ export class Community {
     return this.load(names);
   }
 
-  /** Investors active on date */
-  public async on(date: DateFormat): Promise<Investors> {
-    const names: Names = await this.active(date);
-    return this.load(names);
-  }
-
   /** Investors on latest date */
   public async latest(): Promise<Investors> {
     const end = await this.end();
-    if (end) return await this.on(end);
-    return [];
+    if ( ! end ) return [];
+    const names: Names = await this.namesByDate(end);
+    return this.load(names);
   }
 
   /** Load a list of investor charts from list of names */
