@@ -1,3 +1,2 @@
-export { Investor } from "./investor.ts";
-export { Diary } from "./diary.ts";
-export type { InvestorExport } from "./investor.ts";
+export { Investor } from "📚/investor/investor.ts";
+export { Diary } from "📚/investor/diary.ts";
