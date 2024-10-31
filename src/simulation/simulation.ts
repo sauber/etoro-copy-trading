@@ -47,9 +47,11 @@ export class Simulation {
 
   /** Open all positions suggested by strategy */
   private open(date: DateFormat): void {
+
     const order: Order = this.strategy.order(this.portfolio, date);
     const open = order.buyItems;
     for (const order of open) {
+      if ( order.amount > this.book.balance.cash) break;
       // const name: string = order.name;
       // const investor: Investor = await this.community.investor(name);
       const position: Position = this.exchange.buy(
