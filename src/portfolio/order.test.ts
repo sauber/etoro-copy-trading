@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { investor, position } from "./testdata.ts";
-import { Order } from "./order.ts";
+import { investor, position } from "📚/portfolio/testdata.ts";
+import { Order } from "📚/portfolio/order.ts";
 
 Deno.test("Instance", () => {
   const o = new Order();

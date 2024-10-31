@@ -4,10 +4,10 @@ import { Investor } from "📚/investor/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
 import { DataFrame } from "@sauber/dataframe";
 import type { RowRecord } from "@sauber/dataframe";
-import { Portfolio } from "./portfolio.ts";
-import { Position } from "./position.ts";
-import { Order } from "./order.ts";
-import type { BuyItems, SellItems } from "./order.ts";
+import { Portfolio } from "📚/portfolio/portfolio.ts";
+import { Position } from "📚/portfolio/position.ts";
+import { Order } from "📚/portfolio/order.ts";
+import type { BuyItems, SellItems } from "📚/portfolio/order.ts";
 
 type UserName = string;
 type Score = number;
@@ -110,10 +110,8 @@ export class Policy {
   }
 
   /** Given investor ranks, available cash etc.
-   * what is ideal target investment level for each investor 
-   * 
-   * 
-   * */
+   * what is ideal target investment level for each investor
+   */
   private get target(): DataFrame {
     return this.conviction
       .select((r) => r.Score as Score > 0).sort("Score")

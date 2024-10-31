@@ -1,4 +1,4 @@
-import { Position } from "./position.ts";
+import { Position } from "📚/portfolio/position.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 
 export type Positions = Array<Position>;
@@ -9,12 +9,17 @@ export class Portfolio {
 
   /** Add new position to collection */
   public add(position: Position): Portfolio {
-    return new Portfolio([...this.positions, position]);
+    // return new Portfolio([...this.positions, position]);
+    this.positions.push(position);
+    return this;
   }
 
   /** Remove matching position */
-  public remove(position: Position): Portfolio {
-    return new Portfolio(this.positions.filter(p=>p.id != position.id));
+  public remove(position: Position): boolean {
+    const index: number = this.positions.findIndex((p) => p.id == position.id);
+    if (index < 0) return false; // Not found
+    this.positions.splice(index, 1); // Remove position
+    return true;
   }
 
   /** Count of positions */

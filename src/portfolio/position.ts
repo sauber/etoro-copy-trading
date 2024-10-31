@@ -1,4 +1,4 @@
-import type { DateFormat } from "../time/mod.ts";
+import type { DateFormat } from "📚/time/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { nanoid } from "nanoid";
@@ -56,6 +56,6 @@ export class Position {
 
   /** Confirm if position is considere to still be open */
   public open(date: DateFormat): boolean {
-    return ! this.expired(date) && ! this.limited(date);
+    return !this.expired(date) && !this.limited(date);
   }
 }

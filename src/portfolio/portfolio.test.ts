@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import type { DateFormat } from "📚/time/mod.ts";
-import { Portfolio } from "./portfolio.ts";
-import { investor, position } from "./testdata.ts";
+import { Portfolio } from "📚/portfolio/portfolio.ts";
+import { investor, position } from "📚/portfolio/testdata.ts";
 
 const chart = investor.chart;
 const start: DateFormat = chart.start;
@@ -24,8 +24,9 @@ Deno.test("Add position", () => {
 Deno.test("Remove position", () => {
   const p = new Portfolio();
   const a: Portfolio = p.add(position);
-  const r: Portfolio = a.remove(position);
-  assertEquals(r.length, 0);
+  assertEquals(a, p);
+  const r: boolean = a.remove(position);
+  assertEquals(r, true);
 });
 
 Deno.test("Aggregated Profit", () => {

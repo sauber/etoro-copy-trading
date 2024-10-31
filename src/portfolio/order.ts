@@ -1,8 +1,8 @@
 /** An order contains biud and sell items that have not yet been executed */
 
 import { Investor } from "📚/investor/mod.ts";
-import type { DateFormat } from "../time/mod.ts";
-import { Position } from "./position.ts";
+import type { DateFormat } from "📚/time/mod.ts";
+import { Position } from "📚/portfolio/position.ts";
 
 export type BuyItem = {
   investor: Investor;

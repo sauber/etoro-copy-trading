@@ -1,8 +1,8 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Position } from "./position.ts";
+import { Position } from "📚/portfolio/position.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 import { nextDate } from "📚/time/mod.ts";
-import { investor } from "./testdata.ts";
+import { investor } from "📚/portfolio/testdata.ts";
 
 const chart = investor.chart;
 const open: DateFormat = chart.start;

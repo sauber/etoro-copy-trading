@@ -3,16 +3,16 @@ import {
   assertEquals,
   assertInstanceOf,
 } from "@std/assert";
-import { Portfolio } from "./portfolio.ts";
-import { Position } from "./position.ts";
-import { IPolicy, Policy } from "./policy.ts";
-import type { BuyItems, SellItems } from "./order.ts";
-import { community } from "./testdata.ts";
+import { Portfolio } from "📚/portfolio/portfolio.ts";
+import { Position } from "📚/portfolio/position.ts";
+import { IPolicy, Policy } from "📚/portfolio/policy.ts";
+import type { BuyItems, SellItems } from "📚/portfolio/order.ts";
+import { community } from "📚/portfolio/testdata.ts";
 import { Chart } from "📚/chart/mod.ts";
-import { DateFormat } from "📚/time/mod.ts";
+import * as modTs from "📚/time/mod.ts";
 import { sum } from "📚/math/statistics.ts";
 
-const start: DateFormat = "2021-12-29";
+const start: modTs.DateFormat = "2021-12-29";
 const name = "FundManagerZech";
 const investor = await community.investor(name);
 const name2 = "Robier89";
