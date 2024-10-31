@@ -1,6 +1,6 @@
 import { assertInstanceOf, assertStringIncludes } from "@std/assert";
-import { FetchURL } from "./fetch-url.ts";
-import { discoverFilter, investorId } from "./testdata.ts";
+import { FetchURL } from "📚/repository/fetch-url.ts";
+import { discoverFilter, investorId } from "📚/repository/testdata.ts";
 
 Deno.test("Initialization", () => {
   const f: FetchURL = new FetchURL();

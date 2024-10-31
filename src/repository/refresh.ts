@@ -12,8 +12,8 @@ import type { PortfolioData } from "./portfolio.ts";
 import { Stats } from "./stats.ts";
 import type { StatsData } from "./stats.ts";
 
-import { FetchBackend } from "./mod.ts";
-import type { DiscoverFilter, InvestorId } from "./mod.ts";
+import { FetchBackend } from "./types.ts";
+import type { DiscoverFilter, InvestorId } from "./types.ts";
 
 type Range = {
   min: number;

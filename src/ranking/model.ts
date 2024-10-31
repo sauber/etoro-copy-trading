@@ -1,6 +1,6 @@
 import { Network, Train } from "@sauber/neurons";
 import type { NetworkData } from "@sauber/neurons";
-import type { Input, Inputs, Output, Outputs } from "./mod.ts";
+import type { Input, Inputs, Output, Outputs } from "./types.ts";
 
 type TrainResults = {
   iterations: number;
@@ -42,17 +42,24 @@ export class Model {
     outputs: Outputs,
     max_iterations: number = 20000,
     learning_rate: number = 0.001,
-    callback?: Dashboard
+    batch_size: number = 64,
+    callback?: Dashboard,
   ): TrainResults {
-    this.network.adapt(inputs);
-    const train = new Train(this.network, inputs, outputs);
-    if ( callback ) train.callback = callback;
+    const xs = inputs.map((record) => Object.values(record));
+    const ys = outputs.map((record) => Object.values(record));
+
+    this.network.adapt(xs);
+    const train = new Train(this.network, xs, ys);
+    if (callback) train.callback = callback;
+    train.batchSize = batch_size;
     const iterations: number = train.run(max_iterations, learning_rate);
     return { iterations, loss: train.loss };
   }
 
   /** Forward inference of an input set */
   public predict(input: Input): Output {
-    return this.network.predict(input) as Output;
+    const x: number[] = Object.values(input);
+    const result = this.network.predict(x);
+    return { SharpeRatio: result[0] } as Output;
   }
 }

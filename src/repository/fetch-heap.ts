@@ -1,10 +1,10 @@
-import type { ChartData } from "./chart.ts";
-import type { DiscoverData } from "./discover.ts";
-import type { PortfolioData } from "./portfolio.ts";
-import type { StatsData } from "./stats.ts";
+import type { ChartData } from "📚/repository/chart.ts";
+import type { DiscoverData } from "📚/repository/discover.ts";
+import type { PortfolioData } from "📚/repository/portfolio.ts";
+import type { StatsData } from "📚/repository/stats.ts";
 
-import { FetchBackend } from "./mod.ts";
-import type { DiscoverFilter, InvestorId } from "./mod.ts";
+import { FetchBackend } from "📚/repository/types.ts";
+import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
 
 type Assets = {
   discover: DiscoverData;

@@ -7,12 +7,19 @@ import {
   assertNotEquals,
 } from "@std/assert";
 import { Model } from "📚/ranking/model.ts";
-import type { Input, Inputs, Output, Outputs } from "./mod.ts";
-import { input_labels } from "📚/ranking/mod.ts";
+import type { Input, Inputs, Output, Outputs } from "./types.ts";
+import { input_labels } from "📚/ranking/types.ts";
 
-/** Generate a random set of inputs */
-function set(): Input {
-  return Array.from({ length: input_labels.length }, Math.random) as Input;
+/** Generate a random set of input */
+function input(): Input {
+  return Object.fromEntries(
+    input_labels.map((label) => [label, Math.random()]),
+  ) as Input;
+}
+
+/** Generate a random set of output */
+function output(): Output {
+  return { SharpeRatio: Math.random() };
 }
 
 /** Number of input features */
@@ -33,8 +40,8 @@ Deno.test("Export / Import", () => {
 
 Deno.test("Train", () => {
   const m = Model.generate(features);
-  const inputs: Inputs = [set(), set(), set(), set()];
-  const outputs: Outputs = [[0], [1], [1], [0]];
+  const inputs: Inputs = [input(), input(), input(), input()];
+  const outputs: Outputs = [output(), output(), output(), output()];
   const max = 2000;
   const results = m.train(inputs, outputs, max);
   assertGreater(results.iterations, 0);
@@ -43,7 +50,7 @@ Deno.test("Train", () => {
 
 Deno.test("Predict", () => {
   const m = Model.generate(features);
-  const input: Input = set();
-  const output: Output = m.predict(input);
-  assertNotEquals(output[0], 0);
+  const inp: Input = input();
+  const out: Output = m.predict(inp);
+  assertNotEquals(out.SharpeRatio, 0);
 });

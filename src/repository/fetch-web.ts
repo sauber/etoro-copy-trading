@@ -1,14 +1,14 @@
-import { FetchURL } from "./fetch-url.ts";
-import { RateLimit } from "./ratelimit.ts";
-import { fetchjson } from "./fetch-json.ts";
+import { FetchURL } from "📚/repository/fetch-url.ts";
+import { RateLimit } from "📚/repository/ratelimit.ts";
+import { fetchjson } from "📚/repository/fetch-json.ts";
 
-import type { DiscoverData } from "./discover.ts";
-import type { ChartData } from "./chart.ts";
-import type { PortfolioData } from "./portfolio.ts";
-import type { StatsData } from "./stats.ts";
+import type { DiscoverData } from "📚/repository/discover.ts";
+import type { ChartData } from "📚/repository/chart.ts";
+import type { PortfolioData } from "📚/repository/portfolio.ts";
+import type { StatsData } from "📚/repository/stats.ts";
 
-import { DiscoverFilter, FetchBackend } from "./mod.ts";
-import type { InvestorId } from "./mod.ts";
+import { DiscoverFilter, FetchBackend } from "📚/repository/types.ts";
+import type { InvestorId } from "📚/repository/types.ts";
 
 /** Fetch objects from eToro API */
 export class FetchWebBackend implements FetchBackend {

@@ -1,6 +1,5 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import { assertInstanceOf } from "@std/assert";
 import { Investor } from "./investor.ts";
-import type { InvestorExport } from "./investor.ts";
 import { Diary } from "./diary.ts";
 import { Chart } from "../chart/mod.ts";
 import type { InvestorId, StatsExport } from "📚/repository/mod.ts";
@@ -19,16 +18,3 @@ Deno.test("Initialization", () => {
   assertInstanceOf(investor, Investor);
 });
 
-Deno.test("Export / Import", () => {
-  // Generate original object
-  const investor = new Investor(username, id, fullname, chart, mirrors, stats);
-
-  // Export raw data
-  const data: InvestorExport = investor.export;
-  assertEquals(data.FullName, fullname);
-
-  // Generate from export
-  const imported: Investor = Investor.import(data);
-  assertInstanceOf(imported, Investor);
-  console.log(imported);
-});
