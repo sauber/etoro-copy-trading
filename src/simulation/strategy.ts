@@ -3,7 +3,6 @@ import { Investor } from "📚/investor/mod.ts";
 import type { DateFormat } from "../time/mod.ts";
 import { Order } from "../portfolio/order.ts";
 import { Portfolio } from "../portfolio/portfolio.ts";
-import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
 //import { Ranking } from "📚/ranking/ranking.ts";
 
@@ -66,11 +65,9 @@ export class RandomStrategy extends Strategy {
   ): Order {
     order = this.parent?.order(portfolio, date, order) || order;
     if (this.investors.length > 0) {
-      // const shuffled: Investors = shuffleArray(this.investors);
-      // const investor = shuffled.find((investor) => investor.active(date));
-      const investor: Investor = any(this.investors);
+      const shuffled: Investors = shuffleArray(this.investors);
+      const investor = shuffled.find((investor) => investor.active(date));
       if (investor) {
-        console.log(date, investor.UserName);
         const amount = this.amount;
         order.buy([{ investor, amount, date }]);
       }
