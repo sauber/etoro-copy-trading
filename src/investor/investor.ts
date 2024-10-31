@@ -13,7 +13,7 @@ export class Investor {
     public readonly stats: Diary<StatsExport>,
   ) {}
 
-  /** Confirm if investor has valid data on this date */
+  /** Confirm if investor has chart data on this date */
   public active(date: DateFormat): boolean {
     if (this.chart.start <= date && this.chart.end >= date) return true;
     else return false;

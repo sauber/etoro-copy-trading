@@ -101,8 +101,8 @@ export class Simulation {
 
   /** Run a trading session on a particlar date */
   private step(date: DateFormat): void {
-    this.valuate(date);
     this.expire(date);
+    this.valuate(date);
     this.close(date);
     this.open(date);
   }

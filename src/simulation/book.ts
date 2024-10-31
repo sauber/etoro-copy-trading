@@ -22,7 +22,7 @@ export type Journal = Array<Transaction>;
 /** A journal of transaction on portfolio */
 export class Book {
   private readonly journal: Journal = [];
-  public readonly portfolio = new Portfolio();
+  public portfolio = new Portfolio();
   public readonly balance = {
     invested: 0,
     profit: 0,
@@ -47,6 +47,7 @@ export class Book {
   public add(date: DateFormat, position: Position): boolean {
     // Add to portfolio
     this.portfolio.add(position);
+    // console.log("Add position", position, this.portfolio);
 
     // Add to transactions
     const amount = position.amount;
@@ -105,6 +106,7 @@ export class Book {
     this.journal.push({ date, action: "valuate", ...this.balance });
   }
 
+  /** Count of transactions */
   public get length(): number {
     return this.journal.length;
   }

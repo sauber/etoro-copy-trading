@@ -2,6 +2,7 @@ import {
   assertAlmostEquals,
   assertEquals,
   assertInstanceOf,
+  assertNotEquals,
 } from "@std/assert";
 import type { DateFormat } from "../time/mod.ts";
 import { Book } from "./book.ts";
@@ -29,11 +30,16 @@ Deno.test("Add/Remove position", () => {
   assertEquals(book.add(start, position), true);
   assertEquals(book.balance.invested, position.amount);
   assertEquals(book.balance.profit, 0);
+  assertEquals(book.balance.value, 0);
+  
   const profit: number = position.amount * (chart.last / chart.first - 1);
   const selling_amount = (position.amount * chart.last) / chart.first;
   assertEquals(book.remove(end, position, "sell", selling_amount), true);
   assertEquals(book.balance.invested, 0);
   assertAlmostEquals(book.balance.profit, profit);
+  assertNotEquals(book.balance.value, 0);
+
+  // book.export.print("Book");
 });
 
 Deno.test("Valuation", () => {
