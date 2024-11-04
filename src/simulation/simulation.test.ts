@@ -3,7 +3,11 @@ import { DateFormat, diffDate } from "📚/time/mod.ts";
 import { community } from "📚/simulation/testdata.ts";
 import type { Investors } from "📚/simulation/testdata.ts";
 import { Simulation } from "📚/simulation/simulation.ts";
-import { NullStrategy, RandomStrategy } from "📚/simulation/strategy.ts";
+import {
+  NullStrategy,
+  Positions,
+  RandomStrategy,
+} from "📚/simulation/strategy.ts";
 
 const [start, end] = (await Promise.all([
   community.start(),
@@ -35,7 +39,7 @@ Deno.test.ignore("Random Strategy", () => {
     new RandomStrategy(investors, 1000),
   );
   sim.run();
-  sim.book.export.digits(2).print("Random Strategy");
-  const positions: number = sim.book.portfolio.length;
-  assertEquals(positions, 0);
+  console.log(sim.account.statement);
+  const positions: Positions = sim.account.positions;
+  assertEquals(positions.length, 0);
 });

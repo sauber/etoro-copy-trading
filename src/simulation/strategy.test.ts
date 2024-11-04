@@ -1,17 +1,19 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
+import { Position } from "@sauber/trading-account";
 import {
   ExitStrategy,
   NullStrategy,
+  type Positions,
   RandomStrategy,
   Strategy,
 } from "📚/simulation/strategy.ts";
-import { Order } from "📚/portfolio/order.ts";
-import { Portfolio } from "📚/portfolio/portfolio.ts";
-import { investor, community, position } from "📚/portfolio/testdata.ts";
+import { community, investor } from "📚/simulation/testdata.ts";
+import { InvestorInstrument } from "📚/simulation/investor-instrument.ts";
+import { Investors } from "📚/repository/mod.ts";
 
-const investors = await community.all();
 const date = investor.chart.start;
-const portfolio: Portfolio = new Portfolio();
+const all: Investors = await community.all();
+const investors = all.filter((i) => i.active(date));
 
 Deno.test("Strategy Instance", () => {
   const s = new Strategy(investors);
@@ -20,22 +22,23 @@ Deno.test("Strategy Instance", () => {
 
 Deno.test("Null Strategy", () => {
   const s = new NullStrategy(investors);
-  assertEquals(s.order(portfolio, date).buyItems.length, 0);
+  const positions: Positions = [];
+  assertEquals(s.buy(positions, date).length, 0);
+  assertEquals(s.sell(positions, date).length, 0);
 });
 
 Deno.test("Random Strategy", () => {
   const amount = 1000;
   const s = new RandomStrategy(investors, amount);
-  const order: Order = s.order(portfolio, date);
-  assertEquals(order.buyItems.length, 1);
-  assertEquals(order.buyItems[0].amount, amount);
+  assertEquals(s.buy([], date).length, 1);
+  assertEquals(s.sell([], date).length, 0);
 });
 
 Deno.test("Exit Strategy", () => {
-  const portfolio = new Portfolio().add(position);
-  const s = new ExitStrategy(investors);
-  const order: Order = s.order(portfolio, date);
-  assertEquals(order.sellItems.length, 1);
-  assertEquals(order.sellItems[0].reason, "exit");
-  assertEquals(order.sellItems[0].position, position);
+  const position = new Position(new InvestorInstrument(investor), 1, 1000);
+  const portfolio: Positions = [position];
+  const strategy = new ExitStrategy(investors);
+  const sell: Positions = strategy.sell(portfolio, date);
+  assertEquals(sell.length, 1);
+  assertEquals(sell[0], position);
 });

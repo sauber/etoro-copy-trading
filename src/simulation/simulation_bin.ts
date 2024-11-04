@@ -19,4 +19,5 @@ const [start, _end] = (await Promise.all([
 
 const sim = new Simulation(start, "2022-04-27", investors, new RandomStrategy(investors, 1000));
 sim.run();
-sim.book.export.digits(2).print("Random Strategy");
+console.log(sim.account.statement);
+
