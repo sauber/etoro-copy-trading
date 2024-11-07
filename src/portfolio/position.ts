@@ -54,7 +54,7 @@ export class Position {
     return false;
   }
 
-  /** Confirm if position is considere to still be open */
+  /** Confirm if position is considered to still be open */
   public open(date: DateFormat): boolean {
     return !this.expired(date) && !this.limited(date);
   }
