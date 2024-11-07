@@ -2,7 +2,7 @@ import { Community, type Investors } from "📚/repository/mod.ts";
 import { CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 import { Simulation } from "📚/simulation/simulation.ts";
-import { RandomStrategy } from "📚/simulation/strategy.ts";
+import { Strategy } from "📚/simulation/strategy.ts";
 
 // Community Repo
 const path: string = Deno.args[0];
@@ -17,7 +17,10 @@ const [start, _end] = (await Promise.all([
   community.end(),
 ])) as [DateFormat, DateFormat];
 
-const sim = new Simulation(start, "2022-04-27", investors, new RandomStrategy(investors, 1000));
+// Strategy
+const strategy: Strategy = new Strategy().random();
+
+// Simulation
+const sim = new Simulation(start, "2022-04-27", investors, strategy);
 sim.run();
 console.log(sim.account.statement);
-
