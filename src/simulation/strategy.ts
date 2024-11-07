@@ -1,105 +1,135 @@
 import type { Investors } from "📚/repository/mod.ts";
+import type { DateFormat } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import type { DateFormat } from "../time/mod.ts";
-import { Order } from "../portfolio/order.ts";
-import { Portfolio } from "../portfolio/portfolio.ts";
-import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
-import shuffleArray from "@hugoalh/shuffle-array";
-//import { Ranking } from "📚/ranking/ranking.ts";
+import { today } from "📚/time/calendar.ts";
+
+export type Position = {
+  amount: number;
+  investor: Investor;
+};
+
+export type Portfolio = Array<Position>;
 
 /** Pick a random item from an array */
-function any<T>(items: Array<T>): T {
+function any<T>(items: Array<T>): Array<T> {
   const count = items.length;
+  if (count < 1) return [];
   const index = Math.floor(Math.random() * count);
-  return items[index];
+  return [items[index]];
 }
 
 export class Strategy {
-  constructor(
-    protected readonly investors: Investors,
-    protected readonly parent?: Strategy,
-  ) {}
+  public readonly investors?: Investors;
+  public readonly amount?: number;
+  public readonly date?: DateFormat;
+  public readonly portfolio?: Portfolio;
+  public parent?: Strategy;
 
-  /** List of buy and sell orders */
-  public order(
-    portfolio: Portfolio,
-    date: DateFormat,
-    order: Order = new Order(),
-  ): Order {
-    return this.parent?.order(portfolio, date, order) || order;
+  constructor(options: Partial<Strategy> = {}) {
+    Object.assign(this, options);
   }
 
-  public get null(): NullStrategy {
-    return new NullStrategy(this.investors, this);
+  /** Place another chain of strategies after this chain */
+  public append(other: Strategy): Strategy {
+    return other.prepend(this);
   }
 
-  public get exit(): ExitStrategy {
-    return new ExitStrategy(this.investors, this);
+  /** Place another chain of strategies before this chain */
+  public prepend(other: Strategy): Strategy {
+    if (this.parent) this.parent.prepend(other);
+    else this.parent = other;
+    return this;
   }
 
-  public random(amount: number): RandomStrategy {
-    return new RandomStrategy(this.investors, amount, this);
+  private getAmount(): number {
+    return this.amount || this.parent?.amount || 0;
+  }
+
+  private getDate(): DateFormat {
+    return this.date || this.parent?.date || today();
+  }
+
+  /** Generate list of buy positions or pull from parent */
+  protected getBuy(): Portfolio {
+    if (this.investors) {
+      // Create equal position in each investor
+      const amount: number = this.getAmount() / this.investors.length;
+      return this.investors.map((investor: Investor) => ({ amount, investor }));
+    } else if (this.parent) return this.parent.buy();
+    else return [];
+  }
+
+  public buy(): Portfolio {
+    return this.getBuy();
+  }
+
+  /** Sel whole portfolio or parent portfolio */
+  protected getSell(): Portfolio {
+    return this.portfolio || this.parent?.portfolio || [];
+  }
+
+  public sell(): Portfolio {
+    return this.getSell();
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+  // Amended strategies
+  ////////////////////////////////////////////////////////////////////////
+
+  /** Maybe buy or sell a position */
+  public random(): Strategy {
+    const amount = this.getAmount();
+    return new Strategy({
+      parent: this,
+      buy: (): Portfolio =>
+        Math.random() < 0.5
+          ? any(this.getBuy()).map((p) => ({ amount, investor: p.investor }))
+          : [],
+      sell: (): Portfolio => Math.random() > 0.5 ? any(this.getSell()) : [],
+    });
+  }
+
+  /** Buy nothing, sell all */
+  public exit(): Strategy {
+    return new Strategy({ parent: this, buy: (): Portfolio => [] });
+  }
+
+  /** Only buy active investors */
+  public active(): Strategy {
+    const date = this.getDate();
+    return new Strategy({
+      parent: this,
+      buy: (): Portfolio =>
+        this.getBuy().filter((p) => p.investor.active(date)),
+    });
+  }
+
+  /** Sell all expired investors */
+  public expired(): Strategy {
+    const date = this.getDate();
+    return new Strategy({
+      parent: this,
+      sell: (): Portfolio =>
+        this.getSell().filter((p) => !p.investor.active(date)),
+    });
   }
 }
 
 //////////////////////////////////////////////////////////////////////
-/// Strategies
+/// Custom Strategies
 //////////////////////////////////////////////////////////////////////
 
-/** No change to orders */
-export class NullStrategy extends Strategy {}
-
-/** Always buy one random, never sell */
-export class RandomStrategy extends Strategy {
-  constructor(
-    protected override readonly investors: Investors,
-    private amount: number,
-    protected override readonly parent?: Strategy,
-  ) {
-    super(investors, parent);
+/** Pick first N positions from buy and sell portfolio */
+export class LimitStrategy extends Strategy {
+  constructor(private readonly count: number, data: Partial<Strategy> = {}) {
+    super(data);
   }
 
-  public override order(
-    portfolio: Portfolio,
-    date: DateFormat,
-    order: Order = new Order(),
-  ): Order {
-    order = this.parent?.order(portfolio, date, order) || order;
-    if (this.investors.length > 0) {
-      // const shuffled: Investors = shuffleArray(this.investors);
-      // const investor = shuffled.find((investor) => investor.active(date));
-      const investor: Investor = any(this.investors);
-      if (investor) {
-        console.log(date, investor.UserName);
-        const amount = this.amount;
-        order.buy([{ investor, amount, date }]);
-      }
-    }
-    return order;
+  public override buy(): Portfolio {
+    return this.getBuy().slice(0, this.count);
+  }
+
+  public override sell(): Portfolio {
+    return this.getSell().slice(0, this.count);
   }
 }
-
-/** Sell all positions */
-export class ExitStrategy extends Strategy {
-  public override order(
-    portfolio: Portfolio,
-    date: string,
-    order: Order = new Order(),
-  ): Order {
-    order = this.parent?.order(portfolio, date, order) || order;
-    order.sell(
-      portfolio.positions.map((position) => ({ position, reason: "exit" })),
-    );
-    return order;
-  }
-}
-
-/** Rank all investors by conviction */
-// export class ConvictionStrategy extends Strategy {
-//   public order(portfolio: Portfolio, date: string, order: Order = new Order): Order {
-//     order = this.parent?.order(portfolio, date, order) || order;
-//     const ranking = new Ranking(this.repo);
-//     const investors = this.community.on(date);
-//     const prediction = ranking.predict(investors, date);
-//   }
-// }

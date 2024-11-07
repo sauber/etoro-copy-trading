@@ -1,41 +1,72 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
 import {
-  ExitStrategy,
-  NullStrategy,
-  RandomStrategy,
-  Strategy,
-} from "📚/simulation/strategy.ts";
-import { Order } from "📚/portfolio/order.ts";
-import { Portfolio } from "📚/portfolio/portfolio.ts";
-import { investor, community, position } from "📚/portfolio/testdata.ts";
+  assertArrayIncludes,
+  assertEquals,
+  assertInstanceOf,
+} from "@std/assert";
+import { LimitStrategy, Strategy } from "📚/simulation/strategy.ts";
+import { community, investor } from "📚/simulation/testdata.ts";
+import { Investors } from "📚/repository/mod.ts";
 
-const investors = await community.all();
 const date = investor.chart.start;
-const portfolio: Portfolio = new Portfolio();
+const all: Investors = await community.all();
+const active = all.filter((i) => i.active(date));
 
 Deno.test("Strategy Instance", () => {
-  const s = new Strategy(investors);
+  const s = new Strategy();
   assertInstanceOf(s, Strategy);
+  assertEquals(s.buy(), []);
+  assertEquals(s.sell(), []);
 });
 
-Deno.test("Null Strategy", () => {
-  const s = new NullStrategy(investors);
-  assertEquals(s.order(portfolio, date).buyItems.length, 0);
+Deno.test("Prepend", () => {
+  const child = new Strategy();
+  const parent = new Strategy();
+  const chain = child.prepend(parent);
+  assertEquals(chain, child);
+  assertEquals(chain.buy(), []);
+  assertEquals(chain.sell(), []);
+});
+
+Deno.test("Append", () => {
+  const child = new Strategy();
+  const parent = new Strategy();
+  const chain = parent.append(child);
+  assertEquals(chain, child);
+  assertEquals(chain.buy(), []);
+  assertEquals(chain.sell(), []);
 });
 
 Deno.test("Random Strategy", () => {
-  const amount = 1000;
-  const s = new RandomStrategy(investors, amount);
-  const order: Order = s.order(portfolio, date);
-  assertEquals(order.buyItems.length, 1);
-  assertEquals(order.buyItems[0].amount, amount);
+  const s = new Strategy({ investors: active }).random();
+  assertArrayIncludes([0, 1], [s.buy().length]);
+  assertEquals(s.sell(), []);
 });
 
-Deno.test("Exit Strategy", () => {
-  const portfolio = new Portfolio().add(position);
-  const s = new ExitStrategy(investors);
-  const order: Order = s.order(portfolio, date);
-  assertEquals(order.sellItems.length, 1);
-  assertEquals(order.sellItems[0].reason, "exit");
-  assertEquals(order.sellItems[0].position, position);
+Deno.test("Limit Strategy", () => {
+  const s = new LimitStrategy(5);
+  assertEquals(s.buy(), []);
+  assertEquals(s.sell(), []);
 });
+
+// Deno.test("Null Strategy", () => {
+//   const s = new NullStrategy(investors);
+//   const positions: Positions = [];
+//   assertEquals(s.buy(positions, date).length, 0);
+//   assertEquals(s.sell(positions, date).length, 0);
+// });
+
+// Deno.test("Active Strategy", () => {
+//   const s = new ActiveStrategy(investors, date);
+//   const positions: Positions = [];
+//   assertEquals(s.buy(positions, date).length, 0);
+//   assertEquals(s.sell(positions, date).length, 0);
+// });
+
+// Deno.test("Exit Strategy", () => {
+//   const position = new Position(new InvestorInstrument(investor), 1, 1000);
+//   const portfolio: Positions = [position];
+//   const strategy = new ExitStrategy(investors);
+//   const sell: Positions = strategy.sell(portfolio, date);
+//   assertEquals(sell.length, 1);
+//   assertEquals(sell[0], position);
+// });

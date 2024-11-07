@@ -17,11 +17,11 @@
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.4.1",
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
     "@sauber/table": "jsr:@sauber/table@^0.1.0",
+    "@sauber/trading-account": "jsr:@sauber/trading-account@^0.3.1",
     "@std/assert": "jsr:@std/assert@^1.0.6",
     "@std/datetime": "jsr:@std/datetime@^0.225.2",
     "@std/fmt": "jsr:@std/fmt@^1.0.2",
     "@std/path": "jsr:@std/path@^1.0.6",
-    "nanoid": "https://deno.land/x/nanoid@v3.0.0/mod.ts",
     "semaphore": "https://deno.land/x/semaphore@v1.1.2/semaphore.ts",
     "📚/": "./src/"
   }
