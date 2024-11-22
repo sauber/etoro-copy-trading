@@ -6,14 +6,20 @@ import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 
 export type Names = Array<string>;
 export type Investors = Array<Investor>;
+type Dates = Array<DateFormat>;
 
 /** Handle Community I/O requests to local repository */
 export class Community {
   constructor(private readonly repo: Backend) {}
 
+  /** List of all dates in repo */
+  private dates(): Promise<Dates> {
+    return this.repo.dirs();
+  }
+
   /** Unique set of names across all dates */
   public async allNames(): Promise<Names> {
-    const dates: DateFormat[] = await this.repo.dirs();
+    const dates: Dates = await this.dates();
     const allNames: Names[] = await Promise.all(
       dates.map((date) => this.namesByDate(date)),
     );
@@ -39,7 +45,7 @@ export class Community {
 
   /** The first directory where names exists */
   public async start(): Promise<DateFormat | null> {
-    const dates: DateFormat[] = await this.repo.dirs();
+    const dates: Dates = await this.dates();
     for (const date of [...dates]) {
       if ((await this.namesByDate(date)).length) return date;
     }
@@ -48,7 +54,7 @@ export class Community {
 
   /** The last directory where names exists */
   public async end(): Promise<DateFormat | null> {
-    const dates: DateFormat[] = await this.repo.dirs();
+    const dates: Dates = await this.dates();
     for (const date of [...dates].reverse()) {
       if ((await this.namesByDate(date)).length) return date;
     }
@@ -59,10 +65,10 @@ export class Community {
    * Confirm that investor has all required properties
    * TODO
    */
-  private validName(_username: string): Promise<boolean> {
-    //return this.investor(username).isValid();
-    return Promise.resolve(true);
-  }
+  // private validName(_username: string): Promise<boolean> {
+  //   //return this.investor(username).isValid();
+  //   return Promise.resolve(true);
+  // }
 
   /** Test if investor is active at date */
   private async activeName(
@@ -86,18 +92,12 @@ export class Community {
     return names;
   }
 
-  /** Verify if sufficient data files exists to load ivnestor */
-  private validate(username: string): Promise<boolean> {
-    const assembly = new InvestorAssembly(username, this.repo);
-    return assembly.validate();
-  }
-
   private _loaded: Record<string, Investor> = {};
   /** Create and cache Investor object */
   public async investor(username: string): Promise<Investor> {
     if (!(username in this._loaded)) {
       const assembly = new InvestorAssembly(username, this.repo);
-      this._loaded[username] = await assembly.compiled();
+      this._loaded[username] = await assembly.investor();
     }
     return this._loaded[username];
   }
@@ -111,20 +111,6 @@ export class Community {
     return this.investor(name);
   }
 
-  /** Identify investor with invalid data */
-  public async invalidNames(): Promise<Names> {
-    const names: Names = await this.allNames();
-
-    // Validate each investor
-    const loadable: boolean[] = await Promise.all(
-      names.map((name) => this.validate(name)),
-    );
-
-    // Report invalid investors
-    const invalidNames = names.filter((_name, index) => !loadable[index]);
-    return invalidNames;
-  }
-
   /** Load a list of investors from list of names */
   private load(names: Names): Promise<Investors> {
     return Promise.all(names.map((name) => this.investor(name)));
@@ -136,17 +122,12 @@ export class Community {
     return this.load(names);
   }
 
-  /** Investors active on date */
-  public async on(date: DateFormat): Promise<Investors> {
-    const names: Names = await this.active(date);
-    return this.load(names);
-  }
-
   /** Investors on latest date */
   public async latest(): Promise<Investors> {
-    const end: DateFormat | null = await this.end();
-    if (!end) return [];
-    return this.on(end);
+    const end = await this.end();
+    if ( ! end ) return [];
+    const names: Names = await this.namesByDate(end);
+    return this.load(names);
   }
 
   /** Load a list of investor charts from list of names */

@@ -2,21 +2,21 @@ import { DateFormat } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
-import { input_labels } from "📚/ranking/mod.ts";
-import type { Input, Output } from "📚/ranking/mod.ts";
+import { input_labels } from "📚/ranking/types.ts";
+import type { Input, Output } from "📚/ranking/types.ts";
 
 export class Features {
   constructor(private readonly investor: Investor) {}
 
   /** Prediction input parameters */
   public input(date?: DateFormat): Input {
-    const v: StatsExport = date
+    if ( this.investor.stats.dates.length < 1 ) throw new Error(`Investor ${this.investor.UserName} has no stats`);
+    const values: StatsExport = date
       ? this.investor.stats.before(date)
       : this.investor.stats.first;
 
-    // Pluck data from stats and convert to number
-    return input_labels.map((key: keyof StatsExport) =>
-      Number(v[key])
+    return Object.fromEntries(
+      input_labels.map((key: keyof StatsExport) => [key, Number(values[key])]),
     ) as Input;
   }
 
@@ -31,6 +31,6 @@ export class Features {
       console.log({ chart, name, start, sr });
       throw new Error("Invalid SharpeRatio");
     }
-    return [sr];
+    return { SharpeRatio: sr };
   }
 }

@@ -1,22 +1,61 @@
-import type { DateFormat } from "../time/mod.ts";
-import { diffDate, nextDate } from "../time/calendar.ts";
-import { Asset, Backend } from "../storage/mod.ts";
-import { Investor } from "📚/investor/mod.ts";
+import { type DateFormat, diffDate } from "📚/time/mod.ts";
+import { Asset, Backend } from "📚/storage/mod.ts";
 import { Chart as CompiledChart } from "📚/chart/mod.ts";
-import { InvestorId } from "./mod.ts";
+import { Diary, Investor } from "📚/investor/mod.ts";
 
-import type { ChartData } from "./chart.ts";
-import { Chart } from "./chart.ts";
+import { InvestorId } from "📚/repository/types.ts";
+import { Chart, type ChartData } from "📚/repository/chart.ts";
+import { Portfolio, type PortfolioData } from "📚/repository/portfolio.ts";
+import {
+  Stats,
+  type StatsData,
+  type StatsExport,
+} from "📚/repository/stats.ts";
+import type { Names } from "📚/repository/mod.ts";
 
-import type { PortfolioData } from "./portfolio.ts";
-import { Portfolio } from "./portfolio.ts";
-export type MirrorsByDate = Record<DateFormat, InvestorId[]>;
+type MirrorsByDate = Record<DateFormat, InvestorId[]>;
+type StatsByDate = Record<DateFormat, StatsExport>;
+type Dates = Array<DateFormat>;
 
-import type { StatsData, StatsExport } from "./stats.ts";
-import { Stats } from "./stats.ts";
-import { Diary } from "📚/investor/diary.ts";
-import type { InvestorExport } from "📚/investor/investor.ts";
-export type StatsByDate = Record<DateFormat, StatsExport>;
+type OverlappingCharts = {
+  start: DateFormat;
+  end: DateFormat;
+  values: number[];
+};
+
+// Format of data in cache
+export type InvestorExport = {
+  username: string;
+  fullname?: string;
+  customerid: number;
+  chartend: DateFormat;
+  chart: number[];
+  mirrors: MirrorsByDate;
+  stats: StatsByDate;
+};
+
+/** Given a list of dates, identify the ones within start end end,
+ * and the first just before and just after.
+ */
+function cover(dates: Dates, start: DateFormat, end: DateFormat): Dates {
+  const filtered: Dates = dates.filter((date: DateFormat) =>
+    date >= start && date <= end
+  );
+
+  // If first is not exactly on start, then look for first date before
+  if (filtered[0] != start) {
+    const before: Dates = dates.filter((date: DateFormat) => date < start);
+    filtered.unshift(...before.slice(-1));
+  }
+
+  // If last is not exactly at end, then look for first date after
+  if (filtered[filtered.length - 1] != end) {
+    const after: Dates = dates.filter((date: DateFormat) => date > end);
+    filtered.push(...after.slice(0, 1));
+  }
+
+  return filtered;
+}
 
 /** Extract scraped data and compile an investor object */
 export class InvestorAssembly {
@@ -26,7 +65,6 @@ export class InvestorAssembly {
   private readonly compiledAsset: Asset<InvestorExport>;
 
   constructor(public readonly UserName: string, readonly repo: Backend) {
-    //console.log('InvestorAssembly', {repo});
     this.chartAsset = new Asset<ChartData>(this.UserName + ".chart", repo);
     this.portfolioAsset = new Asset<PortfolioData>(
       this.UserName + ".portfolio",
@@ -40,48 +78,60 @@ export class InvestorAssembly {
   }
 
   /** Customer ID */
-  public async CustomerId(): Promise<number> {
+  private async CustomerId(): Promise<number> {
     const stats: StatsData = await this.statsAsset.last();
     const id: number = stats.Data.CustomerId;
     return id;
   }
 
   /** Customer ID */
-  public async FullName(): Promise<string | undefined> {
+  private async FullName(): Promise<string | undefined> {
     const stats: StatsData = await this.statsAsset.last();
     return stats.Data.FullName;
   }
 
   /** First date of combined charts */
-  public async start(): Promise<DateFormat> {
-    const chart: number[] = await this.chart();
-    const end: DateFormat = await this.end();
-    const days: number = chart.length;
-    const start: DateFormat = nextDate(end, -days + 1);
-    return start;
-  }
+  // public async start(): Promise<DateFormat> {
+  //   const chart: number[] = await this.chart();
+  //   const end: DateFormat = await this.end();
+  //   const days: number = chart.length;
+  //   const start: DateFormat = nextDate(end, -days + 1);
+  //   return start;
+  // }
 
-  /** Last date where chart is present */
-  public end(): Promise<DateFormat> {
-    return this.chartAsset.end();
+  /** Last date where any asset is present */
+  private _end: DateFormat|undefined;
+  private async end(): Promise<DateFormat> {
+    if ( this._end ) return this._end;
+
+    const dates = await Promise.all([
+      this.chartAsset.end(),
+      this.statsAsset.end(),
+      this.statsAsset.end(),
+    ]);
+    // The most last
+    const [last] = dates.sort().slice(-1);
+    this._end = last;
+    return last;
   }
 
   /** Combination of as few charts as possible from start to end */
-  private _chart: number[] | null = null;
-  public async chart(): Promise<number[]> {
+  // private _chart: number[] | null = null;
+  public async chart(): Promise<OverlappingCharts> {
     // Caching
-    if (this._chart) return this._chart;
+    // if (this._chart) return this._chart;
 
     // All dates having a chart
     const dates: DateFormat[] = await this.chartAsset.dates();
 
     // Load latest chart
-    const end: DateFormat = dates[dates.length - 1];
+    let end: DateFormat = dates[dates.length - 1];
     const lastData: ChartData = await this.chartAsset.retrieve(end);
     const lastChart = new Chart(lastData);
     const compiled = new CompiledChart(lastChart.values, end).trim;
     const values: number[] = compiled.values;
     let start: DateFormat = compiled.start;
+    end = compiled.end;
 
     // Prepend older charts
     // Search backwards to find oldest chart which still overlaps
@@ -97,7 +147,9 @@ export class InvestorAssembly {
 
       // Confirm even after trimming, there is still overlap
       if (sooner.end < start) {
-        console.warn(`${this.UserName} sooner chart after trimming no longer overlaps.`);
+        console.warn(
+          `${this.UserName} sooner chart after trimming no longer overlaps.`,
+        );
         break;
       }
 
@@ -124,8 +176,12 @@ export class InvestorAssembly {
     // Truncate floating digits to 2
     const price = values.map((v) => +v.toFixed(2));
     // Caching
-    this._chart = price;
-    return price;
+    // this._chart = price;
+    return {
+      start: start,
+      end: end,
+      values: price,
+    };
   }
 
   /** Extract essential data from stats on date */
@@ -135,19 +191,15 @@ export class InvestorAssembly {
     return stats.value;
   }
 
-  /** Extract stats for all available dates within chart range */
-  public async stats(): Promise<StatsByDate> {
+  /** Extract stats for all available dates within chart range and maximum 1 before and 1 after */
+  private async stats(chart: OverlappingCharts): Promise<StatsByDate> {
     // Dates
-    const start: DateFormat = await this.start();
-    const end: DateFormat = await this.end();
-    const dates: DateFormat[] = await this.statsAsset.dates();
-    const range: DateFormat[] = dates.filter(
-      (date) => date >= start && date <= end,
-    );
+    const available: Dates = await this.statsAsset.dates();
+    const range: Dates = cover(available, chart.start, chart.end);
 
     // Load Stats axports for eachd date in range
     const values: StatsExport[] = await Promise.all(
-      range.map((date) => this.statsValues(date)),
+      range.map((date: DateFormat) => this.statsValues(date)),
     );
 
     // Zip Dates and Stats
@@ -166,14 +218,10 @@ export class InvestorAssembly {
   }
 
   /** Latest mirrors */
-  public async mirrors(): Promise<MirrorsByDate> {
+  private async mirrors(chart: OverlappingCharts): Promise<MirrorsByDate> {
     // Dates
-    const start: DateFormat = await this.start();
-    const end: DateFormat = await this.end();
-    const dates: DateFormat[] = await this.portfolioAsset.dates();
-    const range: DateFormat[] = dates.filter(
-      (date) => date >= start && date <= end,
-    );
+    const available: Dates = await this.portfolioAsset.dates();
+    const range: Dates = cover(available, chart.start, chart.end);
 
     // Load Stats exports for each date in range
     const values: InvestorId[][] = await Promise.all(
@@ -181,15 +229,25 @@ export class InvestorAssembly {
     );
 
     // Zip Dates and Stats
-    // TODO: Skip dates with empty list of mirrors
-    const zip: MirrorsByDate = Object.assign(
-      {},
-      ...range.map((date, index) => ({ [date]: values[index] })),
-    );
+    // Skip consecutive equals
+    const zip: MirrorsByDate = {};
+    let prev: Names;
+    range.forEach((date: DateFormat, index: number) => {
+      const cur: InvestorId[] = values[index];
+      const curnames: Names = cur.map((id: InvestorId)=>id.UserName);
+      // Skip if same as before
+      if (index > 0 && prev.reduce((a, b) => a && curnames.includes(b), true)) false;
+      // Keep
+      else {
+        zip[date] = cur;
+        prev = cur.map((id: InvestorId)=>id.UserName);
+      }
+    });
+
     return zip;
   }
 
-  public async validate(): Promise<boolean> {
+  private async validate(): Promise<boolean> {
     // At least on chart file
     const chartDates: DateFormat[] = await this.chartAsset.dates();
     if (chartDates.length < 1) return false;
@@ -213,39 +271,64 @@ export class InvestorAssembly {
     return true;
   }
 
-  /** Combined investor object */
-  public async investor(): Promise<Investor> {
+  /** Load previously compiled investor, or generate */
+  private async compile(): Promise<InvestorExport> {
+    const chart: OverlappingCharts = await this.chart();
+    const chartend: DateFormat = chart.end;
+    const stats: StatsByDate = await this.stats(chart);
+    const mirrors: MirrorsByDate = await this.mirrors(chart);
+    const fullname: string | undefined = await this.FullName();
+    const customerid: number = await this.CustomerId();
+    return {
+      username: this.UserName,
+      fullname,
+      customerid,
+      chartend,
+      chart: chart.values,
+      mirrors,
+      stats,
+    };
+  }
+
+  /** Attempt to load from cache */
+  private async cached(): Promise<InvestorExport | null> {
+    // Cached version doesn't exist
+    if (!await this.compiledAsset.exists()) return null;
+
+    // Is cached version too old?
+    const prev: DateFormat = await this.compiledAsset.end();
+    const end: DateFormat = await this.end();
+    if (end > prev) {
+      await this.compiledAsset.erase();
+      return null;
+    }
+
+    // Cache is still recent
+    return this.compiledAsset.last();
+  }
+
+  /** Generate investor object from raw data */
+  private generate(data: InvestorExport): Investor {
     return new Investor(
       this.UserName,
-      await this.CustomerId(),
-      await this.FullName(),
-      new CompiledChart(await this.chart(), await this.end()),
-      new Diary<InvestorId[]>(await this.mirrors()),
-      new Diary<StatsExport>(await this.stats()),
+      data.customerid,
+      data.fullname,
+      new CompiledChart(data.chart, data.chartend),
+      new Diary(data.mirrors),
+      new Diary(data.stats),
     );
   }
 
-  /** Load previously compiled investor, or generate */
-  public async compiled(): Promise<Investor> {
-    const end: DateFormat = await this.end();
-    if (await this.compiledAsset.exists()) {
-      if (end > (await this.compiledAsset.end())) {
-        // Newer data exists, expire all previous compiled files
-        await this.compiledAsset.erase();
-      } else {
-        // Old compiled investor is still valid
-        //console.log(`Reusing compiled data`);
-        const data: InvestorExport = await this.compiledAsset.last();
-        const investor: Investor = Investor.import(data);
-        return investor;
-      }
-    }
+  /** Load or generate investor */
+  public async investor(): Promise<Investor> {
+    // Does cache exist and is valid?
+    const cached: InvestorExport | null = await this.cached();
+    if (cached) return this.generate(cached);
 
-    // Generate new compiled investor, and save at end date
-    const investor: Investor = await this.investor();
-    const data = investor.export;
-    console.log(`Compile ${end} ${this.UserName}`);
-    await this.compiledAsset.store(data, end);
-    return investor;
+    // Compile investor from asset
+    const compiled: InvestorExport = await this.compile();
+    const date = await this.end();
+    await this.compiledAsset.store(compiled, date);
+    return this.generate(compiled);
   }
 }

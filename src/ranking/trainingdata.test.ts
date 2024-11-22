@@ -1,18 +1,23 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
-import { TrainingData } from "📚/ranking/trainingdata.ts";
-import { community } from "📚/ranking/testdata.ts";
-import type { Inputs, Outputs } from "📚/ranking/mod.ts";
+import {
+  assertEquals,
+  assertGreaterOrEqual,
+  assertInstanceOf,
+  assertNotEquals,
+} from "@std/assert";
+import { type Samples, TrainingData } from "📚/ranking/trainingdata.ts";
+import { investor } from "📚/ranking/testdata.ts";
 
 Deno.test("Instance", () => {
-  const t = new TrainingData(community);
+  const t = new TrainingData(10);
   assertInstanceOf(t, TrainingData);
 });
 
-Deno.test("Generate data", async () => {
-  const t = new TrainingData(community);
-  await t.load();
-  const inputs: Inputs = t.inputs;
-  const outputs: Outputs = t.outputs;
-  assertEquals(inputs.length, 19);
-  assertEquals(outputs.length, 19);
+Deno.test("Generate data", () => {
+  const t = new TrainingData(10);
+  const fs: Samples = t.features(investor);
+  assertGreaterOrEqual(fs.length, 0);
+  for (const f of fs) {
+    assertEquals(Object.keys(f), ["input", "output"]);
+    assertNotEquals(f.output.SharpeRatio, 0);
+  }
 });

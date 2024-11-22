@@ -1,90 +1,174 @@
-import { avg, correlation } from "jsr:@sauber/statistics";
-import { Dashboard } from "jsr:@sauber/ml-cli-dashboard";
+/** Train ranking model */
+
+import { avg } from "jsr:@sauber/statistics";
+import { Dashboard, type Predict } from "@sauber/ml-cli-dashboard";
 import type { NetworkData } from "@sauber/neurons";
-import { shuffleArray } from "@hugoalh/shuffle-array";
-import { CachingBackend, DiskBackend } from "📚/storage/mod.ts";
+import { DataFrame } from "@sauber/dataframe";
+
+import { Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
+import { Community, type Investors } from "📚/repository/mod.ts";
+
 import { Model } from "📚/ranking/model.ts";
-import {
-  type Input,
-  input_labels,
-  type Inputs,
-  type Outputs,
-} from "📚/ranking/mod.ts";
-import { TrainingData } from "📚/ranking/trainingdata.ts";
-import { Community } from "📚/repository/community.ts";
+import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
+import { type Samples, TrainingData } from "📚/ranking/trainingdata.ts";
 
-// Repo
-if (!Deno.args[0]) throw new Error("Path missing");
-const path: string = Deno.args[0];
-const disk = new DiskBackend(path);
-const backend = new CachingBackend(disk);
+const modelAssetName = "ranking.network";
 
-// Training data
-console.log("Loading...");
-const community = new Community(backend);
-const data = new TrainingData(community, 30);
-await data.load();
-const xs: Inputs = data.inputs;
-const ys: Outputs = data.outputs;
-console.log("Data Length:", xs.length);
-
-// Model
-const assetname = "ranking.network";
-let model: Model;
-if (await backend.has(assetname)) {
-  console.log("Loading existing model...");
-  const rankingparams = await backend.retrieve(assetname) as NetworkData;
-  model = Model.import(rankingparams);
-} else {
-  console.log("Generating new model...");
-  model = Model.generate(xs[0].length);
+// Bind to Repo
+function setupRepo(path: string): Backend {
+  if (!Deno.statSync(path)) throw new Error(`${path} does not exist.`);
+  const disk = new DiskBackend(path);
+  const backend = new CachingBackend(disk);
+  return backend;
 }
 
-// Find the two most correlated columns
-const columns: number[][] = xs[0].map((_, i) => xs.map((r) => r[i]));
-const out: number[] = ys.map((r) => r[0]);
-const correlations: number[] = columns.map((c) => correlation(c, out));
-type CS = [number, number];
-const sorted_index: number[] = correlations
-  .map((c: number, i: number) => [i, Math.abs(c)] as CS)
-  .sort((a: CS, b: CS) => b[1] - a[1])
-  .map((x: CS) => x[0]);
-[0, 1].forEach((s) => {
-  const index: number = sorted_index[s];
-  const label: string = input_labels[index];
-  console.log("Correlation for label", index, label, "is", correlations[index]);
-});
+// Load all investors
+async function loadInvestors(repo: Backend): Promise<Investors> {
+  const community = new Community(repo);
+  const investors: Investors = await community.all();
+  return investors;
+}
+
+// Load training data
+function trainingdata(investors: Investors, window: number = 30): DataFrame {
+  const td = new TrainingData(window);
+  const samples: Samples = [];
+
+  for (const investor of investors) {
+    samples.push(...td.features(investor));
+  }
+  const records = samples.map((s) => Object.assign(s.input, s.output));
+  return DataFrame.fromRecords(records);
+}
+
+// Recursively trim training data until no outliers remai0
+function outlierFilter(data: DataFrame, factor: number = 10): DataFrame {
+  const prev: number = data.length;
+  data = data.outlier(factor);
+  if (data.length != prev) {
+    console.log(`Data length trimmed ${prev} to ${data.length}`);
+  }
+  return (data.length == prev) ? data : outlierFilter(data, factor);
+}
+
+// Load model
+async function loadModel(repo: Backend, inputs: number): Promise<Model> {
+  if (await repo.has(modelAssetName)) {
+    console.log("Loading existing model...");
+    const rankingparams = await repo.retrieve(modelAssetName) as NetworkData;
+    return Model.import(rankingparams);
+  } else {
+    console.log("Generating new model...");
+    return Model.generate(inputs);
+  }
+}
+
+// Save model to repository
+function saveModel(repo: Backend, model: Model): Promise<void> {
+  return repo.store(modelAssetName, model.export());
+}
+
+// Identify top two input columns correlated to output
+function correlations(inputs: DataFrame, outputs: DataFrame): [string, string] {
+  const correlations: DataFrame = inputs
+    .correlationMatrix(outputs)
+    .amend("abs", (r) => Math.abs(r.SharpeRatio as number))
+    .sort("abs")
+    .reverse;
+  const names = correlations.values<string>("Name").slice(0, 2) as [
+    string,
+    string,
+  ];
+  return names;
+}
+
+// Create dashboard
+function createDashboard(
+  data: DataFrame,
+  predict: Predict,
+  xlabel: keyof Input,
+  ylabel: keyof Input,
+): Dashboard {
+  const epochs = 2000;
+  const width = 78;
+  const height = 12;
+  type Point = [number, number];
+
+  // Pick max 200 samples for overlay
+  const samples: DataFrame = data.shuffle.slice(0, 200);
+  const overlay: Array<Point> = samples.records.map((r) =>
+    [r[xlabel], r[ylabel]] as Point
+  );
+  const out: number[] = samples.records.map((r) => r.SharpeRatio as number);
+
+  return new Dashboard(
+    width,
+    height,
+    overlay,
+    out,
+    predict,
+    epochs,
+    xlabel,
+    ylabel,
+  );
+}
+
+// Validation of random inputs
+function validation(model: Model, data: DataFrame, count: number = 5): void {
+  console.log("Validation");
+  const samples = data.shuffle.slice(0, count);
+  const inputs: Inputs = samples.exclude(["SharpeRatio"]).records as Inputs;
+  const outputs: Outputs = samples.include(["SharpeRatio"]).records as Outputs;
+  // Compare training output with predicted output
+  inputs.forEach((input: Input, sample: number) => {
+    console.log("sample");
+    console.log("  xs:", input);
+    console.log("  ys:", outputs[sample]);
+    console.log("  yp:", model.predict(input));
+  });
+}
+
+////////////////////////////////////////////////////////////////////////
+// Main
+////////////////////////////////////////////////////////////////////////
+
+// Load investors
+const repo: Backend = setupRepo(Deno.args[0]);
+console.log("Loading...");
+const investors: Investors = await loadInvestors(repo);
+
+// Extract training data
+console.log("Load features...");
+const loaded: DataFrame = trainingdata(investors);
+console.log("Loaded samples:", loaded.length);
+
+// Filtering
+const data = outlierFilter(loaded, 10);
+const inputs = data.exclude(["SharpeRatio"]);
+const outputs = data.include(["SharpeRatio"]);
+console.log("Sanitized samples:", data.length);
+
+// Load model
+const model = await loadModel(repo, inputs.names.length);
+
+// Get top two correlated columns
+const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
+console.log("Correlations:", { labels });
 
 // Callback to model from dashboard
-const means: Input = columns.map((c) => avg(c)) as Input;
-const xi = sorted_index[0];
-const yi = sorted_index[1];
+const colNames = inputs.names as Array<keyof Input>;
+const means: Input = Object.fromEntries(
+  colNames.map((
+    name: keyof Input,
+  ) => [name, avg(data.values(name) as number[])]),
+) as Input;
 function predict(a: number, b: number): number {
-  means[xi] = a;
-  means[yi] = b;
-  return model.predict(means)[0];
+  means[labels[0]] = a;
+  means[labels[1]] = b;
+  return model.predict(means).SharpeRatio;
 }
 
-// Dashboard
-const epochs = 2000;
-const width = 78;
-const height = 12;
-const xlabel: string = input_labels[sorted_index[0]];
-const ylabel: string = input_labels[sorted_index[1]];
-type Point = [number, number];
-const overlay: Array<Point> = shuffleArray(
-  xs.map((r) => [r[xi], r[yi]] as Point),
-).slice(0, 100);
-const d = new Dashboard(
-  width,
-  height,
-  overlay,
-  out,
-  predict,
-  epochs,
-  xlabel,
-  ylabel,
-);
+const d = createDashboard(data, predict, ...labels);
 
 // Callback to dashboard from training
 function dashboard(iteration: number, loss: number[]): void {
@@ -95,22 +179,19 @@ function dashboard(iteration: number, loss: number[]): void {
 console.log("Training...");
 const iterations = 2000;
 const learning_rate = 0.001;
-const results = model.train(xs, ys, iterations, learning_rate, dashboard);
+const batch_size = 64;
+const results = model.train(
+  inputs.records as Inputs,
+  outputs.records as Outputs,
+  iterations,
+  learning_rate,
+  batch_size,
+  dashboard,
+);
+console.log(d.finish());
 console.log(results);
-
-// Validation of 5 random inputs
-console.log("Validation");
-const samples = shuffleArray(Array.from(Array(xs.length).keys()))
-  .slice(0, 5)
-  .sort((a, b) => a - b);
-// Compare training output with predicted output
-samples.forEach((sample) => {
-  console.log("sample n:", sample);
-  console.log("  xs:", xs[sample]);
-  console.log("  ys:", ys[sample]);
-  console.log("  yp:", model.predict(xs[sample]));
-});
+validation(model, data, 5);
 
 // Store Model
 console.log("Saving...");
-await backend.store(assetname, model.export());
+await saveModel(repo, model);
