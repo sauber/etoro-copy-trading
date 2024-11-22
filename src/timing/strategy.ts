@@ -46,14 +46,18 @@ export class RSIStrategy implements Strategy {
   }
 
   public open(context: StrategyContext): PurchaseOrders {
+    if ( context.amount < 100 ) return [];
     const bar: Bar = context.bar;
     // Identify all instruments where RSI is below buy_threshold
     const toBuy: Instruments = context.instruments.filter((instrument) => {
       const rsiChart = this.chart(instrument as Instrument);
-      if (rsiChart.bar(bar) <= this.buy_threshold) return true;
+      if ( ! rsiChart.has(bar) ) return false;
+      if (rsiChart.bar(bar) > this.buy_threshold) return false;
+      return true;
     });
     // Distribute amount across all application instruments
-    const amount: Amount = context.amount / toBuy.length;
+    const amount: Amount = context.amount / toBuy.length / 2;
+    if ( amount < 100 ) return [];
 
     return toBuy.map((instrument) => ({ instrument, amount }));
   }
@@ -63,7 +67,9 @@ export class RSIStrategy implements Strategy {
     // Identify all instruments where RSI is over sell_threshold
     const toSell: Positions = context.positions.filter((position) => {
       const rsiChart = this.chart(position.instrument as Instrument);
-      if (rsiChart.bar(bar) >= this.sell_threshold) return true;
+      if ( ! rsiChart.has(bar) ) return false;
+      if (rsiChart.bar(bar) < this.sell_threshold) return false;
+      return true;
     });
 
     return toSell;
