@@ -1,48 +1,71 @@
-import type { Chart } from "📚/chart/mod.ts";
-import type { DateFormat } from "📚/time/mod.ts";
+import {
+  Amount,
+  Bar,
+  Chart,
+  Instruments,
+  Positions,
+  PurchaseOrders,
+  Strategy,
+  StrategyContext,
+} from "@sauber/backtest";
+import { RSI } from "@debut/indicators";
+import { Instrument } from "📚/timing/instrument.ts";
 
-/** Base Strategy class */
-export abstract class Strategy {
-  public readonly start: DateFormat;
-  public readonly end: DateFormat;
-
-  constructor(protected readonly chart: Chart) {
-    this.start = chart.start;
-    this.end = chart.end;
+/** Buy nothing, sell nothing */
+export class NullStrategy implements Strategy {
+  public open(_context: StrategyContext): PurchaseOrders {
+    return [];
   }
 
-  /** Signal 0-1=buying, -1-0=selling */
-  abstract signal(date: DateFormat): number;
-}
-
-/** Do nothing */
-export class Noop extends Strategy {
-  public signal(_date: DateFormat): number {
-    return 0;
-  }
-}
-
-/** Random buying and selling */
-export class Random extends Strategy {
-  public signal(_date: DateFormat): number {
-    return 2 * Math.random() - 1;
+  public close(_context: StrategyContext): Positions {
+    return [];
   }
 }
 
-/* RSI signals */
-export class RSI extends Strategy {
+export class RSIStrategy implements Strategy {
   constructor(
-    chart: Chart,
-    window: number,
-    private readonly buy_threshold: number = 20,
-    private readonly sell_threshold: number = 80,
-  ) {
-    super(chart.rsi(window));
+    private readonly window: number = 20,
+    private readonly buy_threshold: number = 30,
+    private readonly sell_threshold: number = 70,
+  ) {}
+
+  // Generate RSI chart for instrument
+  private readonly charts: Record<string, Chart> = {};
+  private chart(instrument: Instrument): Chart {
+    const id = instrument.symbol;
+    if (!this.charts[id]) {
+      const end: Bar = instrument.end;
+      const source: number[] = instrument.chart.values;
+      const rsi = new RSI(this.window);
+      const series = source.map((v) => rsi.nextValue(v)).filter((v) =>
+        v !== undefined
+      );
+      this.charts[id] = new Chart(series, end);
+    }
+    return this.charts[id];
   }
 
-  public signal(date: DateFormat): number {
-    const value = this.chart.value(date);
-    if ( value > this.buy_threshold && value < this.sell_threshold ) return 0;
-    return (50 - value) / 50;
+  public open(context: StrategyContext): PurchaseOrders {
+    const bar: Bar = context.bar;
+    // Identify all instruments where RSI is below buy_threshold
+    const toBuy: Instruments = context.instruments.filter((instrument) => {
+      const rsiChart = this.chart(instrument as Instrument);
+      if (rsiChart.bar(bar) <= this.buy_threshold) return true;
+    });
+    // Distribute amount across all application instruments
+    const amount: Amount = context.amount / toBuy.length;
+
+    return toBuy.map((instrument) => ({ instrument, amount }));
+  }
+
+  public close(context: StrategyContext): Positions {
+    const bar: Bar = context.bar;
+    // Identify all instruments where RSI is over sell_threshold
+    const toSell: Positions = context.positions.filter((position) => {
+      const rsiChart = this.chart(position.instrument as Instrument);
+      if (rsiChart.bar(bar) >= this.sell_threshold) return true;
+    });
+
+    return toSell;
   }
 }
