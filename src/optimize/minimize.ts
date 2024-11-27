@@ -1,54 +1,64 @@
-/**
- * Create original function
- * Establish parameters with bounds
- * iterate
- *   run batch
- *   find gradients
- *   update parameters
- * until gradients are close to 0
- *   or loss is minimized
- */
+import { Parameters } from "📚/optimize/parameter.ts";
+import { sum } from "📚/math/statistics.ts";
 
-import { Parameter, Parameters } from "📚/optimize/parameter.ts";
-
-type Input = [number, number];
+type Inputs = Array<number>;
 type Output = number;
-type Fn = (input: Input) => Output;
 
-function parameters(): Parameters {
-  return [
-    new Parameter(-5, 5),
-    new Parameter(-5, 5),
-  ];
-}
+export class Minimize {
+  /** Set of parameters to optimize */
+  public readonly parameters: Parameters = [];
 
-// f(x,y) = sin(x)*cos(y) + sqrt(abs(x-y))
-// 4 difference minimas at aprox (-4,-4), (-1,-1), (2,2), (5,5)
-function source(): (input: Input) => Output {
-  return (input) =>
-    // Math.sin(input[0]) * Math.cos(input[1]) +
-    // Math.sqrt(0.1+Math.abs(input[0] - input[1]));
-    input[0] *input[0] + input[1]*input[1]
-}
+  /** Loss function */
+  public readonly loss: (inputs: Inputs) => number = () => 0;
 
-function batch(params: Parameters, fn: Fn, iterations: number): void {
-  for (let i = 0; i < iterations; i++) {
-    const input: Input = params.map((p) => p.suggest()) as Input;
-    const output: Output = fn(input);
-    params.forEach((p, index) => p.learn(input[index], output));
+  /** Max number of epochs */
+  public readonly epochs: number = 0;
+
+  /** Callback status function */
+  public readonly status: (
+    iteration: number,
+    inputs: Inputs,
+    output: Output,
+  ) => void = () => undefined;
+
+  /** Frequency of callback */
+  public readonly every: number = 0;
+
+  /** Stop when sum of gradients is less */
+  public readonly epsilon: number = 1;
+
+  /** Count of sample to calculate gradient */
+  public readonly batchSize: number = 2;
+
+  constructor(params: Partial<Minimize> = {}) {
+    Object.assign(this, params);
+  }
+
+  private step(): number {
+    // Take samples to calculate gradients
+    for (let i = 0; i < this.batchSize; i++) {
+      const inputs = this.parameters.map((p) => p.suggest()) as Inputs;
+      const output: Output = this.loss(inputs);
+      this.parameters.forEach((p, index) => p.learn(inputs[index], output));
+    }
+
+    // Total of gradients (before value update)
+    const momentum = sum(this.parameters.map((p) => Math.abs(p.gradient)));
+
+    // Update parameters
+    if (momentum > this.epsilon) this.parameters.forEach((p) => p.update());
+
+    return momentum;
+  }
+
+  /** Iterate until momentum under epsilon or max iterations */
+  public run(): void {
+    for (let i = 0; i < this.epochs; i++) {
+      const momentum = this.step();
+      const inputs = this.parameters.map((p) => p.value) as Inputs;
+      const output: Output = this.loss(inputs);
+      if (i % this.every == 0) this.status(i, inputs, momentum);
+      if (momentum < this.epsilon) break;
+    }
   }
 }
-
-function step(params: Parameters, fn: Fn): void {
-  batch(params, fn, 2);
-  params.forEach((p) => p.update());
-  const input: Input = params.map((p) => p.value) as Input;
-  const output: Output = fn(input);
-  console.log(input, "=>", output);
-}
-
-function run(params: Parameters, fn: Fn): void {
-  for (let i = 0; i < 100; i++) step(params, fn);
-}
-
-run(parameters(), source());
