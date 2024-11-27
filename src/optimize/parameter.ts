@@ -1,3 +1,5 @@
+import { randn } from "jsr:@sauber/statistics";
+
 type Sample = [number, number];
 type Samples = Array<Sample>;
 
@@ -14,12 +16,11 @@ function slope(samples: Samples): number {
   const run: number = len * sum[2] - sum[0] * sum[0];
   const rise: number = len * sum[3] - sum[0] * sum[1];
   const gradient: number = run === 0 ? 0 : rise / run;
-  // console.log("slope", samples, gradient);
   return gradient;
 }
 
 class AdamOptimizer {
-  private readonly learningRate = 0.1;
+  private readonly learningRate = 0.01;
   private readonly beta1 = 0.9;
   private readonly beta2 = 0.99;
   private readonly epsilon = 1e-8;
@@ -45,16 +46,6 @@ class AdamOptimizer {
 
     // Update parameter
     const update = this.learningRate * mHat / (Math.sqrt(vHat) + this.epsilon);
-    // const update = mHat / (Math.sqrt(vHat) + this.epsilon);
-    // console.log("adam", {
-    //   i: this.iteration,
-    //   g: grad,
-    //   m: this.m,
-    //   v: this.v,
-    //   mHat,
-    //   vHat,
-    //   u: update,
-    // });
     return -update;
   }
 }
@@ -73,7 +64,6 @@ export class Parameter {
     private readonly max: number,
     private readonly label: string = "",
   ) {
-    // this._value = min + Math.random() * (max - min);
     this._value = this.random;
   }
 
@@ -90,10 +80,9 @@ export class Parameter {
   /** Suggest a value close to current value */
   public suggest(): number {
     const width = (this.max - this.min) / 1000;
-    const value = this._value - width / 2 + Math.random() * width;
-    // console.log("suggest", this._value, this.min, this.max, width, value);
-    if (value > this.max) return 2*this.max - value; // Bounce from max
-    else if (value < this.min) return 2*this.min - value; // Bounce from min
+    const value = this._value - width / 2 + randn() * width;
+    if (value > this.max) return value;
+    else if (value < this.min) return value;
     else return value;
   }
 
@@ -106,7 +95,6 @@ export class Parameter {
   public get gradient(): number {
     if (this.samples.length < 2) return 0;
     const gr: number = slope(this.samples);
-    // console.log("Slope at", this._value, "=", gr);
     return gr;
   }
 

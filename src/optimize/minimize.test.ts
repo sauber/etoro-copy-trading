@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import { assertEquals, assertGreater, assertInstanceOf } from "@std/assert";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { Minimize } from "📚/optimize/minimize.ts";
 import { Parameter } from "📚/optimize/parameter.ts";
@@ -10,10 +10,11 @@ Deno.test("Instance", () => {
 
 Deno.test("Run", () => {
   const min = new Minimize();
-  assertEquals(min.run(), undefined);
+  const iterations = min.run();
+  assertEquals(iterations, 0);
 });
 
-Deno.test("Optimize parameters for minimal loss", {ignore: true}, () => {
+Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {
   type Inputs = [number, number];
   type Output = number;
 
@@ -25,11 +26,9 @@ Deno.test("Optimize parameters for minimal loss", {ignore: true}, () => {
 
   // Calculate output from inputs
   function NoisyBumpySlope(input: Inputs): Output {
-    return jitter(
-      Math.sin(input[0]) * Math.cos(input[1]) +
-        Math.sqrt(0.1 + Math.abs(input[0] - input[1])),
-      0.2,
-    );
+    const [x, y] = input;
+    // return jitter(Math.sin(x) * Math.cos(y) + 0.1 * x * y, 0.2);
+    return jitter(Math.sin(x) * Math.cos(y) + 0.1 * x * y, 0.05);
   }
 
   // https://www.sfu.ca/~ssurjano/optimization.html
@@ -42,9 +41,9 @@ Deno.test("Optimize parameters for minimal loss", {ignore: true}, () => {
     const term5 = x2 ^ 2;
     const y = term1 + term2 + term3 + term4 + term5;
     return y;
-  };
+  }
 
-  const loss = ThreeHumpCamel;
+  const loss = NoisyBumpySlope;
 
   // Callback to loss function from dashboard
   function sample(a: number, b: number): number {
@@ -57,7 +56,7 @@ Deno.test("Optimize parameters for minimal loss", {ignore: true}, () => {
 
   // Dashboard
   //const epochs = 100;
-  const epochs = 200000;
+  const epochs = 2000;
   const width = 74;
   const height = 12;
   const dashboard = new Dashboard(
@@ -74,10 +73,11 @@ Deno.test("Optimize parameters for minimal loss", {ignore: true}, () => {
     iteration: number,
     xi: Array<number>,
     yi: Output,
+    momentum: number
   ): void {
     xs.push(xi as Inputs);
     ys.push(yi);
-    console.log(dashboard.render(iteration, yi));
+    console.log(dashboard.render(iteration, momentum));
   }
 
   const parameters = [
@@ -95,6 +95,7 @@ Deno.test("Optimize parameters for minimal loss", {ignore: true}, () => {
     batchSize: 100,
   });
 
-  minimizer.run();
+  const iterations = minimizer.run();
   console.log(parameters.map((p) => p.print()));
+  assertGreater(iterations, 0);
 });

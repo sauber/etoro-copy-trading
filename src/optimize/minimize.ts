@@ -19,6 +19,7 @@ export class Minimize {
     iteration: number,
     inputs: Inputs,
     output: Output,
+    momentum: number,
   ) => void = () => undefined;
 
   /** Frequency of callback */
@@ -34,31 +35,40 @@ export class Minimize {
     Object.assign(this, params);
   }
 
-  private step(): number {
-    // Take samples to calculate gradients
+  /** Run samples to have data available for finding gradients */
+  private gradients(): void {
     for (let i = 0; i < this.batchSize; i++) {
       const inputs = this.parameters.map((p) => p.suggest()) as Inputs;
       const output: Output = this.loss(inputs);
       this.parameters.forEach((p, index) => p.learn(inputs[index], output));
     }
+  }
+
+  private step(): number {
+    // Update parameters
+    this.parameters.forEach((p) => p.update());
+
+    // Take samples to calculate gradients at new values
+    this.gradients();
 
     // Total of gradients (before value update)
     const momentum = sum(this.parameters.map((p) => Math.abs(p.gradient)));
-
-    // Update parameters
-    if (momentum > this.epsilon) this.parameters.forEach((p) => p.update());
-
     return momentum;
   }
 
   /** Iterate until momentum under epsilon or max iterations */
-  public run(): void {
-    for (let i = 0; i < this.epochs; i++) {
+  public run(): number {
+    this.gradients();
+    let i = 0;
+    for (; i <= this.epochs; ++i) {
       const momentum = this.step();
       const inputs = this.parameters.map((p) => p.value) as Inputs;
       const output: Output = this.loss(inputs);
-      if (i % this.every == 0) this.status(i, inputs, momentum);
-      if (momentum < this.epsilon) break;
+      if (momentum < this.epsilon) {
+        this.status(i, inputs, output, momentum);
+        break;
+      } else if (i % this.every == 0) this.status(i, inputs, output, momentum);
     }
+    return i;
   }
 }
