@@ -9,7 +9,7 @@ import {
   Simulation,
 } from "@sauber/backtest";
 import { TrainingData } from "📚/timing/trainingdata.ts";
-import { Parameter } from "📚/optimize/parameter.ts";
+import { IntegerParameter, Parameter, Parameters } from "📚/optimize/parameter.ts";
 
 type Charts = Array<Chart>;
 
@@ -95,11 +95,11 @@ const range: Limits = [
 ];
 
 // Parameters
-// const parameters: Parameter = [
-//   new Parameter(2, 100, "Window"),
-//   new Parameter(0, 50, "Buy"),
-//   new Parameter(50, 100, "Sell"),
-// ];
+const parameters: Parameters = [
+  new IntegerParameter(2, 100, "Window"),
+  new Parameter(0, 50, "Buy"),
+  new Parameter(50, 100, "Sell"),
+];
 
 // Random start point
 const optimal = range.map((p: Range) =>
