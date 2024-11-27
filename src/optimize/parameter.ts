@@ -54,14 +54,14 @@ export class Parameter {
   private readonly optimizer = new AdamOptimizer();
 
   // Current float value of parameter
-  private _value: number;
+  protected _value: number;
 
   // Samples of results
   private readonly samples: Samples = [];
 
   constructor(
-    private readonly min: number,
-    private readonly max: number,
+    protected readonly min: number,
+    protected readonly max: number,
     private readonly label: string = "",
   ) {
     this._value = this.random;
@@ -110,7 +110,29 @@ export class Parameter {
 
   // Pretty print value and gradient
   public print(): string {
-    return `${this.label}: v=${this._value.toFixed(4)} g=${this.gradient.toFixed(4)}`;
+    const v: number = parseFloat(this.value.toFixed(4));
+    const g: number = parseFloat(this.gradient.toFixed(4));
+    return `${this.label}: v=${v} g=${g}`;
+  }
+}
+
+/** Value msut be an integer */
+export class IntegerParameter extends Parameter {
+  public override get value(): number {
+    return Math.round(this._value);
+  }
+
+  public override get random(): number {
+    return Math.round(this.min + Math.random() * (this.max - this.min));
+  }
+
+  /** Value, or one below or one above */
+  public override suggest(): number {
+    const value = this.value;
+    const candidates: number[] = [value];
+    if (value - 1 >= this.min) candidates.push(value - 1);
+    if (value + 1 <= this.max) candidates.push(value + 1);
+    return candidates[Math.floor(Math.random() * candidates.length)];
   }
 }
 

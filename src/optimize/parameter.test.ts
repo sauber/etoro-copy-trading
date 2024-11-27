@@ -1,12 +1,14 @@
 import {
-assertAlmostEquals,
+  assertAlmostEquals,
   assertEquals,
   assertGreater,
+  assertGreaterOrEqual,
   assertInstanceOf,
   assertLess,
+  assertLessOrEqual,
   assertNotEquals,
 } from "@std/assert";
-import { Parameter } from "./parameter.ts";
+import { IntegerParameter, Parameter } from "./parameter.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Parameter(0, 1), Parameter);
@@ -33,7 +35,6 @@ Deno.test("Gradient", () => {
 Deno.test("Learning", () => {
   const p = new Parameter(5, 10);
   const initial = p.value;
-  console.log(p.value);
   p.learn(0, 1);
   p.learn(0.5, 2);
   p.learn(1, 3);
@@ -41,9 +42,18 @@ Deno.test("Learning", () => {
   const updated: number = p.value;
   assertNotEquals(updated, initial);
   assertAlmostEquals(updated, initial, 0.01);
-  // console.log(p.value);
 });
 
-// Test function
-// f(x,y) = sin(x)*cos(y) + sqrt(abs(x-y))
-// 4 difference minimas at aprox (-4,-4), (-1,-1), (2,2), (5,5)
+Deno.test("Integer Instance", () => {
+  const int = new IntegerParameter(1, 7);
+  assertInstanceOf(int, Parameter);
+  assertInstanceOf(int, IntegerParameter);
+});
+
+Deno.test("Integer Parameter", () => {
+  const int = new IntegerParameter(1, 7);
+  assertEquals(int.value, Math.round(int.value));
+  const s = int.suggest();
+  assertGreaterOrEqual(s, int.value-1);
+  assertLessOrEqual(s, int.value+1);
+});
