@@ -9,6 +9,7 @@ import {
   Simulation,
 } from "@sauber/backtest";
 import { TrainingData } from "📚/timing/trainingdata.ts";
+import { Parameter } from "📚/optimize/parameter.ts";
 
 type Charts = Array<Chart>;
 
@@ -43,7 +44,8 @@ function runSim(
     console.log("Omega Ratio:", liquidity, "Gain:", gain);
   }
 
-  return Math.sqrt(liquidity*liquidity + gain*gain);
+  const score: number = Math.sqrt(liquidity * liquidity + gain * gain);
+  return score;
 }
 
 type Param = [number, number, number];
@@ -85,25 +87,19 @@ const trainingdata = new TrainingData(community);
 const data: Instruments = await trainingdata.load();
 console.log("Instruments loaded:", data.length);
 
-// // Strategy
-// const strategy = new RSIStrategy(22, 20, 80);
-
-// // Simulation
-// const exchange: Exchange = new Exchange(data);
-// const deposit: Amount = 10000;
-// const simulation = new Simulation(exchange, strategy, deposit);
-// simulation.run();
-
-// // Output
-// console.log(simulation.account.statement);
-// console.log("Omega Ratio:", simulation.stats.omegaRatio);
-
-// Windos, buy_threshold, sell_threshold
+// Window, buy_threshold, sell_threshold
 const range: Limits = [
   { min: 2, max: 100 },
   { min: 0, max: 50 },
   { min: 50, max: 100 },
 ];
+
+// Parameters
+// const parameters: Parameter = [
+//   new Parameter(2, 100, "Window"),
+//   new Parameter(0, 50, "Buy"),
+//   new Parameter(50, 100, "Sell"),
+// ];
 
 // Random start point
 const optimal = range.map((p: Range) =>
@@ -127,26 +123,6 @@ do {
       }
     }
   }
-
-  //   const u: number = optimal.window + 1;
-  //   if (u <= range.window.max) {
-  //     const score = runSim(u, optimal.buy, optimal.sell);
-  //     console.log("try up", u, optimal.buy, optimal.sell, score);
-  //     if (score > omegaScore) {
-  //       omegaScore = score;
-  //       optimal.window = u;
-  //     } else {
-  //       const d: number = optimal.window - 1;
-  //       if (d >= range.window.min) {
-  //         const score = runSim(d, optimal.buy, optimal.sell);
-  //         console.log("try down", d, optimal.buy, optimal.sell, score);
-  //         if (score > omegaScore) {
-  //           omegaScore = score;
-  //           optimal.window = d;
-  //         }
-  //       }
-  //     }
-  //   }
 } while (omegaScore > prevScore);
 runSim(...optimal, true);
 console.log(omegaScore, optimal);
