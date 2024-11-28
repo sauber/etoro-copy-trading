@@ -116,7 +116,7 @@ export class Parameter {
   }
 }
 
-/** Value msut be an integer */
+/** Integer Value */
 export class IntegerParameter extends Parameter {
   public override get value(): number {
     return Math.round(this._value);
@@ -128,12 +128,6 @@ export class IntegerParameter extends Parameter {
 
   /** Value, or one below or one above */
   public override suggest(): number {
-    // const value = this.value;
-    // const candidates: number[] = [value];
-    // if (value - 1 >= this.min) candidates.push(value - 1);
-    // if (value + 1 <= this.max) candidates.push(value + 1);
-    // return candidates[Math.floor(Math.random() * candidates.length)];
-
     const width = this.max - this.min;
     const value = this._value - width / 2 + randn() * width;
     if (value > this.max) return this.max;

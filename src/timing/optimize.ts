@@ -41,16 +41,14 @@ function runSim(
   const invested: number = stats.InvestedRatio;
   const win: number = stats.WinRatio;
 
-  function pct(p: number): string {
-    return (p * 100).toFixed(2) + "%";
-  }
+  const pct = (p: number): string => (p * 100).toFixed(2) + "%";
 
   if (display) {
     console.log(simulation.account.statement);
     console.log(simulation.account.portfolio.statement(exchange.end));
     console.log(
-      `Trades: ${trades}`,
       `Profit: ${pct(profit)}`,
+      `Trades: ${trades}`,
       `Invested: ${pct(invested)}`,
       `Win: ${pct(win)}`,
     );
@@ -100,7 +98,7 @@ function status(
   iteration: number,
   xi: Array<number>,
   yi: Output,
-  momentum: number,
+  _momentum: number,
 ): void {
   xs.push([xi[2], xi[0]]);
   ys.push(yi);
@@ -150,7 +148,7 @@ const dashboard = new Dashboard(
   sample,
   epochs,
   "Sell",
-  "Window",
+  "Len",
 );
 
 // Configure minimizer
