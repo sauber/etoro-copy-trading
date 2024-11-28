@@ -20,7 +20,7 @@ function slope(samples: Samples): number {
 }
 
 class AdamOptimizer {
-  private readonly learningRate = 0.01;
+  private readonly learningRate = 0.1;
   private readonly beta1 = 0.9;
   private readonly beta2 = 0.99;
   private readonly epsilon = 1e-8;
@@ -79,10 +79,10 @@ export class Parameter {
 
   /** Suggest a value close to current value */
   public suggest(): number {
-    const width = (this.max - this.min) / 1000;
+    const width = this.max - this.min;
     const value = this._value - width / 2 + randn() * width;
-    if (value > this.max) return value;
-    else if (value < this.min) return value;
+    if (value > this.max) return this.max;
+    else if (value < this.min) return this.min;
     else return value;
   }
 
@@ -128,11 +128,17 @@ export class IntegerParameter extends Parameter {
 
   /** Value, or one below or one above */
   public override suggest(): number {
-    const value = this.value;
-    const candidates: number[] = [value];
-    if (value - 1 >= this.min) candidates.push(value - 1);
-    if (value + 1 <= this.max) candidates.push(value + 1);
-    return candidates[Math.floor(Math.random() * candidates.length)];
+    // const value = this.value;
+    // const candidates: number[] = [value];
+    // if (value - 1 >= this.min) candidates.push(value - 1);
+    // if (value + 1 <= this.max) candidates.push(value + 1);
+    // return candidates[Math.floor(Math.random() * candidates.length)];
+
+    const width = this.max - this.min;
+    const value = this._value - width / 2 + randn() * width;
+    if (value > this.max) return this.max;
+    else if (value < this.min) return this.min;
+    else return Math.round(value);
   }
 }
 
