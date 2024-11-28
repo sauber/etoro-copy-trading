@@ -1,4 +1,10 @@
-import { Amount, Exchange, Instruments, Simulation } from "@sauber/backtest";
+import {
+  Amount,
+  Exchange,
+  Instruments,
+  Simulation,
+  Stats,
+} from "@sauber/backtest";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { type Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/community.ts";
@@ -10,7 +16,6 @@ import {
   Parameters,
 } from "📚/optimize/parameter.ts";
 import { Minimize } from "📚/optimize/minimize.ts";
-import { printf } from "@std/fmt/printf";
 
 // Number of parameters
 type Inputs = [number, number, number];
@@ -30,14 +35,25 @@ function runSim(
   const deposit: Amount = 10000;
   const simulation = new Simulation(exchange, strategy, deposit);
   simulation.run();
-  const valuation = simulation.account.valuation.values;
-  const gain = valuation[valuation.length - 1] / valuation[0];
+  const stats: Stats = simulation.stats;
+  const trades: number = stats.trades.length;
+  const profit: number = stats.profit;
+  const invested: number = stats.InvestedRatio;
+  const win: number = stats.WinRatio;
+
+  function pct(p: number): string {
+    return (p * 100).toFixed(2) + "%";
+  }
 
   if (display) {
-    const liquidity = simulation.stats.omegaRatio;
     console.log(simulation.account.statement);
     console.log(simulation.account.portfolio.statement(exchange.end));
-    console.log("Omega Ratio:", liquidity, "Gain:", gain);
+    console.log(
+      `Trades: ${trades}`,
+      `Profit: ${pct(profit)}`,
+      `Invested: ${pct(invested)}`,
+      `Win: ${pct(win)}`,
+    );
   }
 
   // Parameters to affect score:
@@ -46,10 +62,22 @@ function runSim(
   // - Volatility
   // - Average amount invested
 
-  // if (isNaN(liquidity)) return 0;
-  // const score: number = Math.sqrt(liquidity * liquidity + gain * gain);
-  // console.log("runSim", {gain, liquidity, score});
-  return gain-1;
+  const scale: number = Math.abs(profit);
+  // Costs are 0=no cost, 1=worst cost
+  // The more trades the worse
+  const trades_cost: number = Math.tanh(
+    trades / simulation.account.valuation.length,
+  );
+  // The more uninvested cash invested the worse
+  const cash_cost = 1 - invested;
+  // The more losses the worse
+  const lose_cost = 1 - win;
+  // Scale each cost to profit
+  const costs = scale * (trades_cost + cash_cost + lose_cost) / 3;
+  // Subtract cost from profit;
+  const score = profit - costs;
+
+  return score;
 }
 
 // Calculate loss
@@ -122,7 +150,7 @@ const dashboard = new Dashboard(
   sample,
   epochs,
   "Sell",
-  "Window"
+  "Window",
 );
 
 // Configure minimizer
@@ -132,7 +160,7 @@ const minimizer = new Minimize({
   epochs,
   status,
   every: 10,
-  epsilon: 0.001,
+  epsilon: 0.0001,
   batchSize: 20,
 });
 
@@ -140,5 +168,5 @@ const minimizer = new Minimize({
 console.log("start", parameters.map((p) => p.print()));
 const iterations = minimizer.run();
 console.log(iterations, parameters.map((p) => p.print()));
-console.log(parameters);
+// console.log(parameters);
 runSim(parameters[0].value, parameters[1].value, parameters[2].value, true);
