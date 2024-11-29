@@ -4,7 +4,7 @@
     "check": "deno fmt --check && deno lint && deno check **/*.ts",
     "community": "deno run --allow-read=testdata,../etoro-data/data src/repository/community_bin.ts ../etoro-data/data",
     "config": "deno run --allow-read=../etoro-data/data --allow-write=/workspaces/etoro-data/data src/config/config_bin.ts ../etoro-data/data",
-    "profile": "deno run --allow-read=testdata,../etoro-data/data --v8-flags=--prof src/repository/community_bin.ts ../etoro-data/data",
+    "profile": "deno run --allow-read=testdata,../etoro-data/data --v8-flags=--prof src/timing/optimize_bin.ts testdata",
     "train": "deno run --allow-read=testdata,../etoro-data/data --allow-write=testdata,../etoro-data/data src/ranking/train_bin.ts",
     "scrape": "deno run --allow-read=../etoro-data/data --allow-write=/workspaces/etoro-data/data --allow-net=www.etoro.com src/repository/refresh_bin.ts ../etoro-data/data",
     "test": "deno test --allow-write=tmp,testdata --allow-read=tmp,testdata,src/neural --allow-net=www.etoro.com,jsonplaceholder.typicode.com,github.com,objects.githubusercontent.com,deno.com"
@@ -13,7 +13,7 @@
   "imports": {
     "@debut/indicators": "npm:@debut/indicators@^1.3.21",
     "@hugoalh/shuffle-array": "jsr:@hugoalh/shuffle-array@^2.0.4",
-    "@sauber/backtest": "jsr:@sauber/backtest@^0.1.4",
+    "@sauber/backtest": "jsr:@sauber/backtest@^0.2.0",
     "@sauber/dataframe": "jsr:@sauber/dataframe@^0.3.2",
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.5.1",
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
