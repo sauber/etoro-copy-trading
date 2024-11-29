@@ -137,7 +137,7 @@ const ys: Array<Output> = [];
 
 // Dashboard
 // const epochs = 100;
-const epochs = 500;
+const epochs = 50;
 const width = 74;
 const height = 12;
 const dashboard = new Dashboard(
@@ -168,3 +168,4 @@ const iterations = minimizer.run();
 console.log(iterations, parameters.map((p) => p.print()));
 // console.log(parameters);
 runSim(parameters[0].value, parameters[1].value, parameters[2].value, true);
+// TODO: Display graph of valuation chart
