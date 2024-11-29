@@ -90,15 +90,6 @@ export class InvestorAssembly {
     return stats.Data.FullName;
   }
 
-  /** First date of combined charts */
-  // public async start(): Promise<DateFormat> {
-  //   const chart: number[] = await this.chart();
-  //   const end: DateFormat = await this.end();
-  //   const days: number = chart.length;
-  //   const start: DateFormat = nextDate(end, -days + 1);
-  //   return start;
-  // }
-
   /** Last date where any asset is present */
   private _end: DateFormat|undefined;
   private async end(): Promise<DateFormat> {
@@ -304,6 +295,7 @@ export class InvestorAssembly {
     }
 
     // Cache is still recent
+    // TODO: Confirm asset validates, otherwise erase
     return this.compiledAsset.last();
   }
 
