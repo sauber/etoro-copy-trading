@@ -77,6 +77,14 @@ export class Parameter {
     return this._value;
   }
 
+  /** Set value  */
+  public set(value: number): void {
+    this._value = value;
+    if (this._value < this.min) this._value = this.min;
+    if (this._value > this.max) this._value = this.max;
+    this.samples.length = 0;
+  }
+
   /** Suggest a value close to current value */
   public suggest(): number {
     const width = this.max - this.min;
@@ -102,10 +110,7 @@ export class Parameter {
   public update(): void {
     const grad = this.gradient;
     const update = this.optimizer.optimize(grad);
-    this._value += update;
-    if (this._value < this.min) this._value = this.min;
-    if (this._value > this.max) this._value = this.max;
-    this.samples.length = 0;
+    this.set(this._value + update);
   }
 
   // Pretty print value and gradient

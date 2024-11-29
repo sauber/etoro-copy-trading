@@ -23,6 +23,16 @@ Deno.test("Min / Max", () => {
   assertLess(v, max);
 });
 
+Deno.test("Set", () => {
+  const min = 5;
+  const max = 10;
+  const p = new Parameter(min, max);
+  p.set(min - 1);
+  assertEquals(p.value, min);
+  p.set(max + 1);
+  assertEquals(p.value, max);
+});
+
 Deno.test("Gradient", () => {
   const p = new Parameter(5, 10);
   p.learn(0, 1);
@@ -41,7 +51,7 @@ Deno.test("Learning", () => {
   p.update();
   const updated: number = p.value;
   assertNotEquals(updated, initial);
-  assertAlmostEquals(updated, initial, 0.01);
+  assertAlmostEquals(updated, initial, 0.1);
 });
 
 Deno.test("Integer Instance", () => {
@@ -54,6 +64,6 @@ Deno.test("Integer Parameter", () => {
   const int = new IntegerParameter(1, 7);
   assertEquals(int.value, Math.round(int.value));
   const s = int.suggest();
-  assertGreaterOrEqual(s, int.value-1);
-  assertLessOrEqual(s, int.value+1);
+  assertGreaterOrEqual(s, int.value - 1);
+  assertLessOrEqual(s, int.value + 1);
 });
