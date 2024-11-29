@@ -23,10 +23,15 @@ export class NullStrategy implements Strategy {
 }
 
 export class RSIStrategy implements Strategy {
+  // Weekday of today
+  private readonly today = new Date().getDay();
+  // console.log(weekday, weekday - 413 % 7);
+
   constructor(
     private readonly window: number = 20,
     private readonly buy_threshold: number = 30,
     private readonly sell_threshold: number = 70,
+    private readonly weekday: number = 0,
   ) {}
 
   // Generate RSI chart for instrument
@@ -46,28 +51,36 @@ export class RSIStrategy implements Strategy {
   }
 
   public open(context: StrategyContext): PurchaseOrders {
-    if ( context.amount < 100 ) return [];
+    // Available funds
+    if (context.amount < 100) return [];
+
+    // Is today a trading day
     const bar: Bar = context.bar;
+    if (this.today - context.bar % 7 !== 0) return [];
+
     // Identify all instruments where RSI is below buy_threshold
     const toBuy: Instruments = context.instruments.filter((instrument) => {
       const rsiChart = this.chart(instrument as Instrument);
-      if ( ! rsiChart.has(bar) ) return false;
+      if (!rsiChart.has(bar)) return false;
       if (rsiChart.bar(bar) > this.buy_threshold) return false;
       return true;
     });
     // Distribute amount across all application instruments
     const amount: Amount = context.amount / toBuy.length / 2;
-    if ( amount < 100 ) return [];
+    if (amount < 100) return [];
 
     return toBuy.map((instrument) => ({ instrument, amount }));
   }
 
   public close(context: StrategyContext): Positions {
+    // Is today a trading day
     const bar: Bar = context.bar;
+    if (this.today - bar % 7 !== 0) return [];
+
     // Identify all instruments where RSI is over sell_threshold
     const toSell: Positions = context.positions.filter((position) => {
       const rsiChart = this.chart(position.instrument as Instrument);
-      if ( ! rsiChart.has(bar) ) return false;
+      if (!rsiChart.has(bar)) return false;
       if (rsiChart.bar(bar) < this.sell_threshold) return false;
       return true;
     });

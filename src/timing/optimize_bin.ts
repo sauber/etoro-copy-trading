@@ -18,20 +18,34 @@ import {
 import { Minimize } from "📚/optimize/minimize.ts";
 
 // Number of parameters
-type Inputs = [number, number, number];
+type Inputs = [number, number, number, number];
 type Output = number;
+
+// Sanity check loaded data
+function verify(instruments: Instruments): void {
+  instruments.forEach((instrument) => {
+    if (isNaN(instrument.start)) {
+      console.log(instrument);
+      throw new Error("Invalid start date for " + instrument.symbol);
+    }
+  });
+}
 
 // Run simulation and return score
 function runSim(
-  window: number,
-  buy: number,
-  sell: number,
+  inputs: Inputs,
   display: boolean = false,
 ): number {
-  const strategy = new RSIStrategy(Math.round(window), buy, sell);
+  const [window, buy, sell, weekday] = inputs;
+  const strategy = new RSIStrategy(
+    Math.round(window),
+    buy,
+    sell,
+    Math.round(weekday),
+  );
 
   // Simulation
-  const exchange: Exchange = new Exchange(data);
+  // const exchange: Exchange = new Exchange(instruments);
   const deposit: Amount = 10000;
   const simulation = new Simulation(exchange, strategy, deposit);
   simulation.run();
@@ -61,7 +75,7 @@ function runSim(
   // - Average amount invested
 
   const scale: number = Math.abs(profit);
-  // Costs are 0=no cost, 1=worst cost
+  // Normalize costs: 0=no cost, 1=worst cost
   // The more trades the worse
   const trades_cost: number = Math.tanh(
     trades / simulation.account.valuation.length,
@@ -80,17 +94,18 @@ function runSim(
 
 // Calculate loss
 function loss(input: Inputs): Output {
-  const score = runSim(...input);
+  const score = runSim(input);
   return -score;
 }
 
 // Status page need to probe two parameters
-// a = Sell, b = Window
-function sample(a: number, b: number): number {
-  const window: number = b;
-  const buy: number = parameters[1].value;
-  const sell: number = a;
-  return -runSim(window, buy, sell);
+function sample(x: number, y: number): number {
+  const inputs = parameters.map((p, i) => {
+    if (i === xcol) return x;
+    else if (i === ycol) return y;
+    else return p.value;
+  }) as Inputs;
+  return -runSim(inputs);
 }
 
 // Callback to dashboard from training
@@ -100,7 +115,7 @@ function status(
   yi: Output,
   _momentum: number,
 ): void {
-  xs.push([xi[2], xi[0]]);
+  xs.push([xi[xcol], xi[ycol]]);
   ys.push(yi);
   console.log(dashboard.render(iteration, yi));
   // console.log(parameters.map(p=>p.print()).join(", "), yi);
@@ -117,27 +132,56 @@ const disk: Backend = new DiskBackend(path);
 const backend: Backend = new CachingBackend(disk);
 const community = new Community(backend);
 const trainingdata = new TrainingData(community);
-const data: Instruments = await trainingdata.load();
-console.log("Instruments loaded:", data.length);
+const instruments: Instruments = await trainingdata.load();
+// verify(instruments);
+console.log("Instruments loaded:", instruments.length);
+const exchange: Exchange = new Exchange(instruments);
 
 // Parameters
 const parameters: Parameters = [
   new IntegerParameter(2, 100, "Window"),
   new Parameter(0, 50, "Buy"),
   new Parameter(50, 100, "Sell"),
+  new IntegerParameter(0, 6, "Weekday"),
 ];
+
+// Run simulation on random parameters within boundaries to find best starting point
+let best = -Infinity;
+for (let i = 0; i < 100; i++) {
+  const inputs = parameters.map((p) => p.random) as Inputs;
+  const output = runSim(inputs);
+  if (output > best) {
+    // console.log("Best", i, inputs, output);
+    inputs.map((v, i) => parameters[i].set(v));
+    best = output;
+  }
+}
+
+// Which parameters to display on scatter chart
+const xcol = 2; // RSI Sell threshold
+const ycol = 0; // RSI Window Size
+const xlabel = "Sell";
+const ylabel = "Len";
 
 // Trail of parameters towards minimum
 const xs: Array<[number, number]> = [];
 const ys: Array<Output> = [];
 
-// const xs: Array<[number, number]> = Array.from(Array(100)).map(_=>[parameters[2].random, parameters[0].random]);
-// const ys: Array<Output> = xs.map(x=>runSim(x[1], parameters[1].random, x[0]));
+// const xs: Array<[number, number]> = Array.from(Array(100)).map(
+//   (_) => [parameters[xcol].random, parameters[ycol].random],
+// );
+// const ys: Array<Output> = xs.map((x) =>
+//   runSim(parameters.map((p, i) => {
+//     if (i === xcol) return x[0];
+//     else if (i === ycol) return x[1];
+//     else return p.value;
+//   }) as Inputs)
+// );
 // console.log(xs, ys);
 
 // Dashboard
-// const epochs = 100;
-const epochs = 50;
+// const epochs = 20000;
+const epochs = 500;
 const width = 74;
 const height = 12;
 const dashboard = new Dashboard(
@@ -147,8 +191,8 @@ const dashboard = new Dashboard(
   ys,
   sample,
   epochs,
-  "Sell",
-  "Len",
+  xlabel,
+  ylabel,
 );
 
 // Configure minimizer
@@ -167,5 +211,6 @@ console.log("start", parameters.map((p) => p.print()));
 const iterations = minimizer.run();
 console.log(iterations, parameters.map((p) => p.print()));
 // console.log(parameters);
-runSim(parameters[0].value, parameters[1].value, parameters[2].value, true);
+runSim(parameters.map((p) => p.value) as Inputs, true);
 // TODO: Display graph of valuation chart
+// TODO: Reserve some data as validate data, and run simulation on it
