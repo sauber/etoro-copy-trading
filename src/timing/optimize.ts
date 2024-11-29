@@ -49,7 +49,8 @@ function runSim(
   // if (isNaN(liquidity)) return 0;
   // const score: number = Math.sqrt(liquidity * liquidity + gain * gain);
   // console.log("runSim", {gain, liquidity, score});
-  return gain-1;
+  const profit = gain - 1;
+  return profit;
 }
 
 // Calculate loss
@@ -122,7 +123,7 @@ const dashboard = new Dashboard(
   sample,
   epochs,
   "Sell",
-  "Window"
+  "Window",
 );
 
 // Configure minimizer
