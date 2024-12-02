@@ -41,7 +41,7 @@ export class TrainingData {
         const features: Features = new Features(investor);
         const input: Input = features.input(date);
         const output: Output = features.output(date);
-        samples.push({ input, output });
+        if ( isFinite(output.SharpeRatio)) samples.push({ input, output });
       });
 
     return samples;

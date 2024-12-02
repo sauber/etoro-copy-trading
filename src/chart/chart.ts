@@ -183,6 +183,7 @@ export class Chart {
       while (this.value(next) == this.value(nextDate(next))) {
         next = nextDate(next);
       }
+
       const start = next;
 
       // Seach for end

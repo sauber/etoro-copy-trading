@@ -10,7 +10,9 @@ export class Features {
 
   /** Prediction input parameters */
   public input(date?: DateFormat): Input {
-    if ( this.investor.stats.dates.length < 1 ) throw new Error(`Investor ${this.investor.UserName} has no stats`);
+    if (this.investor.stats.dates.length < 1) {
+      throw new Error(`Investor ${this.investor.UserName} has no stats`);
+    }
     const values: StatsExport = date
       ? this.investor.stats.before(date)
       : this.investor.stats.first;
@@ -23,14 +25,18 @@ export class Features {
   /** Prediction output parameters */
   public output(start: DateFormat = this.investor.stats.start): Output {
     const chart: Chart = this.investor.chart.from(start);
+    // if (this.investor.UserName === "bendri00") {
+    //   console.log(chart);
+    //   Deno.exit(143);
+    // }
     // 5% is annual money market return.
     // TODO: Load from config
     const sr: number = chart.sharpe_ratio(0.0);
-    if (!Number.isFinite(sr)) {
-      const name = this.investor.UserName;
-      console.log({ chart, name, start, sr });
-      throw new Error("Invalid SharpeRatio");
-    }
+    // if (!Number.isFinite(sr)) {
+    //   const name = this.investor.UserName;
+    //   console.log({ chart, name, start, sr });
+    //   throw new Error("Invalid SharpeRatio");
+    // }
     return { SharpeRatio: sr };
   }
 }
