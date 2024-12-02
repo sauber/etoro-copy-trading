@@ -3,17 +3,25 @@ import type { DateFormat } from "📚/time/mod.ts";
 import { std } from "📚/math/statistics.ts";
 import { ema, rsi, sma } from "📚/chart/indicators.ts";
 
+// Series of numbers
 type Numbers = number[];
+
+// Function to calculate derived series and end date
+type Derive = () => [series: Numbers, end: DateFormat];
 
 /** Numbers by date */
 export class Chart {
   public readonly start: DateFormat;
+  public readonly first: number;
+  public readonly last: number;
 
   constructor(
     public readonly values: Numbers,
     public readonly end: DateFormat,
   ) {
     this.start = nextDate(this.end, -this.values.length + 1);
+    this.first = values[0];
+    this.last = values[values.length - 1];
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -40,14 +48,6 @@ export class Chart {
       );
     }
     return this.values[index];
-  }
-
-  public get first(): number {
-    return this.values[0];
-  }
-
-  public get last(): number {
-    return this.values[this.values.length - 1];
   }
 
   public get length(): number {
@@ -104,53 +104,58 @@ export class Chart {
 
   /** Create a derived chart, cache for future use */
   private readonly subcharts: Record<string, Chart> = {};
-  private derive(
-    values: Numbers,
-    id: string,
-    enddate: DateFormat = this.end,
-  ): Chart {
-    if (!(id in this.subcharts)) {
-      this.subcharts[id] = new Chart(values, enddate);
-    }
+  private derive(derive: Derive, id: string): Chart {
+    if (!(id in this.subcharts)) this.subcharts[id] = new Chart(...derive());
     return this.subcharts[id];
   }
 
   /** Sub chart with entries starting on date */
   public from(start: DateFormat): Chart {
-    const offset: number = diffDate(this.start, start);
-    const trimmed: Numbers = this.values.slice(offset);
-    return this.derive(trimmed, "from" + start);
+    const calc: Derive =
+      () => [this.values.slice(diffDate(this.start, start)), this.end];
+    return this.derive(calc, "from" + start);
   }
 
   /** Sub chart with entries until and including date */
   public until(end: DateFormat): Chart {
-    const count: number = diffDate(this.start, end);
-    const trimmed: Numbers = this.values.slice(0, count + 1);
-    return this.derive(trimmed, "until" + end, end);
+    const calc: Derive =
+      () => [this.values.slice(0, diffDate(this.start, end) + 1), end];
+    return this.derive(calc, "until" + end);
   }
 
   /** Value as ratio above previous value */
   private get returns(): Chart {
     const v: Numbers = this.values;
-    return this.derive(
-      v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),
-      "win",
-    );
+    const calc: Derive =
+      () => [
+        v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),
+        this.end,
+      ];
+    return this.derive(calc, "win");
   }
 
   /** Simple Moving Average */
   public sma(window: number): Chart {
-    return this.derive(sma(this.values, window), "sma" + window);
+    return this.derive(
+      () => [sma(this.values, window), this.end],
+      "sma" + window,
+    );
   }
 
   /** Exponential Moving Average */
   public ema(window: number): Chart {
-    return this.derive(ema(this.values, window), "ema" + window);
+    return this.derive(
+      () => [ema(this.values, window), this.end],
+      "ema" + window,
+    );
   }
 
   /** Relative Strength Index */
   public rsi(window: number): Chart {
-    return this.derive(rsi(this.values, window), "rsi" + window);
+    return this.derive(
+      () => [rsi(this.values, window), this.end],
+      "rsi" + window,
+    );
   }
 
   /** this chart - other chart */
@@ -168,24 +173,29 @@ export class Chart {
 
   /** Trim leading 10000 (means not started) and trailing 6000 (means copy stopped) */
   public get trim(): Chart {
-    // No trimming required
-    if (
-      this.value(nextDate(this.start)) != 10000 &&
-      this.value(nextDate(this.end, -1)) != 6000
-    ) return this;
+    const calc: Derive = () => {
+      // No trimming required
+      if (
+        this.value(nextDate(this.end, -1)) !== 6000 &&
+        this.value(nextDate(this.start)) != this.value(this.start)
+      ) return [this.values, this.end];
 
-    // Search for start
-    let next: DateFormat = nextDate(this.start);
-    while (this.value(next) == 10000) next = nextDate(next);
-    const start = nextDate(next, -1);
+      // Search for start
+      let next: DateFormat = nextDate(this.start);
+      while (this.value(next) == this.value(nextDate(next))) {
+        next = nextDate(next);
+      }
+      const start = next;
 
-    // Seach for end
-    let prev: DateFormat = nextDate(this.end, -1);
-    while (this.value(prev) == 6000) prev = nextDate(prev, -1);
-    const end = nextDate(prev);
+      // Seach for end
+      let prev: DateFormat = nextDate(this.end, -1);
+      while (this.value(prev) == 6000) prev = nextDate(prev, -1);
+      const end = nextDate(prev);
 
-    const values = this.from(start).until(end).values;
+      const values = this.from(start).until(end).values;
+      return [values, end];
+    };
 
-    return this.derive(values, "trim", end);
+    return this.derive(calc, "trim");
   }
 }

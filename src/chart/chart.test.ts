@@ -1,5 +1,5 @@
 import {
-assertAlmostEquals,
+  assertAlmostEquals,
   assertEquals,
   assertInstanceOf,
   assertThrows,
@@ -59,14 +59,14 @@ Deno.test("Invalid range", () => {
   assertThrows(
     () => chart.value(nextDate(dates[0], -1)),
     Error,
-    "Date not in range: 2023-10-30 < 2023-10-29 < 2023-11-02"
+    "Date not in range: 2023-10-30 < 2023-10-29 < 2023-11-02",
   );
 
   // After range
   assertThrows(
     () => chart.value(nextDate(dates[dates.length - 1], 1)),
     Error,
-    "Date not in range: 2023-10-30 < 2023-11-03 < 2023-11-02"
+    "Date not in range: 2023-10-30 < 2023-11-03 < 2023-11-02",
   );
 });
 
@@ -88,6 +88,15 @@ Deno.test("Range until date", () => {
   const until = chart.until(cut);
   assertEquals(until.start, cut);
   assertEquals(until.end, cut);
+});
+
+Deno.test("Trimming", () => {
+  const end = "2023-10-31";
+  const chart = new Chart([10000, 10000, 6000, 6000], end);
+  assertEquals(chart.length, 4);
+  const trimmed = chart.trim;
+  assertEquals(trimmed.length, 2);
+  assertEquals(trimmed.values, [10000, 6000]);
 });
 
 Deno.test("Gain", () => {
