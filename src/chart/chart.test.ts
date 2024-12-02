@@ -1,11 +1,12 @@
 import {
+assertAlmostEquals,
   assertEquals,
   assertInstanceOf,
   assertThrows,
 } from "@std/assert";
 import { Chart } from "./chart.ts";
-import type { DateFormat } from "../time/mod.ts";
-import { nextDate } from "../time/mod.ts";
+import type { DateFormat } from "📚/time/mod.ts";
+import { nextDate } from "📚/time/mod.ts";
 
 Deno.test("Blank Initialization", () => {
   const chart = new Chart([], "2022-10-10");
@@ -98,7 +99,21 @@ Deno.test("Gain", () => {
 
 Deno.test("Annual Percentage Yield", () => {
   const end = "2023-10-31";
-  const chart = new Chart([10, 20], end);
-  const apy: number = chart.apy;
-  assertEquals(apy, 365);
+  const chart = new Chart([10, 9.9, 10.2], end);
+  const apy: number = chart.annual_return;
+  assertAlmostEquals(apy, 36.1134516309932);
+});
+
+Deno.test("Annual Standard Deviation", () => {
+  const end = "2023-10-31";
+  const chart = new Chart([10, 9.9, 10.2], end);
+  const ysd: number = chart.annual_standard_deviation;
+  assertAlmostEquals(ysd, 0.5444639574097383);
+});
+
+Deno.test("Sharpe Ratio", () => {
+  const end = "2023-10-31";
+  const chart = new Chart([10, 9.9, 10.2], end);
+  const sr: number = chart.sharpe_ratio(0.0);
+  assertAlmostEquals(sr, 66.32845230527529);
 });

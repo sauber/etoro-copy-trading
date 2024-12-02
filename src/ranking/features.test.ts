@@ -30,5 +30,5 @@ Deno.test("Input at specific date", () => {
 Deno.test("Output", () => {
   const rank = new Features(investor);
   const features: Output = rank.output();
-  assertAlmostEquals(features.SharpeRatio, 0.11076050031109397);
+  assertAlmostEquals(features.SharpeRatio, 2.0305043667429);
 });

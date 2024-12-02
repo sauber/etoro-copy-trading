@@ -73,24 +73,6 @@ export class Chart {
     return std(this.values);
   }
 
-  /** Sharpe Ratio, riskfree is annual riskfree return, for example 0.05 */
-  public sharpeRatio(riskfree: number): number {
-    // Daily average profit and daily benchmark
-    const profit = (this.last / this.first - 1) / (this.length - 1);
-    const benchmark = riskfree / 365;
-
-    // Incrementals are wins > 0
-    const incrementals = this.win.values.filter((x) => x > 0);
-
-    // No wins, only losses
-    if (incrementals.length < 2) return (profit - benchmark) * this.length;
-
-    // Sharpe Ratio
-    const volatility = std(incrementals);
-    const sharpe = (profit - benchmark) / volatility;
-    return sharpe;
-  }
-
   /** Ratio of gain from arbitrary date to another */
   public gain(start: DateFormat, end: DateFormat): number {
     const first: number = this.value(start);
@@ -99,11 +81,21 @@ export class Chart {
     return ratio;
   }
 
-  /** Annual Percentage Yield */
-  public get apy(): number {
-    const profit: number = this.last / this.first - 1;
-    const apy: number = (365 / (this.length - 1)) * profit;
-    return apy;
+  /** Annual Yield */
+  public get annual_return(): number {
+    const years: number = (this.length - 1) / 365;
+    const annual_return = (this.last / this.first) ** (1 / years) - 1;
+    return annual_return;
+  }
+
+  /** Annual Standard Deviation */
+  public get annual_standard_deviation(): number {
+    return std(this.returns.values) * Math.sqrt(365);
+  }
+
+  /** Sharpe Ratio, riskfree is annual riskfree return, for example 0.05 */
+  public sharpe_ratio(riskfree: number = 0.0): number {
+    return (this.annual_return - riskfree) / this.annual_standard_deviation;
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -138,7 +130,7 @@ export class Chart {
   }
 
   /** Value as ratio above previous value */
-  private get win(): Chart {
+  private get returns(): Chart {
     const v: Numbers = this.values;
     return this.derive(
       v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),

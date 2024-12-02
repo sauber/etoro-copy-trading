@@ -25,7 +25,7 @@ export class Features {
     const chart: Chart = this.investor.chart.from(start);
     // 5% is annual money market return.
     // TODO: Load from config
-    const sr: number = chart.sharpeRatio(0.0);
+    const sr: number = chart.sharpe_ratio(0.0);
     if (!Number.isFinite(sr)) {
       const name = this.investor.UserName;
       console.log({ chart, name, start, sr });
