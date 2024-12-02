@@ -1,15 +1,27 @@
 import {
   Amount,
   Bar,
-  Chart,
+  Instrument,
   Instruments,
   Positions,
+  Price,
   PurchaseOrders,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { RSI } from "@debut/indicators";
-import { Instrument } from "📚/timing/instrument.ts";
+
+type Series = Array<Price>;
+
+class Chart {
+  constructor(private readonly series: Series, private readonly end: Bar) {}
+  public has(bar: Bar): boolean {
+    return bar >= this.end && bar <= this.end + this.series.length;
+  }
+  public bar(bar: Bar): Price {
+    return this.series[bar - this.end];
+  }
+}
 
 /** Buy nothing, sell nothing */
 export class NullStrategy implements Strategy {
@@ -25,7 +37,6 @@ export class NullStrategy implements Strategy {
 export class RSIStrategy implements Strategy {
   // Weekday of today
   private readonly today = new Date().getDay();
-  // console.log(weekday, weekday - 413 % 7);
 
   constructor(
     private readonly window: number = 20,
@@ -40,7 +51,7 @@ export class RSIStrategy implements Strategy {
     const id = instrument.symbol;
     if (!this.charts[id]) {
       const end: Bar = instrument.end;
-      const source: number[] = instrument.chart.values;
+      const source: Series = instrument.series;
       const rsi = new RSI(this.window);
       const series = source.map((v) => rsi.nextValue(v)).filter((v) =>
         v !== undefined

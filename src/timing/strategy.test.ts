@@ -7,6 +7,7 @@ Deno.test("Do nothing strategy", () => {
   assertInstanceOf(strategy, NullStrategy);
   const context: StrategyContext = {
     bar: 0,
+    value: 0,
     amount: 0,
     instruments: [],
     positions: [],

@@ -1,6 +1,7 @@
 import { Community, type Investors, type Names } from "📚/repository/mod.ts";
-import { Instrument } from "📚/timing/instrument.ts";
-import { Instruments } from "@sauber/backtest";
+import { Instrument, Instruments } from "@sauber/backtest";
+import { Investor } from "📚/investor/mod.ts";
+import { DateFormat, diffDate } from "📚/time/mod.ts";
 
 /** Convert investors to simulation instruments */
 export class TrainingData {
@@ -14,7 +15,21 @@ export class TrainingData {
       names.map((name) => this.community.investor(name)),
     );
 
+    // Most recent end
+    const ends: Array<DateFormat> = investors.map((investor: Investor) =>
+      investor.chart.end
+    );
+    ends.sort();
+    const last: DateFormat = ends[ends.length - 1];
+
     // Convert
-    return investors.map((i) => new Instrument(i));
+    return investors.map((investor: Investor) =>
+      new Instrument(
+        investor.chart.values,
+        diffDate(investor.chart.end, last),
+        investor.UserName,
+        investor.FullName,
+      )
+    );
   }
 }
