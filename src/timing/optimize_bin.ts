@@ -141,10 +141,10 @@ const exchange: Exchange = new Exchange(instruments);
 
 // Parameters
 const parameters: Parameters = [
-  new IntegerParameter(2, 100, "Window"),
-  new Parameter(0, 50, "Buy"),
-  new Parameter(50, 100, "Sell"),
-  new IntegerParameter(1, 5, "Day"),
+  new IntegerParameter("Window", 2, 100),
+  new Parameter("Buy", 0, 50),
+  new Parameter("Sell", 50, 100),
+  new IntegerParameter("Weekday", 1, 5),
 ];
 
 // Run simulation on random parameters within boundaries to find best starting point
@@ -171,9 +171,9 @@ const correlations: Array<[number, number]> = parameters.map((_, c: number) =>
 
 // Which parameters to display on scatter chart
 const xcol: number = correlations[0][0];
-const xlabel: string = parameters[xcol].label;
+const xlabel: string = parameters[xcol].name;
 const ycol: number = correlations[1][0];
-const ylabel: string = parameters[ycol].label;
+const ylabel: string = parameters[ycol].name;
 // console.log({correlations, xcol, xlabel, ycol, ylabel});
 
 // Trail of parameters towards minimum

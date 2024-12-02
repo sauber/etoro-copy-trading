@@ -81,8 +81,8 @@ Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {
   }
 
   const parameters = [
-    new Parameter(-5, 5, "x"),
-    new Parameter(-5, 5, "y"),
+    new Parameter("x", -5, 5),
+    new Parameter("y", -5, 5),
   ];
 
   const minimizer = new Minimize({

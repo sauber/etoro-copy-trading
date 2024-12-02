@@ -1,3 +1,4 @@
+import { Values } from "@sauber/neurons";
 import { randn } from "jsr:@sauber/statistics";
 
 type Sample = [number, number];
@@ -50,6 +51,13 @@ class AdamOptimizer {
   }
 }
 
+export type ParameterData = {
+  name: string;
+  min: number;
+  max: number;
+  value: number;
+};
+
 export class Parameter {
   private readonly optimizer = new AdamOptimizer();
 
@@ -60,11 +68,18 @@ export class Parameter {
   private readonly samples: Samples = [];
 
   constructor(
+    public readonly name: string,
     protected readonly min: number,
     protected readonly max: number,
-    public readonly label: string = "",
-  ) {
-    this._value = this.random;
+    value?: number
+  ) { this._value = value || this.random }
+
+  public static import(par: ParameterData): Parameter {
+    return new Parameter(par.name, par.min, par.max, par.value);
+  }
+
+  public export(): ParameterData {
+    return { name: this.name, min: this.min, max: this.max, value: this.value };
   }
 
   /** Random number between min and max */
@@ -117,7 +132,7 @@ export class Parameter {
   public print(): string {
     const v: number = parseFloat(this.value.toFixed(4));
     const g: number = parseFloat(this.gradient.toFixed(4));
-    return `${this.label}: v=${v} g=${g}`;
+    return `${this.name}: v=${v} g=${g}`;
   }
 }
 
