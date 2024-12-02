@@ -1,7 +1,7 @@
 import { diffDate, nextDate } from "📚/time/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 import { std } from "📚/math/statistics.ts";
-import { ema, rsi, sma } from "📚/chart/indicators.ts";
+import { EMA, RSI, SMA } from "@debut/indicators";
 
 // Series of numbers
 type Numbers = number[];
@@ -126,36 +126,34 @@ export class Chart {
   /** Value as ratio above previous value */
   private get returns(): Chart {
     const v: Numbers = this.values;
-    const calc: Derive =
-      () => [
-        v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),
-        this.end,
-      ];
+    const calc: Derive = () => [
+      v.map((a, i) => (i == 0 ? 0 : a / v[i - 1] - 1)).slice(1),
+      this.end,
+    ];
     return this.derive(calc, "win");
+  }
+
+  /** Run values through an indicator function */
+  private indicator(fn: SMA | EMA | RSI): Derive {
+    return () => [
+      this.values.map((v) => fn.nextValue(v)).filter((v) => v !== undefined),
+      this.end,
+    ];
   }
 
   /** Simple Moving Average */
   public sma(window: number): Chart {
-    return this.derive(
-      () => [sma(this.values, window), this.end],
-      "sma" + window,
-    );
+    return this.derive(this.indicator(new SMA(window)), "sma" + window);
   }
 
   /** Exponential Moving Average */
   public ema(window: number): Chart {
-    return this.derive(
-      () => [ema(this.values, window), this.end],
-      "ema" + window,
-    );
+    return this.derive(this.indicator(new EMA(window)), "ema" + window);
   }
 
   /** Relative Strength Index */
   public rsi(window: number): Chart {
-    return this.derive(
-      () => [rsi(this.values, window), this.end],
-      "rsi" + window,
-    );
+    return this.derive(this.indicator(new RSI(window)), "rsi" + window);
   }
 
   /** this chart - other chart */
