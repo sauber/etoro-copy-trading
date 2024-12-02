@@ -62,7 +62,7 @@ export class Parameter {
   constructor(
     protected readonly min: number,
     protected readonly max: number,
-    private readonly label: string = "",
+    public readonly label: string = "",
   ) {
     this._value = this.random;
   }

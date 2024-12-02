@@ -1,6 +1,7 @@
 import {
   Amount,
   Exchange,
+  Instrument,
   Instruments,
   Simulation,
   Stats,
@@ -16,6 +17,7 @@ import {
   Parameters,
 } from "📚/optimize/parameter.ts";
 import { Minimize } from "📚/optimize/minimize.ts";
+import { correlation } from "jsr:@sauber/statistics";
 
 // Number of parameters
 type Inputs = [number, number, number, number];
@@ -23,7 +25,7 @@ type Output = number;
 
 // Sanity check loaded data
 function verify(instruments: Instruments): void {
-  instruments.forEach((instrument) => {
+  instruments.forEach((instrument: Instrument) => {
     if (isNaN(instrument.start)) {
       console.log(instrument);
       throw new Error("Invalid start date for " + instrument.symbol);
@@ -142,14 +144,19 @@ const parameters: Parameters = [
   new IntegerParameter(2, 100, "Window"),
   new Parameter(0, 50, "Buy"),
   new Parameter(50, 100, "Sell"),
-  new IntegerParameter(0, 6, "Weekday"),
+  new IntegerParameter(1, 5, "Day"),
 ];
 
 // Run simulation on random parameters within boundaries to find best starting point
+const start_samples = 200;
+const xi: Array<Inputs> = Array(start_samples);
+const yi: Array<Output> = Array(start_samples);
 let best = -Infinity;
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < start_samples; i++) {
   const inputs = parameters.map((p) => p.random) as Inputs;
   const output = runSim(inputs);
+  xi[i] = inputs;
+  yi[i] = output;
   if (output > best) {
     // console.log("Best", i, inputs, output);
     inputs.map((v, i) => parameters[i].set(v));
@@ -157,27 +164,21 @@ for (let i = 0; i < 100; i++) {
   }
 }
 
+// Which input correlates most to output
+const correlations: Array<[number, number]> = parameters.map((_, c: number) =>
+  [c, Math.abs(correlation(xi.map((r) => r[c]), yi))] as [number, number]
+).sort((a,b)=>b[1]-a[1]);
+
 // Which parameters to display on scatter chart
-const xcol = 2; // RSI Sell threshold
-const ycol = 0; // RSI Window Size
-const xlabel = "Sell";
-const ylabel = "Len";
+const xcol: number = correlations[0][0];
+const xlabel: string = parameters[xcol].label;
+const ycol: number = correlations[1][0];
+const ylabel: string = parameters[ycol].label;
+// console.log({correlations, xcol, xlabel, ycol, ylabel});
 
 // Trail of parameters towards minimum
 const xs: Array<[number, number]> = [];
 const ys: Array<Output> = [];
-
-// const xs: Array<[number, number]> = Array.from(Array(100)).map(
-//   (_) => [parameters[xcol].random, parameters[ycol].random],
-// );
-// const ys: Array<Output> = xs.map((x) =>
-//   runSim(parameters.map((p, i) => {
-//     if (i === xcol) return x[0];
-//     else if (i === ycol) return x[1];
-//     else return p.value;
-//   }) as Inputs)
-// );
-// console.log(xs, ys);
 
 // Dashboard
 // const epochs = 20000;
