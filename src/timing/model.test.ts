@@ -27,14 +27,14 @@ Deno.test("Predict", () => {
   const exchange: Exchange = makeExchange();
   const model = new Model(exchange);
   const score: number = model.predict(21, 30, 70, 1);
-  console.log(score);
+  // console.log(score);
   assertEquals(isNaN(score), false);
 });
 
 Deno.test("Optimize", () => {
   const exchange: Exchange = makeExchange();
   const model = new Model(exchange);
-  model.optimize();
+  model.optimize(1);
   // console.log(model);
 //   const inputs: Inputs = [input(), input(), input(), input()];
 //   const outputs: Outputs = [output(), output(), output(), output()];

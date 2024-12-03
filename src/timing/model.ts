@@ -134,26 +134,36 @@ export class Model {
 
     // Find most correlated columns
     const [xcol, ycol] = this.correlation(samples);
-    const xlabel = this.parameters[xcol].name;
-    const ylabel = this.parameters[ycol].name;
+    const xlabel = Object.values(this.parameters)[xcol].name;
+    const ylabel = Object.values(this.parameters)[ycol].name;
+    // console.log({xcol, ycol, xlabel, ylabel});
 
     // Trail of parameters towards minimum
     const xs: Array<[number, number]> = [];
     const ys: Array<Output> = [];
 
     // Callback from dashboard to model
-    const input = this.input;
-    const predict = this.predict;
+    const input = (
+      parameters: Parameters,
+      override: Record<string, number>,
+    ): Input => {
+      return this.input(parameters, override);
+    };
+
+    const predict = (input: Input): Output => {
+      return this.predict(...input);
+    };
+    // console.log(predict);
     const parameters = this.parameters;
     function sample(x: number, y: number): number {
       const inputs: Input = input(parameters, { [xlabel]: x, [ylabel]: y });
-      const output: Output = predict(...inputs);
+      const output: Output = predict(inputs);
       return -output;
     }
 
     // Callback from optimize to model
     function loss(input: Input): number {
-      const score: Output = predict(...input);
+      const score: Output = predict(input);
       return -score;
     }
 
