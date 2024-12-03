@@ -1,4 +1,3 @@
-import { Values } from "@sauber/neurons";
 import { randn } from "jsr:@sauber/statistics";
 
 type Sample = [number, number];
@@ -69,8 +68,8 @@ export class Parameter {
 
   constructor(
     public readonly name: string,
-    protected readonly min: number,
-    protected readonly max: number,
+    public readonly min: number,
+    public readonly max: number,
     value?: number
   ) { this._value = value || this.random }
 
@@ -156,4 +155,4 @@ export class IntegerParameter extends Parameter {
   }
 }
 
-export type Parameters = Array<Parameter>;
+// export type Parameters = Array<Parameter>;

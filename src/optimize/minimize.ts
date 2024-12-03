@@ -1,4 +1,4 @@
-import { Parameters } from "📚/optimize/parameter.ts";
+import { Parameter } from "📚/optimize/parameter.ts";
 import { sum } from "📚/math/statistics.ts";
 
 type Inputs = Array<number>;
@@ -6,10 +6,10 @@ type Output = number;
 
 export class Minimize {
   /** Set of parameters to optimize */
-  public readonly parameters: Parameters = [];
+  public readonly parameters: Array<Parameter> = [];
 
-  /** Loss function */
-  public readonly loss: (inputs: Inputs) => number = () => 0;
+  /** Function calculating output from parameters */
+  public readonly fn: (inputs: Inputs) => number = () => 0;
 
   /** Max number of epochs */
   public readonly epochs: number = 0;
@@ -39,7 +39,7 @@ export class Minimize {
   private gradients(): void {
     for (let i = 0; i < this.batchSize; i++) {
       const inputs = this.parameters.map((p) => p.suggest()) as Inputs;
-      const output: Output = this.loss(inputs);
+      const output: Output = this.fn(inputs);
       this.parameters.forEach((p, index) => p.learn(inputs[index], output));
     }
   }
@@ -63,7 +63,7 @@ export class Minimize {
     for (; i <= this.epochs; ++i) {
       const momentum = this.step();
       const inputs = this.parameters.map((p) => p.value) as Inputs;
-      const output: Output = this.loss(inputs);
+      const output: Output = this.fn(inputs);
       if (momentum < this.epsilon) {
         this.status(i, inputs, output, momentum);
         break;

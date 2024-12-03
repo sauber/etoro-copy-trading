@@ -2,6 +2,7 @@ import { assertEquals, assertGreater, assertInstanceOf } from "@std/assert";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { Minimize } from "📚/optimize/minimize.ts";
 import { Parameter } from "📚/optimize/parameter.ts";
+import { NoisyBumpySlope, Inputs, Output } from "📚/optimize/testdata.ts";
 
 Deno.test("Instance", () => {
   const min = new Minimize();
@@ -15,39 +16,11 @@ Deno.test("Run", () => {
 });
 
 Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {
-  type Inputs = [number, number];
-  type Output = number;
-
-  /** Add noise by +/- percentage value */
-  function jitter(value: number, ratio: number): number {
-    const noise = Math.random() * value * ratio * 2 - ratio;
-    return value + noise;
-  }
-
-  // Calculate output from inputs
-  function NoisyBumpySlope(input: Inputs): Output {
-    const [x, y] = input;
-    // return jitter(Math.sin(x) * Math.cos(y) + 0.1 * x * y, 0.2);
-    return jitter(Math.sin(x) * Math.cos(y) + 0.1 * x * y, 0.05);
-  }
-
-  // https://www.sfu.ca/~ssurjano/optimization.html
-  function ThreeHumpCamel(input: Inputs): Output {
-    const [x1, x2] = input;
-    const term1 = 2 * x1 ** 2;
-    const term2 = -1.05 * x1 ** 4;
-    const term3 = x1 ** 6 / 6;
-    const term4 = x1 * x2;
-    const term5 = x2 ^ 2;
-    const y = term1 + term2 + term3 + term4 + term5;
-    return y;
-  }
-
-  const loss = NoisyBumpySlope;
+  const fn: (input: Inputs) => Output = NoisyBumpySlope;
 
   // Callback to loss function from dashboard
   function sample(a: number, b: number): number {
-    return loss([a, b]);
+    return fn([a, b]);
   }
 
   // Trail of parameters towards minimum
@@ -87,7 +60,7 @@ Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {
 
   const minimizer = new Minimize({
     parameters,
-    loss: loss as (inputs: Array<number>) => number,
+    fn: fn as (inputs: Array<number>) => number,
     epochs,
     status,
     every: 10,
