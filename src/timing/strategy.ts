@@ -6,13 +6,13 @@ import {
   Positions,
   Price,
   PurchaseOrders,
+  Series,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { RSI } from "@debut/indicators";
 
-type Series = Array<Price>;
-
+/** Lookup Series by Bar */
 class Chart {
   constructor(private readonly series: Series, private readonly end: Bar) {}
   public has(bar: Bar): boolean {
@@ -23,18 +23,9 @@ class Chart {
   }
 }
 
-/** Buy nothing, sell nothing */
-export class NullStrategy implements Strategy {
-  public open(_context: StrategyContext): PurchaseOrders {
-    return [];
-  }
+// export type TimingData = Array<ParameterData>;
 
-  public close(_context: StrategyContext): Positions {
-    return [];
-  }
-}
-
-export class RSIStrategy implements Strategy {
+export class TimingStrategy implements Strategy {
   // Weekday of today
   private readonly today = new Date().getDay();
 

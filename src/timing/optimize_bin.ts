@@ -10,7 +10,7 @@ import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { type Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/community.ts";
 import { TrainingData } from "📚/timing/trainingdata.ts";
-import { RSIStrategy } from "📚/timing/strategy.ts";
+import { TimingStrategy } from "📚/timing/strategy.ts";
 import {
   IntegerParameter,
   Parameter,
@@ -39,7 +39,7 @@ function runSim(
   display: boolean = false,
 ): number {
   const [window, buy, sell, weekday] = inputs;
-  const strategy = new RSIStrategy(
+  const strategy = new TimingStrategy(
     Math.round(window),
     buy,
     sell,
@@ -199,7 +199,7 @@ const dashboard = new Dashboard(
 // Configure minimizer
 const minimizer = new Minimize({
   parameters,
-  loss: loss as (inputs: Array<number>) => number,
+  fn: loss as (inputs: Array<number>) => number,
   epochs,
   status,
   every: 10,

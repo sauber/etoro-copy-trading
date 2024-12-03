@@ -1,55 +1,45 @@
-// import type { NetworkData } from "@sauber/neurons";
-import {
-  assertEquals,
-  assertGreater,
-  assertInstanceOf,
-  assertLessOrEqual,
-  assertNotEquals,
-} from "@std/assert";
+import { assertEquals, assertInstanceOf } from "@std/assert";
+import { Exchange, TestInstrument } from "@sauber/backtest";
 import { Model, TimingData } from "📚/timing/model.ts";
-// import type { Input, Inputs, Output, Outputs } from "./types.ts";
-// import { input_labels } from "📚/timing/types.ts";
 
-/** Generate a random set of input */
-// function input(): Input {
-//   return Object.fromEntries(
-//     input_labels.map((label) => [label, Math.random()]),
-//   ) as Input;
-// }
-
-/** Generate a random set of output */
-// function output(): Output {
-//   return { SharpeRatio: Math.random() };
-// }
-
-/** Number of input features */
-// const features = input_labels.length;
+// Random instruments on an exchange
+function makeExchange(count: number = 3): Exchange {
+  return new Exchange(
+    Array.from(Array(count).keys().map(() => new TestInstrument())),
+  );
+}
 
 Deno.test("Generate", () => {
-  assertInstanceOf(Model.generate(), Model);
+  assertInstanceOf(new Model(makeExchange()), Model);
 });
 
 Deno.test("Export / Import", () => {
-  const m = Model.generate();
-  const e: TimingData = m.export();
-  assertEquals(e.length, 4);
-  const i = Model.import(e);
+  const exchange: Exchange = makeExchange();
+  const model = new Model(exchange);
+  const data: TimingData = model.export();
+  assertEquals(Object.keys(data).length, 4);
+  const i = Model.import(exchange, data);
   assertInstanceOf(i, Model);
 });
 
-// Deno.test("Train", () => {
-//   const m = Model.generate(features);
+
+Deno.test("Predict", () => {
+  const exchange: Exchange = makeExchange();
+  const model = new Model(exchange);
+  const score: number = model.predict(21, 30, 70, 1);
+  console.log(score);
+  assertEquals(isNaN(score), false);
+});
+
+Deno.test("Optimize", () => {
+  const exchange: Exchange = makeExchange();
+  const model = new Model(exchange);
+  model.optimize();
+  // console.log(model);
 //   const inputs: Inputs = [input(), input(), input(), input()];
 //   const outputs: Outputs = [output(), output(), output(), output()];
 //   const max = 2000;
 //   const results = m.train(inputs, outputs, max);
 //   assertGreater(results.iterations, 0);
 //   assertLessOrEqual(results.iterations, max);
-// });
-
-// Deno.test("Predict", () => {
-//   const m = Model.generate(features);
-//   const inp: Input = input();
-//   const out: Output = m.predict(inp);
-//   assertNotEquals(out.SharpeRatio, 0);
-// });
+});

@@ -3,7 +3,7 @@ import type { DateFormat } from "📚/time/mod.ts";
 import { diffDate } from "📚/time/mod.ts";
 import { Features } from "📚/ranking/features.ts";
 import { Chart } from "📚/chart/mod.ts";
-import type { Input, Output } from "./types.ts";
+import type { Input, Output } from "📚/ranking/types.ts";
 
 // Combine input and output records
 type Sample = {
