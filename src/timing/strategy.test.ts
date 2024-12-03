@@ -1,4 +1,4 @@
-import { NullStrategy } from "📚/timing/strategy.ts";
+import { NullStrategy } from "📚/timing/testdata.ts";
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { StrategyContext } from "@sauber/backtest";
 
