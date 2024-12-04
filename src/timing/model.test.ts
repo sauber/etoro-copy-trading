@@ -10,36 +10,35 @@ function makeExchange(count: number = 3): Exchange {
 }
 
 Deno.test("Generate", () => {
-  assertInstanceOf(new Model(makeExchange()), Model);
+  assertInstanceOf(new Model(), Model);
 });
 
 Deno.test("Export / Import", () => {
-  const exchange: Exchange = makeExchange();
-  const model = new Model(exchange);
+  const model = new Model();
   const data: TimingData = model.export();
   assertEquals(Object.keys(data).length, 4);
-  const i = Model.import(exchange, data);
+  const i = Model.import(data);
   assertInstanceOf(i, Model);
 });
 
-
 Deno.test("Predict", () => {
   const exchange: Exchange = makeExchange();
-  const model = new Model(exchange);
-  const score: number = model.predict(21, 30, 70, 1);
-  // console.log(score);
+  const model = new Model();
+  const score: number = model.predict(exchange);
+  console.log(score);
   assertEquals(isNaN(score), false);
 });
 
 Deno.test("Optimize", () => {
+  const model = new Model();
   const exchange: Exchange = makeExchange();
-  const model = new Model(exchange);
-  model.optimize(1);
+  const results = model.optimize(exchange, 2000);
+  console.log(results);
   // console.log(model);
-//   const inputs: Inputs = [input(), input(), input(), input()];
-//   const outputs: Outputs = [output(), output(), output(), output()];
-//   const max = 2000;
-//   const results = m.train(inputs, outputs, max);
-//   assertGreater(results.iterations, 0);
-//   assertLessOrEqual(results.iterations, max);
+  //   const inputs: Inputs = [input(), input(), input(), input()];
+  //   const outputs: Outputs = [output(), output(), output(), output()];
+  //   const max = 2000;
+  //   const results = m.train(inputs, outputs, max);
+  //   assertGreater(results.iterations, 0);
+  //   assertLessOrEqual(results.iterations, max);
 });

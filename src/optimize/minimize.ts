@@ -52,6 +52,8 @@ export class Minimize {
     this.gradients();
 
     // Total of gradients (before value update)
+    // TODO: Momentum is derived from acceleration and movement.
+    //       Not from gradients, which may remain high at edges.
     const momentum = sum(this.parameters.map((p) => Math.abs(p.gradient)));
     return momentum;
   }
