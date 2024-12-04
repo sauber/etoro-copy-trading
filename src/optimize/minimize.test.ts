@@ -1,4 +1,4 @@
-import { assertEquals, assertGreater, assertInstanceOf } from "@std/assert";
+import { assertEquals, assertGreater, assertInstanceOf, assertLessOrEqual } from "@std/assert";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { Minimize } from "📚/optimize/minimize.ts";
 import { Parameter } from "📚/optimize/parameter.ts";
@@ -71,4 +71,5 @@ Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {
   const iterations = minimizer.run();
   console.log(parameters.map((p) => p.print()));
   assertGreater(iterations, 0);
+  assertLessOrEqual(iterations, epochs);
 });
