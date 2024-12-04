@@ -23,8 +23,6 @@ class Chart {
   }
 }
 
-// export type TimingData = Array<ParameterData>;
-
 export class TimingStrategy implements Strategy {
   // Weekday of today
   private readonly today = new Date().getDay();

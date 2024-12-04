@@ -17,9 +17,8 @@ export class Minimize {
   /** Callback status function */
   public readonly status: (
     iteration: number,
-    inputs: Inputs,
-    output: Output,
     momentum: number,
+    parameters: Parameters,
   ) => void = () => undefined;
 
   /** Frequency of callback */
@@ -59,12 +58,10 @@ export class Minimize {
     let i = 1;
     for (; i <= this.epochs; ++i) {
       const momentum = this.step();
-      const inputs = this.parameters.map((p) => p.value) as Inputs;
-      const output: Output = this.fn(inputs);
       if (momentum < this.epsilon) {
-        this.status(i, inputs, output, momentum);
+        this.status(i, momentum, this.parameters);
         break;
-      } else if (i % this.every == 0) this.status(i, inputs, output, momentum);
+      } else if (i % this.every == 0) this.status(i, momentum, this.parameters);
     }
     return i - 1;
   }
