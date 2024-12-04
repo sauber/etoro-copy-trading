@@ -56,7 +56,7 @@ export class Minimize {
 
   /** Iterate until momentum under epsilon or max iterations */
   public run(): number {
-    let i = 0;
+    let i = 1;
     for (; i <= this.epochs; ++i) {
       const momentum = this.step();
       const inputs = this.parameters.map((p) => p.value) as Inputs;
@@ -66,6 +66,6 @@ export class Minimize {
         break;
       } else if (i % this.every == 0) this.status(i, inputs, output, momentum);
     }
-    return i;
+    return i - 1;
   }
 }
