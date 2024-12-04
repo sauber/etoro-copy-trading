@@ -169,7 +169,7 @@ export class Model {
     batch_size: number = 64,
     callback?: Dashboard,
    * */
-  public optimize(exchange: Exchange, epochs: number = 500): TrainResults {
+  public optimize(exchange: Exchange, epochs: number = 500, epsilon: number = 0.001): TrainResults {
     // Find starting point
     const samples: Samples = this.samples(exchange, 200);
     samples.sort((a, b) => b.output - a.output);
@@ -248,7 +248,7 @@ export class Model {
       epochs,
       status,
       every: 10,
-      epsilon: 0.0001,
+      epsilon,
       batchSize: 20,
     });
 

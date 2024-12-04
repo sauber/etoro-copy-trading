@@ -32,7 +32,7 @@ Deno.test("Predict", () => {
 Deno.test("Optimize", () => {
   const model = new Model();
   const exchange: Exchange = makeExchange();
-  const results = model.optimize(exchange, 2000);
+  const results = model.optimize(exchange, 20, 0.01);
   console.log(results);
   // console.log(model);
   //   const inputs: Inputs = [input(), input(), input(), input()];
