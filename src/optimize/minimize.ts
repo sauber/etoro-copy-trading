@@ -46,21 +46,16 @@ export class Minimize {
 
   private step(): number {
     // Update parameters
+    this.gradients();
     this.parameters.forEach((p) => p.update());
 
-    // Take samples to calculate gradients at new values
-    this.gradients();
-
     // Total of gradients (before value update)
-    // TODO: Momentum is derived from acceleration and movement.
-    //       Not from gradients, which may remain high at edges.
-    const momentum = sum(this.parameters.map((p) => Math.abs(p.gradient)));
+    const momentum = Math.sqrt(sum(this.parameters.map((p) => p.changed ** 2)));
     return momentum;
   }
 
   /** Iterate until momentum under epsilon or max iterations */
   public run(): number {
-    this.gradients();
     let i = 0;
     for (; i <= this.epochs; ++i) {
       const momentum = this.step();
