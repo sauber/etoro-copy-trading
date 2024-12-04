@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Line } from "📚/timing/line.ts";
+import { Line } from "../optimize/line.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Line(0), Line);

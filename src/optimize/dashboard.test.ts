@@ -1,5 +1,5 @@
 import { assertInstanceOf } from "@std/assert";
-import { Dashboard } from "📚/timing/dashboard.ts";
+import { Dashboard } from "📚/optimize/dashboard.ts";
 import {
   IntegerParameter,
   Parameter,
@@ -11,7 +11,7 @@ Deno.test("Instance", () => {
   assertInstanceOf(new Dashboard(), Dashboard);
 });
 
-Deno.test("Render", {ignore: true}, async () => {
+Deno.test("Render", { ignore: true }, async () => {
   const d = new Dashboard();
   const parameters: Parameters = [
     new Parameter("Low", 0, 1, 0.25),

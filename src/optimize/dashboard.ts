@@ -1,5 +1,5 @@
 import { Parameter, Parameters } from "📚/optimize/parameter.ts";
-import { Line } from "📚/timing/line.ts";
+import { Line } from "../optimize/line.ts";
 
 // ANSI escape codes
 const ESC = "\u001B[";
