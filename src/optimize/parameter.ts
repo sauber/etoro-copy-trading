@@ -28,6 +28,9 @@ export type ParameterData = {
 };
 
 export class Parameter {
+  /** Amount value has changed */
+  public changed: number = 0;
+
   private readonly optimizer = new Adam();
 
   // Current float value of parameter
@@ -96,6 +99,7 @@ export class Parameter {
   public update(): void {
     const grad = this.gradient;
     const update = this.optimizer.update(grad);
+    this.changed = update;
     this.set(this._value + update);
   }
 
