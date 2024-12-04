@@ -30,7 +30,12 @@ function values(parameters: Parameters): Input {
   return parameters.map((p) => p.value) as Input;
 }
 
-export type Dashboard = (x: number, y: number[]) => void;
+export type Dashboard = (
+  iteration: number,
+  x: number[],
+  y: number,
+  momentum: number,
+) => void;
 
 /** Exported data of model */
 export type TimingData = Array<ParameterData>;
@@ -42,10 +47,10 @@ export type TimingData = Array<ParameterData>;
 //   weekday: number;
 // };
 
-export type TrainResults = {
-  iterations: number;
-  loss: number;
-};
+// export type TrainResults = {
+//   iterations: number;
+//   loss: number;
+// };
 
 type Samples = Array<{ input: Parameters; output: number }>;
 
@@ -169,14 +174,19 @@ export class Model {
     batch_size: number = 64,
     callback?: Dashboard,
    * */
-  public optimize(exchange: Exchange, epochs: number = 500, epsilon: number = 0.001): TrainResults {
+  public optimize(
+    exchange: Exchange,
+    epochs: number = 500,
+    epsilon: number = 0.001,
+    status: Dashboard = () => undefined,
+  ): number {
     // Find starting point
     const samples: Samples = this.samples(exchange, 200);
     samples.sort((a, b) => b.output - a.output);
     const start = samples[0];
-    console.log("Start score:", start.output);
+    // console.log("Start score:", start.output);
     start.input.map((p, i) => this.parameters[i].set(p.value));
-    console.log(this.print(exchange));
+    // console.log(this.print(exchange));
 
     //   // Find most correlated columns
     //   const [xcol, ycol] = this.correlation(samples);
@@ -228,18 +238,18 @@ export class Model {
     //   );
 
     // Callback from optimizer to dashboard
-    const status = (
-      _iteration: number,
-      _xi: Array<number>,
-      _yi: Output,
-      _momentum: number,
-    ): void => {
-      // xs.push([xi[xcol], xi[ycol]]);
-      // ys.push(yi);
-      // console.log(dashboard.render(iteration, yi));
-      // console.log(this.parameters.map((p) => p.print()).join(", "), yi);
-      console.log(this.print(exchange));
-    };
+    // const status = (
+    //   _iteration: number,
+    //   _xi: Array<number>,
+    //   _yi: Output,
+    //   _momentum: number,
+    // ): void => {
+    //   // xs.push([xi[xcol], xi[ycol]]);
+    //   // ys.push(yi);
+    //   // console.log(dashboard.render(iteration, yi));
+    //   // console.log(this.parameters.map((p) => p.print()).join(", "), yi);
+    //   console.log(this.print(exchange));
+    // };
 
     // Configure minimizer
     const minimizer = new Minimize({
@@ -254,7 +264,7 @@ export class Model {
 
     const iterations = minimizer.run();
 
-    return { iterations, loss: 0 };
+    return iterations;
   }
 
   public predict(exchange: Exchange): Output {

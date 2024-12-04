@@ -1,4 +1,9 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import {
+  assertEquals,
+  assertGreaterOrEqual,
+  assertInstanceOf,
+  assertLessOrEqual,
+} from "@std/assert";
 import { Exchange, TestInstrument } from "@sauber/backtest";
 import { Model, TimingData } from "📚/timing/model.ts";
 
@@ -25,20 +30,28 @@ Deno.test("Predict", () => {
   const exchange: Exchange = makeExchange();
   const model = new Model();
   const score: number = model.predict(exchange);
-  console.log(score);
+  // console.log(score);
   assertEquals(isNaN(score), false);
 });
 
 Deno.test("Optimize", () => {
   const model = new Model();
   const exchange: Exchange = makeExchange();
-  const results = model.optimize(exchange, 20, 0.01);
-  console.log(results);
-  // console.log(model);
-  //   const inputs: Inputs = [input(), input(), input(), input()];
-  //   const outputs: Outputs = [output(), output(), output(), output()];
-  //   const max = 2000;
-  //   const results = m.train(inputs, outputs, max);
-  //   assertGreater(results.iterations, 0);
-  //   assertLessOrEqual(results.iterations, max);
+  const epochs = 10;
+  const epsilon = 0.01;
+  const iterations = model.optimize(exchange, epochs, epsilon);
+  // console.log(results);
+  assertGreaterOrEqual(iterations, 1);
+  assertLessOrEqual(iterations, epochs);
+});
+
+Deno.test("Visualized training", () => {
+  const model = new Model();
+  const exchange: Exchange = makeExchange();
+  const epochs = 10;
+  const epsilon = 0.01;
+  const iterations = model.optimize(exchange, epochs, epsilon);
+  // console.log(results);
+  assertGreaterOrEqual(iterations, 1);
+  assertLessOrEqual(iterations, epochs);
 });
