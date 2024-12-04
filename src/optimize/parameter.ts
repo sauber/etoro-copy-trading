@@ -106,7 +106,7 @@ export class Parameter {
   // Pretty print value and gradient
   public print(): string {
     const v: number = parseFloat(this.value.toFixed(4));
-    const g: number = parseFloat(this.gradient.toFixed(4));
+    const g: number = parseFloat(this.changed.toFixed(4));
     return `${this.name}: v=${v} g=${g}`;
   }
 }
