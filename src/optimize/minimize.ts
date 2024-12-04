@@ -1,4 +1,4 @@
-import { Parameter } from "📚/optimize/parameter.ts";
+import { Parameters } from "📚/optimize/parameter.ts";
 import { sum } from "📚/math/statistics.ts";
 
 type Inputs = Array<number>;
@@ -6,13 +6,13 @@ type Output = number;
 
 export class Minimize {
   /** Set of parameters to optimize */
-  public readonly parameters: Array<Parameter> = [];
+  public readonly parameters: Parameters = [];
 
   /** Function calculating output from parameters */
   public readonly fn: (inputs: Inputs) => number = () => 0;
 
   /** Max number of epochs */
-  public readonly epochs: number = 0;
+  public readonly epochs: number = 1000;
 
   /** Callback status function */
   public readonly status: (

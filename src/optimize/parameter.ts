@@ -1,4 +1,5 @@
 import { randn } from "jsr:@sauber/statistics";
+import { Adam } from "📚/optimize/adam.ts";
 
 type Sample = [number, number];
 type Samples = Array<Sample>;
@@ -19,37 +20,6 @@ function slope(samples: Samples): number {
   return gradient;
 }
 
-class AdamOptimizer {
-  private readonly learningRate = 0.1;
-  private readonly beta1 = 0.9;
-  private readonly beta2 = 0.99;
-  private readonly epsilon = 1e-8;
-  private m = 0;
-  private v = 0;
-  private iteration = 0;
-
-  /** How much to increment param */
-  optimize(grad: number): number {
-    this.iteration++;
-
-    // Update biased first moment estimate
-    this.m = this.beta1 * this.m + (1 - this.beta1) * grad;
-
-    // Update biased second raw moment estimate
-    this.v = this.beta2 * this.v + (1 - this.beta2) * grad * grad;
-
-    // Compute bias-corrected first moment estimate
-    const mHat = this.m / (1 - Math.pow(this.beta1, this.iteration));
-
-    // Compute bias-corrected second raw moment estimate
-    const vHat = this.v / (1 - Math.pow(this.beta2, this.iteration));
-
-    // Update parameter
-    const update = this.learningRate * mHat / (Math.sqrt(vHat) + this.epsilon);
-    return -update;
-  }
-}
-
 export type ParameterData = {
   name: string;
   min: number;
@@ -58,7 +28,7 @@ export type ParameterData = {
 };
 
 export class Parameter {
-  private readonly optimizer = new AdamOptimizer();
+  private readonly optimizer = new Adam();
 
   // Current float value of parameter
   protected _value: number;
@@ -123,7 +93,7 @@ export class Parameter {
   /** Adjust value according to gradient */
   public update(): void {
     const grad = this.gradient;
-    const update = this.optimizer.optimize(grad);
+    const update = this.optimizer.update(grad);
     this.set(this._value + update);
   }
 
@@ -155,4 +125,4 @@ export class IntegerParameter extends Parameter {
   }
 }
 
-// export type Parameters = Array<Parameter>;
+export type Parameters = Array<Parameter>;
