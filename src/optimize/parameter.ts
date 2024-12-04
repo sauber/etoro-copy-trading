@@ -28,6 +28,9 @@ export type ParameterData = {
 };
 
 export class Parameter {
+  /** Amount value has changed */
+  public changed: number = 0;
+
   private readonly optimizer = new Adam();
 
   // Current float value of parameter
@@ -40,8 +43,10 @@ export class Parameter {
     public readonly name: string,
     public readonly min: number,
     public readonly max: number,
-    value?: number
-  ) { this._value = value || this.random }
+    value?: number,
+  ) {
+    this._value = value || this.random;
+  }
 
   public static import(par: ParameterData): Parameter {
     return new Parameter(par.name, par.min, par.max, par.value);
@@ -94,6 +99,7 @@ export class Parameter {
   public update(): void {
     const grad = this.gradient;
     const update = this.optimizer.update(grad);
+    this.changed = update;
     this.set(this._value + update);
   }
 
@@ -112,16 +118,11 @@ export class IntegerParameter extends Parameter {
   }
 
   public override get random(): number {
-    return Math.round(this.min + Math.random() * (this.max - this.min));
+    return Math.round(super.random);
   }
 
-  /** Value, or one below or one above */
   public override suggest(): number {
-    const width = this.max - this.min;
-    const value = this._value - width / 2 + randn() * width;
-    if (value > this.max) return this.max;
-    else if (value < this.min) return this.min;
-    else return Math.round(value);
+    return Math.round(super.suggest());
   }
 }
 

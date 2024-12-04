@@ -77,6 +77,7 @@ Deno.test("Learning", () => {
   const updated: number = p.value;
   assertNotEquals(updated, initial);
   assertAlmostEquals(updated, initial, 0.1);
+  assertAlmostEquals(p.changed, updated-initial, 0.1);
 });
 
 Deno.test("Integer Instance", () => {
