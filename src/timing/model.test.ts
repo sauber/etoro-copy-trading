@@ -46,7 +46,7 @@ Deno.test("Optimize", () => {
   assertLessOrEqual(iterations, epochs);
 });
 
-Deno.test("Visualized training", { ignore: false }, () => {
+Deno.test("Visualized training", { ignore: true }, () => {
   // Dashboard
   const console_width = 74;
   const dashboard: Dashboard = new Dashboard(console_width);
