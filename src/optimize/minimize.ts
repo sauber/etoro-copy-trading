@@ -4,6 +4,9 @@ import { sum } from "📚/math/statistics.ts";
 type Inputs = Array<number>;
 type Output = number;
 
+// Callback for displaying status of optimizing
+export type Status = (iteration: number, momentum: number, parameters: Parameters) => void;
+
 export class Minimize {
   /** Set of parameters to optimize */
   public readonly parameters: Parameters = [];
@@ -15,11 +18,7 @@ export class Minimize {
   public readonly epochs: number = 1000;
 
   /** Callback status function */
-  public readonly status: (
-    iteration: number,
-    momentum: number,
-    parameters: Parameters,
-  ) => void = () => undefined;
+  public readonly status: Status = () => undefined;
 
   /** Frequency of callback */
   public readonly every: number = 0;
