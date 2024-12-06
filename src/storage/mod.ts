@@ -1,4 +1,3 @@
-export { Journal } from "./journal.ts";
 export { Asset } from "./asset.ts";
 export { Backend } from "./backend.ts";
 export { DiskBackend } from "./disk-backend.ts";
