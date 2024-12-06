@@ -9,7 +9,7 @@ import { Investor } from "📚/investor/mod.ts";
 import { Model } from "📚/ranking/model.ts";
 import { Ranking } from "📚/ranking/ranking.ts";
 import { Assets } from "📚/backend/mod.ts";
-import { Asset } from "📚/storage/mod.ts";
+import { RootAsset } from "📚/storage/root-asset.ts";
 
 // Repo
 if (!Deno.args[0]) throw new Error("Path missing");
@@ -17,12 +17,12 @@ const path: string = Deno.args[0];
 const backend = Assets.disk(path);
 
 // Load Model
-const asset: Asset<NetworkData> = backend.ranking;
+const asset: RootAsset<NetworkData> = backend.ranking;
 if (!await asset.exists()) {
   throw new Error("No ranking model exists. Perform training first.");
 }
 console.log("Loading existing model...");
-const rankingparams = await asset.last() as NetworkData;
+const rankingparams = await asset.retrieve() as NetworkData;
 const model: Model = Model.import(rankingparams);
 const ranking = new Ranking(model);
 
