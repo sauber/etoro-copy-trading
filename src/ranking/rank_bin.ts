@@ -2,33 +2,33 @@
 import type { NetworkData } from "@sauber/neurons";
 import { DataFrame } from "@sauber/dataframe";
 
-import { CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/mod.ts";
 import { DateFormat } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 
 import { Model } from "📚/ranking/model.ts";
 import { Ranking } from "📚/ranking/ranking.ts";
+import { Assets } from "📚/backend/mod.ts";
+import { Asset } from "📚/storage/mod.ts";
 
 // Repo
 if (!Deno.args[0]) throw new Error("Path missing");
 const path: string = Deno.args[0];
-const disk = new DiskBackend(path);
-const backend = new CachingBackend(disk);
+const backend = Assets.disk(path);
 
 // Load Model
-const modelAssetName = "ranking.network";
-if (!await backend.has(modelAssetName)) {
+const asset: Asset<NetworkData> = backend.ranking;
+if (!await asset.exists()) {
   throw new Error("No ranking model exists. Perform training first.");
 }
 console.log("Loading existing model...");
-const rankingparams = await backend.retrieve(modelAssetName) as NetworkData;
+const rankingparams = await asset.last() as NetworkData;
 const model: Model = Model.import(rankingparams);
 const ranking = new Ranking(model);
 
 // Load list of investors
 console.log("Loading latest investors...");
-const community = new Community(backend);
+const community: Community = backend.community;
 const latest = await community.latest();
 const end: DateFormat | null = await community.end();
 if (!end) throw new Error("No end date in community");

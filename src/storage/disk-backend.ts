@@ -77,8 +77,6 @@ export class DiskBackend implements Backend {
   }
 
   public async names(): Promise<AssetNames> {
-    //if (!(await exists(await this.path()))) return [];
-
     const path: string = await this.path();
     try {
       const filenames: string[] = await files(path);
@@ -86,7 +84,7 @@ export class DiskBackend implements Backend {
         this.assetname(FileName)
       );
       return assetnames;
-    } catch (err) {
+    } catch (_err) {
       return [];
     }
   }

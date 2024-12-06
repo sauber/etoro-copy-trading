@@ -1,5 +1,9 @@
-import type { JSONObject, JSONValue } from "../storage/mod.ts";
-import { Backend, Asset } from "../storage/mod.ts";
+import {
+  Asset,
+  Backend,
+  type JSONObject,
+  type JSONValue,
+} from "📚/storage/mod.ts";
 
 export class Config {
   private static readonly assetname = "config";
@@ -7,7 +11,7 @@ export class Config {
 
   constructor(
     private readonly repo: Backend,
-    private readonly defaults: JSONObject = {}
+    private readonly defaults: JSONObject = {},
   ) {
     this.asset = new Asset<JSONObject>(Config.assetname, repo);
   }
