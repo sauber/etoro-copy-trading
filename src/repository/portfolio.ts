@@ -1,4 +1,8 @@
-import { InvestorId } from "📚/repository/types.ts";
+export type Mirror = {
+  CustomerId: number;
+  UserName: string;
+  Value: number;
+};
 
 type Position = {
   InstrumentID: number;
@@ -53,11 +57,12 @@ export class Portfolio {
     return true;
   }
 
-  public get investors(): InvestorId[] {
+  public get mirrors(): Mirror[] {
     return this.raw.AggregatedMirrors.map((investor) => {
       return {
         UserName: investor.ParentUsername,
         CustomerId: investor.ParentCID,
+        Value: investor.Value,
       };
     });
   }

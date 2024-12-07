@@ -1,9 +1,10 @@
-export { Asset } from "./asset.ts";
-export { Backend } from "./backend.ts";
-export { DiskBackend } from "./disk-backend.ts";
-export { TempBackend } from "./temp-backend.ts";
-export { HeapBackend } from "./heap-backend.ts";
-export { CachingBackend } from "./caching-backend.ts";
+export { Asset } from "📚/storage/asset.ts";
+export { RootAsset } from "📚/storage/root-asset.ts";
+export { Backend } from "📚/storage/backend.ts";
+export { DiskBackend } from "📚/storage/disk-backend.ts";
+export { TempBackend } from "📚/storage/temp-backend.ts";
+export { HeapBackend } from "📚/storage/heap-backend.ts";
+export { CachingBackend } from "📚/storage/caching-backend.ts";
 
 export type JSONValue =
   | string

@@ -25,7 +25,7 @@ Deno.test("Portfolio", async (t) => {
   });
 
   await t.step("mirrors", () => {
-    const inv: InvestorId[] = portfolio.investors;
+    const inv: InvestorId[] = portfolio.mirrors;
     assert(inv.length > 0);
   });
 });

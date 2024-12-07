@@ -1,10 +1,9 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Asset } from "📚/storage/mod.ts";
-import { Community } from "📚/repository/community.ts";
-import { HeapBackend } from "📚/storage/heap-backend.ts";
+import { Asset, HeapBackend } from "📚/storage/mod.ts";
 import { nextDate, today } from "📚/time/mod.ts";
-import { repo as temprepo } from "📚/repository/testdata.ts";
 import { Investor } from "📚/investor/mod.ts";
+import { Community } from "📚/repository/community.ts";
+import { repo as temprepo } from "📚/repository/testdata.ts";
 
 Deno.test("Initialization", () => {
   const repo = new HeapBackend();
@@ -17,8 +16,6 @@ Deno.test("Heap repo", async (t) => {
   const community: Community = new Community(repo);
   const name = "john";
   const date = today();
-
-  console.log({ date });
 
   await t.step("incomplete write", async () => {
     await Promise.all([

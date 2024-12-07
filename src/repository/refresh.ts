@@ -192,7 +192,7 @@ export class Refresh {
     if (await asset.exists()) {
       const data: PortfolioData = await asset.last();
       const portfolio: Portfolio = new Portfolio(data);
-      return portfolio.investors;
+      return portfolio.mirrors;
     } else return [];
   }
 

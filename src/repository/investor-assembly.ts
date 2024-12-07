@@ -5,7 +5,11 @@ import { Diary, Investor } from "📚/investor/mod.ts";
 
 import { InvestorId } from "📚/repository/types.ts";
 import { Chart, type ChartData } from "📚/repository/chart.ts";
-import { Portfolio, type PortfolioData } from "📚/repository/portfolio.ts";
+import {
+  type Mirror,
+  Portfolio,
+  type PortfolioData,
+} from "📚/repository/portfolio.ts";
 import {
   Stats,
   type StatsData,
@@ -13,7 +17,7 @@ import {
 } from "📚/repository/stats.ts";
 import type { Names } from "📚/repository/mod.ts";
 
-type MirrorsByDate = Record<DateFormat, InvestorId[]>;
+type MirrorsByDate = Record<DateFormat, Mirror[]>;
 type StatsByDate = Record<DateFormat, StatsExport>;
 type Dates = Array<DateFormat>;
 
@@ -91,9 +95,9 @@ export class InvestorAssembly {
   }
 
   /** Last date where any asset is present */
-  private _end: DateFormat|undefined;
+  private _end: DateFormat | undefined;
   private async end(): Promise<DateFormat> {
-    if ( this._end ) return this._end;
+    if (this._end) return this._end;
 
     const dates = await Promise.all([
       this.chartAsset.end(),
@@ -202,10 +206,10 @@ export class InvestorAssembly {
   }
 
   /** Extract list of investors from portfolio */
-  private async portfolioValues(date: DateFormat): Promise<InvestorId[]> {
+  private async portfolioValues(date: DateFormat): Promise<Mirror[]> {
     const loaded: PortfolioData = await this.portfolioAsset.retrieve(date);
     const portfolio = new Portfolio(loaded);
-    return portfolio.investors;
+    return portfolio.mirrors;
   }
 
   /** Latest mirrors */
@@ -215,7 +219,7 @@ export class InvestorAssembly {
     const range: Dates = cover(available, chart.start, chart.end);
 
     // Load Stats exports for each date in range
-    const values: InvestorId[][] = await Promise.all(
+    const values: Mirror[][] = await Promise.all(
       range.map((date) => this.portfolioValues(date)),
     );
 
@@ -224,14 +228,15 @@ export class InvestorAssembly {
     const zip: MirrorsByDate = {};
     let prev: Names;
     range.forEach((date: DateFormat, index: number) => {
-      const cur: InvestorId[] = values[index];
-      const curnames: Names = cur.map((id: InvestorId)=>id.UserName);
+      const cur: Mirror[] = values[index];
+      const curnames: Names = cur.map((id: Mirror) => id.UserName);
       // Skip if same as before
-      if (index > 0 && prev.reduce((a, b) => a && curnames.includes(b), true)) false;
-      // Keep
+      if (index > 0 && prev.reduce((a, b) => a && curnames.includes(b), true)) {
+        false;
+      } // Keep
       else {
         zip[date] = cur;
-        prev = cur.map((id: InvestorId)=>id.UserName);
+        prev = cur.map((id: InvestorId) => id.UserName);
       }
     });
 
@@ -281,22 +286,32 @@ export class InvestorAssembly {
     };
   }
 
+  /** Confirm if compiled data is valid */
+  private compiled(data: InvestorExport): boolean {
+    // Confirm mirrors have Value parameter
+    for (const [_date, mirrors] of Object.entries(data.mirrors)) {
+      for (const mirror of mirrors) if (!mirror.Value) return false;
+    }
+    return true;
+  }
+
   /** Attempt to load from cache */
-  private async cached(): Promise<InvestorExport | null> {
+  private async cached(): Promise<InvestorExport | undefined> {
     // Cached version doesn't exist
-    if (!await this.compiledAsset.exists()) return null;
+    if (!await this.compiledAsset.exists()) return undefined;
 
     // Is cached version too old?
     const prev: DateFormat = await this.compiledAsset.end();
     const end: DateFormat = await this.end();
     if (end > prev) {
       await this.compiledAsset.erase();
-      return null;
+      return undefined;
     }
 
-    // Cache is still recent
-    // TODO: Confirm asset validates, otherwise erase
-    return this.compiledAsset.last();
+    // Confirm asset validates, otherwise erase
+    const loaded = await this.compiledAsset.last();
+    if (this.compiled(loaded)) return loaded;
+    await this.compiledAsset.erase();
   }
 
   /** Generate investor object from raw data */
@@ -314,7 +329,7 @@ export class InvestorAssembly {
   /** Load or generate investor */
   public async investor(): Promise<Investor> {
     // Does cache exist and is valid?
-    const cached: InvestorExport | null = await this.cached();
+    const cached: InvestorExport | undefined = await this.cached();
     if (cached) return this.generate(cached);
 
     // Compile investor from asset
