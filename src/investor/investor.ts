@@ -1,6 +1,6 @@
 import { Chart } from "📚/chart/mod.ts";
 import { Diary } from "📚/investor/diary.ts";
-import type { InvestorId, StatsExport } from "📚/repository/mod.ts";
+import type { Mirror, StatsExport } from "📚/repository/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 
 export class Investor {
@@ -9,7 +9,7 @@ export class Investor {
     public readonly CustomerID: number,
     public readonly FullName: string | undefined,
     public readonly chart: Chart,
-    public readonly mirrors: Diary<InvestorId[]>,
+    public readonly mirrors: Diary<Mirror[]>,
     public readonly stats: Diary<StatsExport>,
   ) {}
 
