@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Asset } from "📚/storage/mod.ts";
+import { Asset } from "📚/storage/asset.ts";
 import { HeapBackend } from "📚/storage/heap-backend.ts";
 
 const assetName = "MyAsset";
@@ -17,6 +17,6 @@ Deno.test("Store / Retrieve", async () => {
   asset.store(data);
   assertEquals(await asset.exists(), true);
 
-  const loaded = await asset.retrieve();
+  const loaded: AssetContent = await asset.retrieve();
   assertEquals(loaded, data);
 });
