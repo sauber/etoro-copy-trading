@@ -17,6 +17,7 @@
     "@sauber/dataframe": "jsr:@sauber/dataframe@^0.3.2",
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.5.1",
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
+    "@sauber/statistics": "jsr:@sauber/statistics@^0.4.0",
     "@sauber/table": "jsr:@sauber/table@^0.1.0",
     "@sauber/trading-account": "jsr:@sauber/trading-account@^0.3.1",
     "@std/assert": "jsr:@std/assert@^1.0.6",

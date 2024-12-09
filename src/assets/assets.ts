@@ -11,10 +11,12 @@ import { Ranking } from "📚/ranking/mod.ts";
 export class Assets {
   public readonly config: Config;
   public readonly community: Community;
+  public readonly ranking: Ranking;
 
   constructor(private readonly repo: Backend) {
     this.config = new Config(repo);
     this.community = new Community(repo);
+    this.ranking = new Ranking(repo);
   }
 
   /** Create backend using disk repository */
@@ -28,10 +30,5 @@ export class Assets {
   public static heap(): Assets {
     const repo = new HeapBackend();
     return new Assets(repo);
-  }
-
-  /** Load or generate Ranking model */
-  public ranking(): Promise<Ranking> {
-    return Ranking.load(this.repo);
   }
 }

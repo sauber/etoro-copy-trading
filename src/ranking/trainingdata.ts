@@ -44,6 +44,7 @@ export class TrainingData {
         if ( isFinite(output.SharpeRatio)) samples.push({ input, output });
       });
 
+      // TODO: Remove outliers
     return samples;
   }
 }
