@@ -1,4 +1,6 @@
+import { NetworkData } from "@sauber/neurons";
 import {
+  Asset,
   Backend,
   CachingBackend,
   DiskBackend,
@@ -6,8 +8,6 @@ import {
 } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Config } from "📚/config/config.ts";
-import { NetworkData } from "@sauber/neurons";
-import { Asset } from "../storage/asset.ts";
 
 // Asset names
 const rankingAsset = "ranking.network";

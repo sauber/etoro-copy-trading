@@ -1,10 +1,11 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { HeapBackend, type JSONValue } from "📚/storage/mod.ts";
 import { Config } from "📚/config/config.ts";
 
-Deno.test("Config", async (t) => {
+Deno.test("Get/Set", async (t) => {
   const repo = new HeapBackend();
   const config: Config = new Config(repo);
+  assertInstanceOf(config, Config);
 
   await t.step("get unknown value", async () => {
     const value: JSONValue = await config.get("foo");
@@ -16,9 +17,12 @@ Deno.test("Config", async (t) => {
     const value: JSONValue = await config.get("foo");
     assertEquals(value, "bar");
   });
+});
 
+Deno.test("Defaults", async (t) => {
   // Create new derived config object with defaults
-  const configWithDefaults = config.withDefaults({ standard: "normal" });
+  const repo = new HeapBackend();
+  const configWithDefaults = new Config(repo, { standard: "normal" });
 
   await t.step("set default", async () => {
     const value: JSONValue = await configWithDefaults.get("standard");
