@@ -1,4 +1,4 @@
-import { Asset, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
+import { JournaledAsset, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
 import type { DiscoverData } from "📚/repository/discover.ts";
 import type { ChartData } from "📚/repository/chart.ts";
@@ -18,10 +18,10 @@ export const discoverFilter: DiscoverFilter = { risk: 4, daily: 6, weekly: 11 };
 // Most recent asset data
 const n = investorId.UserName;
 export const testAssets = {
-  discover: await new Asset<DiscoverData>("discover", repo).last(),
-  chart: await new Asset<ChartData>(n + ".chart", repo).last(),
-  portfolio: await new Asset<PortfolioData>(n + ".portfolio", repo).last(),
-  stats: await new Asset<StatsData>(n + ".stats", repo).last(),
+  discover: await new JournaledAsset<DiscoverData>("discover", repo).last(),
+  chart: await new JournaledAsset<ChartData>(n + ".chart", repo).last(),
+  portfolio: await new JournaledAsset<PortfolioData>(n + ".portfolio", repo).last(),
+  stats: await new JournaledAsset<StatsData>(n + ".stats", repo).last(),
 };
 
 export const blacklist = {};

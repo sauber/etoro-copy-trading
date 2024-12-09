@@ -1,4 +1,4 @@
-import { Asset, Backend } from "📚/storage/mod.ts";
+import { JournaledAsset, Backend } from "📚/storage/mod.ts";
 
 import { Discover } from "./discover.ts";
 import type { DiscoverData } from "./discover.ts";
@@ -70,7 +70,7 @@ export class Refresh {
     download: () => Promise<DataFormat>,
     validate?: (data: DataFormat) => boolean,
   ): Promise<boolean> {
-    const asset = new Asset(assetname, this.repo);
+    const asset = new JournaledAsset(assetname, this.repo);
 
     // Skip if exists and still valid in repo
     if (await asset.exists()) {
@@ -121,7 +121,7 @@ export class Refresh {
       validate,
     );
     if (available) {
-      const asset = new Asset<DiscoverData>("discover", this.repo);
+      const asset = new JournaledAsset<DiscoverData>("discover", this.repo);
       const data: DiscoverData = await asset.last();
       const discover: Discover = new Discover(data);
       return discover.investors;
@@ -185,7 +185,7 @@ export class Refresh {
     await this.loadInvestor(this.investor, this.expire.mirror);
 
     // Load data from repo
-    const asset = new Asset<PortfolioData>(
+    const asset = new JournaledAsset<PortfolioData>(
       this.investor.UserName + ".portfolio",
       this.repo,
     );

@@ -6,7 +6,7 @@ import { Backend } from "./backend.ts";
 type Dates = DateFormat[];
 
 /** A named asset in repo on all the dates it is available */
-export class Asset<AssetType> {
+export class JournaledAsset<AssetType> {
   constructor(
     private readonly assetname: AssetName,
     private readonly repo: Backend,

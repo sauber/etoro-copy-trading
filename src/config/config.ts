@@ -1,5 +1,5 @@
 import {
-  Asset,
+  JournaledAsset,
   Backend,
   type JSONObject,
   type JSONValue,
@@ -7,13 +7,13 @@ import {
 
 export class Config {
   private static readonly assetname = "config";
-  private readonly asset: Asset<JSONObject>;
+  private readonly asset: JournaledAsset<JSONObject>;
 
   constructor(
     private readonly repo: Backend,
     private readonly defaults: JSONObject = {},
   ) {
-    this.asset = new Asset<JSONObject>(Config.assetname, repo);
+    this.asset = new JournaledAsset<JSONObject>(Config.assetname, repo);
   }
 
   /** create new Config object with default values */

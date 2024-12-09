@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Asset, HeapBackend } from "📚/storage/mod.ts";
+import { JournaledAsset, HeapBackend } from "📚/storage/mod.ts";
 import { nextDate, today } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Community } from "📚/repository/community.ts";
@@ -19,8 +19,8 @@ Deno.test("Heap repo", async (t) => {
 
   await t.step("incomplete write", async () => {
     await Promise.all([
-      new Asset(`${name}.chart`, repo).store({}),
-      new Asset(`${name}.portfolio`, repo).store({}),
+      new JournaledAsset(`${name}.chart`, repo).store({}),
+      new JournaledAsset(`${name}.portfolio`, repo).store({}),
     ]);
     const names: string[] = await community.namesByDate(date);
     assertEquals(names, [name]);
@@ -28,7 +28,7 @@ Deno.test("Heap repo", async (t) => {
 
   await t.step("complete write", async () => {
     await Promise.all([
-      new Asset(`${name}.chart`, repo).store({
+      new JournaledAsset(`${name}.chart`, repo).store({
         simulation: {
           oneYearAgo: {
             chart: [
@@ -38,8 +38,8 @@ Deno.test("Heap repo", async (t) => {
           },
         },
       }),
-      new Asset(`${name}.stats`, repo).store({ Data: { CustomerId: name } }),
-      new Asset(`${name}.portfolio`, repo).store({ AggregatedMirrors: [] }),
+      new JournaledAsset(`${name}.stats`, repo).store({ Data: { CustomerId: name } }),
+      new JournaledAsset(`${name}.portfolio`, repo).store({ AggregatedMirrors: [] }),
     ]);
     const names: string[] = await community.namesByDate(date);
     assertEquals(names, [name]);

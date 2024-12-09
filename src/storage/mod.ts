@@ -1,4 +1,4 @@
-export { Asset } from "📚/storage/asset.ts";
+export { JournaledAsset } from "./journaled-asset.ts";
 export { RootAsset } from "📚/storage/root-asset.ts";
 export { Backend } from "📚/storage/backend.ts";
 export { DiskBackend } from "📚/storage/disk-backend.ts";

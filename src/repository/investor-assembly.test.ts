@@ -14,7 +14,7 @@ import {
 import { repo } from "📚/repository/testdata.ts";
 import type { InvestorId } from "📚/repository/types.ts";
 import type { Chart } from "📚/chart/mod.ts";
-import { Asset } from "📚/storage/mod.ts";
+import { JournaledAsset } from "📚/storage/mod.ts";
 
 // Test Data
 const username = "Schnaub123";
@@ -34,7 +34,7 @@ Deno.test("UserName", () => {
 Deno.test("Caching", async () => {
   const assembly = new InvestorAssembly(username, repo);
   const _investor: Investor = await assembly.investor();
-  const asset = new Asset<InvestorExport>(username + ".compiled", repo);
+  const asset = new JournaledAsset<InvestorExport>(username + ".compiled", repo);
   assert(await asset.exists());
 });
 

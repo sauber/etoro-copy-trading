@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { type DateFormat, today } from "📚/time/mod.ts";
 import { HeapBackend } from "📚/storage/mod.ts";
-import { Asset } from "📚/storage/asset.ts";
+import { JournaledAsset } from "📚/storage/journaled-asset.ts";
 
 type TestAsset = {
   name: string;
@@ -16,12 +16,12 @@ const content: TestAsset = {
 const repo = new HeapBackend();
 
 Deno.test("Blank Initialization", () => {
-  const series = new Asset("", repo);
-  assertInstanceOf(series, Asset);
+  const series = new JournaledAsset("", repo);
+  assertInstanceOf(series, JournaledAsset);
 });
 
 Deno.test("Store and retrieve asset", async (t) => {
-  const asset = new Asset<TestAsset>("", repo);
+  const asset = new JournaledAsset<TestAsset>("", repo);
 
   await t.step("No initial dates", async () => {
     assertEquals(await asset.dates(), []);

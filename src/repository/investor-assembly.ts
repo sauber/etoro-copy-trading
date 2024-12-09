@@ -1,5 +1,5 @@
 import { type DateFormat, diffDate } from "📚/time/mod.ts";
-import { Asset, Backend } from "📚/storage/mod.ts";
+import { JournaledAsset, Backend } from "📚/storage/mod.ts";
 import { Chart as CompiledChart } from "📚/chart/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
@@ -63,19 +63,19 @@ function cover(dates: Dates, start: DateFormat, end: DateFormat): Dates {
 
 /** Extract scraped data and compile an investor object */
 export class InvestorAssembly {
-  private readonly chartAsset: Asset<ChartData>;
-  private readonly portfolioAsset: Asset<PortfolioData>;
-  private readonly statsAsset: Asset<StatsData>;
-  private readonly compiledAsset: Asset<InvestorExport>;
+  private readonly chartAsset: JournaledAsset<ChartData>;
+  private readonly portfolioAsset: JournaledAsset<PortfolioData>;
+  private readonly statsAsset: JournaledAsset<StatsData>;
+  private readonly compiledAsset: JournaledAsset<InvestorExport>;
 
   constructor(public readonly UserName: string, readonly repo: Backend) {
-    this.chartAsset = new Asset<ChartData>(this.UserName + ".chart", repo);
-    this.portfolioAsset = new Asset<PortfolioData>(
+    this.chartAsset = new JournaledAsset<ChartData>(this.UserName + ".chart", repo);
+    this.portfolioAsset = new JournaledAsset<PortfolioData>(
       this.UserName + ".portfolio",
       repo,
     );
-    this.statsAsset = new Asset<StatsData>(this.UserName + ".stats", repo);
-    this.compiledAsset = new Asset<InvestorExport>(
+    this.statsAsset = new JournaledAsset<StatsData>(this.UserName + ".stats", repo);
+    this.compiledAsset = new JournaledAsset<InvestorExport>(
       this.UserName + ".compiled",
       repo,
     );
