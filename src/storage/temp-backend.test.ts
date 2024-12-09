@@ -1,25 +1,26 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { HeapBackend } from "./heap-backend.ts";
-import { CachingBackend } from "./caching-backend.ts";
-import type { JSONObject } from "./mod.ts";
-import { Backend } from "./backend.ts";
+import { TempBackend } from "📚/storage/temp-backend.ts";
+import type { JSONObject } from "📚/storage/mod.ts";
+import { Backend } from "📚/storage/backend.ts";
 
 const assetname = "foo";
 const content = { name: "bar" };
 
 Deno.test("Initialization", () => {
-  const repo: CachingBackend = new CachingBackend(new HeapBackend());
-  assertInstanceOf(repo, CachingBackend);
+  const repo: TempBackend = new TempBackend();
+  assertInstanceOf(repo, TempBackend);
 });
 
 Deno.test("Create and delete Repo", async () => {
-  const repo: CachingBackend = new CachingBackend(new HeapBackend());
+  const repo: TempBackend = new TempBackend();
   const names = await repo.names();
   assertEquals(names.length, 0);
+
+  await repo.delete();
 });
 
 Deno.test("Store and Retrieve", async () => {
-  const repo: CachingBackend = new CachingBackend(new HeapBackend());
+  const repo: TempBackend = new TempBackend();
 
   const result = await repo.store(assetname, content);
   assertEquals(result, undefined);
@@ -32,11 +33,15 @@ Deno.test("Store and Retrieve", async () => {
 
   // Age is mostly positive number, but sometimes negative
   const _age: number = await repo.age(assetname);
+
+  await repo.delete();
 });
 
 Deno.test("Partition", async () => {
-  const repo: CachingBackend = new CachingBackend(new HeapBackend());
+  const repo: TempBackend = new TempBackend();
   const sub: Backend = await repo.sub("sub");
   const names = await sub.names();
   assertEquals(names.length, 0);
+
+  await repo.delete();
 });

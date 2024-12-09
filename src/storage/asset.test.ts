@@ -1,8 +1,7 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import type { DateFormat } from "../time/mod.ts";
-import { today } from "../time/mod.ts";
-import { HeapBackend } from "./mod.ts";
-import { Asset } from "./asset.ts";
+import { type DateFormat, today } from "📚/time/mod.ts";
+import { HeapBackend } from "📚/storage/mod.ts";
+import { Asset } from "📚/storage/asset.ts";
 
 type TestAsset = {
   name: string;
@@ -42,11 +41,9 @@ Deno.test("Store and retrieve asset", async (t) => {
     // assertEquals(await asset.after(date), content);
   });
 
-  
   await t.step("Erase data", async () => {
     await asset.erase();
     assertEquals(await asset.dates(), []);
     assertEquals(await asset.exists(), false);
   });
-
 });

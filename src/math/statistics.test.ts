@@ -1,5 +1,5 @@
 import { assertEquals, assertAlmostEquals } from "@std/assert";
-import { sum, avg, std } from "./statistics.ts";
+import { sum, avg, std } from "📚/math/statistics.ts";
 
 Deno.test("Sum", () => {
   const testData = [10, 20, 30, 40, 50, 60];

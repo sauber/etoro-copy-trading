@@ -1,6 +1,5 @@
 import { assertAlmostEquals } from "@std/assert";
-import { parabolic } from "./parabolic.ts";
-import type { Point } from "./parabolic.ts";
+import { parabolic, type Point } from "📚/math/parabolic.ts";
 
 Deno.test("Parabola Regression Peak", () => {
   const testData = [40, 42, 44, 40, 38, 42, 45, 48, 50];

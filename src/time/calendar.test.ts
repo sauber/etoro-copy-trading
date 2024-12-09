@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { diffDate, nextDate, range, today } from "./calendar.ts";
+import { diffDate, nextDate, range, today } from "📚/time/calendar.ts";
 
 Deno.test("today", () => {
   assertEquals(today(), new Date().toISOString().substring(0, 10));
