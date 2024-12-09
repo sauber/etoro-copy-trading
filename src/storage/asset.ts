@@ -1,7 +1,7 @@
 import { Backend, JSONObject } from "📚/storage/mod.ts";
 
-/** An unjournal asset stored in root folder */
-export class RootAsset<AssetType> {
+/** A storable asset */
+export class Asset<AssetType> {
   constructor(
     private readonly assetname: string,
     private readonly repo: Backend,
