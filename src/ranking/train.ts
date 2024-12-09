@@ -6,7 +6,6 @@ import { Investors } from "📚/repository/mod.ts";
 import { Samples, TrainingData } from "📚/ranking/trainingdata.ts";
 import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
 
-
 // Dashboard size
 const WIDTH = 78;
 const HEIGHT = 12;
@@ -83,7 +82,6 @@ function validation(model: Model, data: DataFrame, count: number = 5): void {
   });
 }
 
-
 ////////////////////////////////////////////////////////////////////////
 
 /** Train Ranking model with Training data */
@@ -106,39 +104,50 @@ export class Train {
   constructor(
     private readonly model: Model,
     private readonly investors: Investors,
-    params: Partial<Train> = {}
+    params: Partial<Train> = {},
   ) {
     Object.assign(this, params);
   }
 
+  private _data?: DataFrame;
   private trainingdata(): DataFrame {
-    const td = new TrainingData(this.bar_count);
-    const samples: Samples = [];
+    if (!this._data) {
+      const td = new TrainingData(this.bar_count);
+      const samples: Samples = [];
 
-    for (const investor of this.investors) {
-      samples.push(...td.features(investor));
+      for (const investor of this.investors) {
+        samples.push(...td.features(investor));
+      }
+      const records = samples.map((s) => Object.assign(s.input, s.output));
+      const df = DataFrame.fromRecords(records);
+      const trimmed = outlierFilter(df);
+      console.log("Training sample loaded:", trimmed.length);
+      this._data = trimmed;
     }
-    const records = samples.map((s) => Object.assign(s.input, s.output));
-    const df = DataFrame.fromRecords(records);
-    const trimmed = outlierFilter(df);
-    return trimmed;
+    return this._data;
   }
 
-  /** Run training */
-  public run(): number {
-    const data: DataFrame = this.trainingdata();
-    console.log("Training sample loaded:", data.length);
-    const inputs: DataFrame = data.exclude(["SharpeRatio"]);
-    const outputs: DataFrame = data.include(["SharpeRatio"]);
-    const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
+  /** Mean value for each input column */
+  private means(): Input {
+    const inputs: DataFrame = this.trainingdata().exclude(["SharpeRatio"]);
 
     // Mean values
     const colNames = inputs.names as Array<keyof Input>;
     const means: Input = Object.fromEntries(
       colNames.map((
         name: keyof Input,
-      ) => [name, avg(data.values(name) as number[])]),
+      ) => [name, avg(this.trainingdata().values(name) as number[])]),
     ) as Input;
+    return means;
+  }
+
+  /** Create a callback to a dashboard  */
+  public get dashboard(): Dashboard {
+    const data: DataFrame = this.trainingdata();
+    const means: Input = this.means();
+    const inputs: DataFrame = data.exclude(["SharpeRatio"]);
+    const outputs: DataFrame = data.include(["SharpeRatio"]);
+    const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
 
     // Callback to model from dashboard
     const predict = (a: number, b: number): number => {
@@ -147,12 +156,29 @@ export class Train {
       return this.model.predict(means).SharpeRatio;
     };
 
-    const dashboard = createDashboard(data, predict, ...labels, this.epochs, this.overlay_size);
+    const dashboard = createDashboard(
+      data,
+      predict,
+      ...labels,
+      this.epochs,
+      this.overlay_size,
+    );
+    return dashboard;
+  }
+
+  /** Run training */
+  public run(dashboard?: Dashboard): number {
+    const data: DataFrame = this.trainingdata();
+    console.log("Training sample loaded:", data.length);
+    const inputs: DataFrame = data.exclude(["SharpeRatio"]);
+    const outputs: DataFrame = data.include(["SharpeRatio"]);
 
     // Callback to dashboard from training
-    function status(iteration: number, loss: number[]): void {
-      console.log(dashboard.render(iteration, loss[loss.length - 1]));
-    }
+    const status = dashboard
+      ? (iteration: number, loss: number[]): void => {
+        console.log(dashboard.render(iteration, loss[loss.length - 1]));
+      }
+      : () => {};
 
     // Training
     console.log("Training...");
@@ -165,9 +191,10 @@ export class Train {
       this.batch_size,
       status,
     );
-    console.log(dashboard.finish());
+
+    if (dashboard) console.log(dashboard.finish());
     console.log(results);
-    validation(this.model, data, 5);
+    // validation(this.model, data, 5);
     return results.iterations;
   }
 }

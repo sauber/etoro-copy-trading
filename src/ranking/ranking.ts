@@ -8,6 +8,7 @@ import { Features } from "📚/ranking/features.ts";
 import { type Input, input_labels, type Output } from "📚/ranking/types.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Train } from "📚/ranking/train.ts";
+import { Dashboard } from "@sauber/ml-cli-dashboard";
 
 export class Ranking {
   public static readonly assetName = "ranking.network";
@@ -53,6 +54,7 @@ export class Ranking {
     const community: Community = new Community(this.repo);
     const investors = await community.all();
     const train = new Train(this.model, investors);
-    train.run();
+    const dashboard: Dashboard = train.dashboard;
+    train.run(dashboard);
   }
 }
