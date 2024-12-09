@@ -90,7 +90,7 @@ export class Train {
   public readonly bar_count: number = 30;
 
   /** Maximum number fo training iterations */
-  public readonly epochs: number = 200;
+  public readonly epochs: number = 2000;
 
   /** Model learning rate */
   public readonly learning_rate: number = 0.001;
@@ -169,7 +169,6 @@ export class Train {
   /** Run training */
   public run(dashboard?: Dashboard): number {
     const data: DataFrame = this.trainingdata();
-    console.log("Training sample loaded:", data.length);
     const inputs: DataFrame = data.exclude(["SharpeRatio"]);
     const outputs: DataFrame = data.include(["SharpeRatio"]);
 

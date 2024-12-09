@@ -7,6 +7,6 @@ const path = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`${path} does not exist.`);
 const assets: Assets = Assets.disk(path);
 const ranking: Ranking = assets.ranking;
-await ranking.load()
+if ( !(await ranking.load())) ranking.generate();
 await ranking.train();
 await ranking.save();
