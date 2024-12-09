@@ -1,6 +1,4 @@
-import { NetworkData } from "@sauber/neurons";
 import {
-  Asset,
   Backend,
   CachingBackend,
   DiskBackend,
@@ -8,19 +6,15 @@ import {
 } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Config } from "📚/config/config.ts";
-
-// Asset names
-const rankingAsset = "ranking.network";
+import { Ranking } from "📚/ranking/mod.ts";
 
 export class Assets {
   public readonly config: Config;
-  public readonly ranking: Asset<NetworkData>;
   public readonly community: Community;
 
   constructor(private readonly repo: Backend) {
     this.config = new Config(repo);
     this.community = new Community(repo);
-    this.ranking = new Asset<NetworkData>(rankingAsset, repo);
   }
 
   /** Create backend using disk repository */
@@ -34,5 +28,10 @@ export class Assets {
   public static heap(): Assets {
     const repo = new HeapBackend();
     return new Assets(repo);
+  }
+
+  /** Load or generate Ranking model */
+  public ranking(): Promise<Ranking> {
+    return Ranking.load(this.repo);
   }
 }

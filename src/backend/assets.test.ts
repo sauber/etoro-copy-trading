@@ -3,17 +3,29 @@ import { Config } from "📚/config/config.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Assets } from "📚/backend/assets.ts";
 import { path } from "📚/backend/testdata.ts";
-import { Asset } from "📚/storage/mod.ts";
+import { Ranking } from "📚/ranking/mod.ts";
 
 Deno.test("Heap Backend", () => {
   const assets = Assets.heap();
   assertInstanceOf(assets, Assets);
-  assertInstanceOf(assets.config, Config);
-  assertInstanceOf(assets.community, Community);
-  assertInstanceOf(assets.ranking, Asset);
 });
 
 Deno.test("Disk Backend", () => {
   const assets = Assets.disk(path);
   assertInstanceOf(assets, Assets);
+});
+
+Deno.test("Config", () => {
+  const assets = Assets.heap();
+  assertInstanceOf(assets.config, Config);
+});
+
+Deno.test("Community", () => {
+  const assets = Assets.heap();
+  assertInstanceOf(assets.community, Community);
+});
+
+Deno.test("Ranking", async () => {
+  const assets = Assets.heap();
+  assertInstanceOf((await assets.ranking()), Ranking);
 });
