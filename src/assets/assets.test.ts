@@ -1,8 +1,8 @@
 import { assertInstanceOf } from "@std/assert/instance-of";
 import { Config } from "📚/config/config.ts";
 import { Community } from "📚/repository/mod.ts";
-import { Assets } from "📚/backend/assets.ts";
-import { path } from "📚/backend/testdata.ts";
+import { Assets } from "./assets.ts";
+import { path } from "./testdata.ts";
 import { Ranking } from "📚/ranking/mod.ts";
 
 Deno.test("Heap Backend", () => {

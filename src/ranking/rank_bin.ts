@@ -8,7 +8,7 @@ import { Investor } from "📚/investor/mod.ts";
 
 import { Model } from "📚/ranking/model.ts";
 import { Ranking } from "📚/ranking/ranking.ts";
-import { Assets } from "📚/backend/mod.ts";
+import { Assets } from "../assets/mod.ts";
 import { Asset } from "../storage/asset.ts";
 
 // Repo

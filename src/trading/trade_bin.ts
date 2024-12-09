@@ -12,7 +12,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { Assets } from "📚/backend/assets.ts";
+import { Assets } from "../assets/assets.ts";
 import { NullStrategy, PassThroughStrategy } from "📚/timing/testdata.ts";
 import { Community, Mirror } from "📚/repository/mod.ts";
 import { TrainingData } from "📚/timing/trainingdata.ts";
