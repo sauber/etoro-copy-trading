@@ -7,6 +7,7 @@ import {
   Position,
   Positions,
   Price,
+  PurchaseOrders,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
@@ -34,6 +35,7 @@ const bar: Bar = exchange.end;
 const value: Amount = 10000;
 
 // Positions
+// TODO: Read username from config
 const me = await repo.community.investor("GainersQtr");
 let positionid = 0;
 const positions: Positions = me.mirrors.last
@@ -63,3 +65,9 @@ const situation: StrategyContext = {
 // console.log(situation);
 
 const strategy: Strategy = new NullStrategy();
+
+const open: PurchaseOrders = strategy.open(situation);
+console.log({ open });
+
+const close: Positions = strategy.close(situation);
+console.log({ close });
