@@ -226,18 +226,19 @@ export class InvestorAssembly {
     // Zip Dates and Stats
     // Skip consecutive equals
     const zip: MirrorsByDate = {};
-    let prev: Names;
+    // let prev: Names;
     range.forEach((date: DateFormat, index: number) => {
       const cur: Mirror[] = values[index];
-      const curnames: Names = cur.map((id: Mirror) => id.UserName);
+      // const curnames: Names = cur.map((id: Mirror) => id.UserName);
       // Skip if same as before
-      if (index > 0 && prev.reduce((a, b) => a && curnames.includes(b), true)) {
-        false;
-      } // Keep
-      else {
+      // TODO: Code below is broken. All data is missing after empty mirrors list.
+      // if (index > 0 && prev.reduce((a, b) => a && curnames.includes(b), true)) {
+        // false;
+      // } // Keep
+      // else {
         zip[date] = cur;
-        prev = cur.map((id: InvestorId) => id.UserName);
-      }
+        // prev = cur.map((id: InvestorId) => id.UserName);
+      // }
     });
 
     return zip;
