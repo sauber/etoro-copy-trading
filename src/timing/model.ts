@@ -6,7 +6,7 @@ import {
   ParameterData,
   Parameters,
 } from "📚/optimize/mod.ts";
-import { TimingStrategy } from "📚/timing/strategy.ts";
+import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
 
 function makeParameters(): Parameters {
   return [
@@ -76,7 +76,7 @@ export class Model {
     values: Input,
   ): Output {
     // Configure a simulation using input parameters
-    const strategy: Strategy = new TimingStrategy(...values);
+    const strategy: Strategy = new RSIStrategy(...values);
     const simulation = new Simulation(exchange, strategy);
 
     // Run simulation

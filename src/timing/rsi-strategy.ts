@@ -1,10 +1,9 @@
 import {
-  Amount,
   Bar,
   Instrument,
-  Instruments,
   Positions,
   Price,
+  PurchaseOrder,
   PurchaseOrders,
   Series,
   Strategy,
@@ -16,14 +15,15 @@ import { RSI } from "@debut/indicators";
 class Chart {
   constructor(private readonly series: Series, private readonly end: Bar) {}
   public has(bar: Bar): boolean {
-    return bar >= this.end && bar <= this.end + this.series.length;
+    return bar >= this.end && bar <= this.end + this.series.length &&
+      this.series.length > 0;
   }
   public bar(bar: Bar): Price {
     return this.series[bar - this.end];
   }
 }
 
-export class TimingStrategy implements Strategy {
+export class RSIStrategy implements Strategy {
   // Weekday of today
   private readonly today = new Date().getDay();
 
@@ -43,48 +43,34 @@ export class TimingStrategy implements Strategy {
       const source: Series = instrument.series;
       const rsi = new RSI(this.window);
       const series = source.map((v) => rsi.nextValue(v)).filter((v) =>
-        v !== undefined
+        v !== undefined && !isNaN(v)
       );
       this.charts[id] = new Chart(series, end);
     }
     return this.charts[id];
   }
 
-  public open(context: StrategyContext): PurchaseOrders {
-    // Available funds
-    if (context.amount < 100) return [];
-
-    // Is today a trading day
-    const bar: Bar = context.bar;
-    if (this.today - context.bar % 7 !== 0) return [];
-
-    // Identify all instruments where RSI is below buy_threshold
-    const toBuy: Instruments = context.instruments.filter((instrument) => {
-      const rsiChart = this.chart(instrument as Instrument);
+  public close(context: StrategyContext): Positions {
+    const bar: Bar = context.bar + 2; // Charts delayed two days
+    return context.positions.filter((position) => {
+      const rsiChart = this.chart(position.instrument as Instrument);
+      // console.log("Close RSI", position.instrument.symbol, bar, rsiChart.bar(bar));
       if (!rsiChart.has(bar)) return false;
-      if (rsiChart.bar(bar) > this.buy_threshold) return false;
+      if (rsiChart.bar(bar) > this.sell_threshold) return false;
       return true;
     });
-    // Distribute amount across all application instruments
-    const amount: Amount = context.amount / toBuy.length / 2;
-    if (amount < 100) return [];
-
-    return toBuy.map((instrument) => ({ instrument, amount }));
   }
 
-  public close(context: StrategyContext): Positions {
-    // Is today a trading day
+  public open(context: StrategyContext): PurchaseOrders {
     const bar: Bar = context.bar;
-    if (this.today - bar % 7 !== 0) return [];
-
-    // Identify all instruments where RSI is over sell_threshold
-    const toSell: Positions = context.positions.filter((position) => {
-      const rsiChart = this.chart(position.instrument as Instrument);
-      if (!rsiChart.has(bar)) return false;
-      if (rsiChart.bar(bar) < this.sell_threshold) return false;
-      return true;
-    });
-
-    return toSell;
+    const threshold: number = this.buy_threshold;
+    return context.instruments
+      .map((instrument) => {
+        const rsiChart = this.chart(instrument as Instrument);
+        if (!rsiChart.has(bar)) return { instrument, amount: 0 };
+        const rsi = rsiChart.bar(bar);
+        return { instrument, amount: (threshold - rsi) / threshold };
+      })
+      .filter((po: PurchaseOrder) => po.amount > 0);
   }
 }
