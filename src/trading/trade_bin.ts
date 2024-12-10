@@ -14,11 +14,13 @@ import {
 } from "@sauber/backtest";
 import { Assets } from "../assets/assets.ts";
 import { TradingStrategy } from "📚/trading/trading-strategy.ts";
-import { Community, Mirror } from "📚/repository/mod.ts";
+import { Community, InvestorId, Mirror } from "📚/repository/mod.ts";
 import { TrainingData } from "📚/timing/trainingdata.ts";
 import { sum } from "jsr:@sauber/statistics";
 import { Table } from "@sauber/table";
 import { nextDate, today } from "📚/time/mod.ts";
+import { Config } from "📚/config/config.ts";
+import { Investor } from "📚/investor/mod.ts";
 
 // Convert community to exchange
 async function makeExchange(community: Community): Promise<Exchange> {
@@ -38,25 +40,31 @@ const repo = Assets.disk(path);
 
 // Instruments
 const exchange = await makeExchange(repo.community);
-const end: Bar = exchange.end;
-console.log("Trading Day:", nextDate(today(), -end));
+// Charts are two days old
+const chartend: Bar = exchange.end;
+const statsend: Bar = chartend - 2;
+console.log("Trading Day:", nextDate(today(), -statsend));
 const instruments: Instruments = exchange.on(exchange.end);
 
 // Dummy price series for instruments now found
-const unknownSeries = Array(exchange.start - exchange.end + 1).fill(10000);
+const unknownSeries = Array(exchange.start - chartend + 1).fill(10000);
 
 // TODO: Load total value from config
 const value: Amount = 10000;
 
 // Positions
-// TODO: Read username from config
-const me = await repo.community.investor("GainersQtr");
+const config: Config = repo.config;
+const username: string = (await config.get("investor") as InvestorId).UserName;
+const me: Investor = await repo.community.investor(username);
+console.log("My ID:", username);
+const mirrors: Mirror[] = me.mirrors.last;
+console.log(mirrors);
 let positionid = 0;
-const positions: Positions = me.mirrors.last
+const positions: Positions = mirrors
   .map((m: Mirror) => {
     // console.log("Mirror:", m.UserName);
     const instrument: Instrument = exchange.get(m.UserName) ||
-      new Instrument(unknownSeries, exchange.end, m.UserName);
+      new Instrument(unknownSeries, chartend, m.UserName);
     // console.log("Start/end", instrument.start, instrument.end);
     const amount: Amount = m.Value / 100 * value;
     // TODO: Need date of opening to calculate opening price
@@ -67,12 +75,12 @@ const positions: Positions = me.mirrors.last
   });
 
 const invested: number = sum(
-  positions.map((position) => position.value(end)),
+  positions.map((position) => position.value(chartend)),
 );
 // console.log({ positions, invested });
 
 const situation: StrategyContext = {
-  bar: end,
+  bar: statsend,
   value,
   amount: value - invested,
   instruments,
@@ -80,11 +88,11 @@ const situation: StrategyContext = {
 };
 // console.log(situation);
 
-const strategy: Strategy = new TradingStrategy({weekday: 1});
+const strategy: Strategy = new TradingStrategy({ weekday: 1 });
 
 const close: Positions = strategy.close(situation);
 const portfolio = new Portfolio(close);
-console.log("Positions to close:", portfolio.toString(end));
+console.log("Positions to close:", portfolio.toString(chartend));
 
 const open: PurchaseOrders = strategy.open(situation);
 // console.log({ open });

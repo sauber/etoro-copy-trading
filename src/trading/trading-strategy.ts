@@ -1,10 +1,13 @@
 import {
   Bar,
+  Instrument,
   Positions,
   PurchaseOrders,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
+import { RSIStrategy } from "../timing/rsi-strategy.ts";
+import { nextDate, today } from "📚/time/calendar.ts";
 
 /** Only trade on certain day of week */
 export class WeekdayStrategy implements Strategy {
@@ -37,16 +40,57 @@ export class TradingStrategy implements Strategy {
   private readonly timing: Strategy;
   public readonly weekday: number = 1;
 
+  private readonly technical: Strategy;
+  public readonly buy: number = 50;
+  public readonly sell: number = 70;
+  public readonly window: number = 21;
+
   constructor(params: Partial<TradingStrategy> = {}) {
     Object.assign(this, params);
     this.timing = new WeekdayStrategy(this.weekday);
+    this.technical = new RSIStrategy(this.window, this.buy, this.sell);
   }
 
-  public open(context: StrategyContext): PurchaseOrders {
-    return this.timing.open(context);
+  /** Print out conect of Context */
+  private printContext(context: StrategyContext): void {
+    console.log(
+      "Context: Bar",
+      context.bar,
+      "Date",
+      nextDate(today(), -context.bar),
+    );
+    console.log("  Value", context.value, "Amount", context.amount);
+    console.log("  Positions", context.positions.length);
+    console.log("  Instruments", context.instruments.length);
   }
 
   public close(context: StrategyContext): Positions {
-    return this.timing.close(context);
+    console.log("Closing strategies");
+    this.printContext(context);
+    const strategies: Array<Strategy> = [this.timing, this.technical];
+
+    let positions: Positions = [];
+    for (const strategy of strategies) {
+      positions = strategy.close(context);
+      Object.assign(context, { positions });
+      this.printContext(context);
+      if (positions.length < 1) return [];
+    }
+    return positions;
+  }
+
+  public open(context: StrategyContext): PurchaseOrders {
+    console.log("Opening strategies");
+    this.printContext(context);
+    const strategies: Array<Strategy> = [this.timing, this.technical];
+
+    let pos: PurchaseOrders = [];
+    for (const strategy of strategies) {
+      pos = strategy.open(context);
+      Object.assign(context, { instruments: pos.map((po) => po.instrument) });
+      this.printContext(context);
+      if (pos.length < 1) return [];
+    }
+    return pos;
   }
 }
