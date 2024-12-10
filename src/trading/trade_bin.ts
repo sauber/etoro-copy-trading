@@ -37,6 +37,7 @@ async function makeExchange(community: Community): Promise<Exchange> {
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
+const config: Config = repo.config;
 
 // Instruments
 const exchange = await makeExchange(repo.community);
@@ -49,16 +50,15 @@ const instruments: Instruments = exchange.on(exchange.end);
 // Dummy price series for instruments now found
 const unknownSeries = Array(exchange.start - chartend + 1).fill(10000);
 
-// TODO: Load total value from config
-const value: Amount = 10000;
+// Total value of account
+const value: Amount = await config.get("value") as number;
 
 // Positions
-const config: Config = repo.config;
 const username: string = (await config.get("investor") as InvestorId).UserName;
 const me: Investor = await repo.community.investor(username);
 console.log("My ID:", username);
 const mirrors: Mirror[] = me.mirrors.last;
-console.log(mirrors);
+// console.log(mirrors);
 let positionid = 0;
 const positions: Positions = mirrors
   .map((m: Mirror) => {

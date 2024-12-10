@@ -62,7 +62,7 @@ export class RSIStrategy implements Strategy {
   }
 
   public open(context: StrategyContext): PurchaseOrders {
-    const bar: Bar = context.bar;
+    const bar: Bar = context.bar + 2; // Charts delayed two days
     const threshold: number = this.buy_threshold;
     return context.instruments
       .map((instrument) => {
