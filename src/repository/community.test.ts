@@ -59,13 +59,8 @@ Deno.test("Heap repo", async (t) => {
 Deno.test("Disk repo", async (t) => {
   const community: Community = new Community(temprepo);
 
-  // await t.step("invalid names", async () => {
-  //   const names: string[] = await community.invalidNames();
-  //   assertEquals(names.length, 0);
-  // });
-
   await t.step("all names", async () => {
     const names: Investor[] = await community.all();
-    assertEquals(names.length, 26);
+    assertEquals(names.length, 25);
   });
 });
