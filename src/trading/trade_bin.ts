@@ -13,11 +13,12 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { Assets } from "../assets/assets.ts";
-import { NullStrategy, PassThroughStrategy } from "📚/timing/testdata.ts";
+import { TradingStrategy } from "📚/trading/trading-strategy.ts";
 import { Community, Mirror } from "📚/repository/mod.ts";
 import { TrainingData } from "📚/timing/trainingdata.ts";
 import { sum } from "jsr:@sauber/statistics";
 import { Table } from "@sauber/table";
+import { nextDate, today } from "📚/time/mod.ts";
 
 // Convert community to exchange
 async function makeExchange(community: Community): Promise<Exchange> {
@@ -38,6 +39,7 @@ const repo = Assets.disk(path);
 // Instruments
 const exchange = await makeExchange(repo.community);
 const end: Bar = exchange.end;
+console.log("Trading Day:", nextDate(today(), -end));
 const instruments: Instruments = exchange.on(exchange.end);
 
 // Dummy price series for instruments now found
@@ -78,7 +80,7 @@ const situation: StrategyContext = {
 };
 // console.log(situation);
 
-const strategy: Strategy = new PassThroughStrategy();
+const strategy: Strategy = new TradingStrategy({weekday: 1});
 
 const close: Positions = strategy.close(situation);
 const portfolio = new Portfolio(close);
