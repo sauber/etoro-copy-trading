@@ -15,7 +15,7 @@ import {
 import { Assets } from "../assets/assets.ts";
 import { TradingStrategy } from "📚/trading/trading-strategy.ts";
 import { Community, InvestorId, Mirror } from "📚/repository/mod.ts";
-import { TrainingData } from "📚/timing/trainingdata.ts";
+import { TrainingData } from "../technical/trainingdata.ts";
 import { sum } from "jsr:@sauber/statistics";
 import { Table } from "@sauber/table";
 import { nextDate, today } from "📚/time/mod.ts";

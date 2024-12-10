@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { StrategyContext } from "@sauber/backtest";
-import { NullStrategy } from "📚/timing/testdata.ts";
+import { NullStrategy } from "./testdata.ts";
 
 Deno.test("Do nothing strategy", () => {
   const strategy = new NullStrategy();

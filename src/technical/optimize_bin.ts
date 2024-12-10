@@ -1,11 +1,11 @@
 import { Exchange, Instrument, Instruments } from "@sauber/backtest";
 import { type Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/community.ts";
-import { TrainingData } from "📚/timing/trainingdata.ts";
+import { TrainingData } from "./trainingdata.ts";
 import { Dashboard, Parameters, Status } from "📚/optimize/mod.ts";
 import { Config } from "📚/config/config.ts";
-import { TimingData } from "📚/timing/model.ts";
-import { Model } from "📚/timing/model.ts";
+import { TimingData } from "./model.ts";
+import { Model } from "./model.ts";
 
 // Sanity check loaded data
 function verify(instruments: Instruments): void {

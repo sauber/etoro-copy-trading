@@ -6,7 +6,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { RSIStrategy } from "../timing/rsi-strategy.ts";
+import { RSIStrategy } from "../technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
 
 /** Only trade on certain day of week */

@@ -5,7 +5,7 @@ import {
   assertLessOrEqual,
 } from "@std/assert";
 import { Exchange, TestInstrument } from "@sauber/backtest";
-import { Model, TimingData } from "📚/timing/model.ts";
+import { Model, TimingData } from "./model.ts";
 import { Dashboard } from "📚/optimize/dashboard.ts";
 import { Parameters } from "📚/optimize/parameter.ts";
 

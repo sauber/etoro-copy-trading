@@ -1,6 +1,6 @@
 import { assertGreater, assertInstanceOf } from "@std/assert";
-import { TrainingData } from "📚/timing/trainingdata.ts";
-import { community } from "📚/timing/testdata.ts";
+import { TrainingData } from "./trainingdata.ts";
+import { community } from "./testdata.ts";
 import { Instruments } from "@sauber/backtest";
 
 Deno.test("Instance", () => {

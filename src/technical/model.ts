@@ -6,7 +6,7 @@ import {
   ParameterData,
   Parameters,
 } from "📚/optimize/mod.ts";
-import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
+import { RSIStrategy } from "./rsi-strategy.ts";
 
 function makeParameters(): Parameters {
   return [

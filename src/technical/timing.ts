@@ -1,5 +1,5 @@
-import { Model } from "📚/timing/model.ts";
-import { Features } from "📚/timing/features.ts";
+import { Model } from "./model.ts";
+import { Features } from "./features.ts";
 
 export class Ranking {
   constructor(private readonly model: Model) {}
