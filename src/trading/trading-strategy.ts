@@ -1,6 +1,5 @@
 import {
   Bar,
-  Instrument,
   Positions,
   PurchaseOrders,
   Strategy,
@@ -11,10 +10,14 @@ import { nextDate, today } from "📚/time/calendar.ts";
 
 /** Only trade on certain day of week */
 export class WeekdayStrategy implements Strategy {
-  constructor(public readonly weekday: number) {}
+  constructor(private readonly weekday: number) {}
 
   private trading(bar: Bar): boolean {
     return (this.weekday - bar % 7 === 0);
+  }
+
+  public close(context: StrategyContext): Positions {
+    return this.trading(context.bar) ? context.positions : [];
   }
 
   public open(context: StrategyContext): PurchaseOrders {
@@ -22,9 +25,19 @@ export class WeekdayStrategy implements Strategy {
       ? context.instruments.map((instrument) => ({ instrument, amount: 1 }))
       : [];
   }
+}
 
-  public close(context: StrategyContext): Positions {
-    return this.trading(context.bar) ? context.positions : [];
+/** Adjust purchase order sizes to maximum and minimum ratio of value */
+export class MinMaxStrategy implements Strategy {
+  constructor(
+    private readonly min: number = 0.01,
+    private readonly max: number = 0.1,
+  ) {}
+
+  public close = (context: StrategyContext): Positions => context.positions;
+
+  public open(context: StrategyContext): PurchaseOrders {
+    return [];
   }
 }
 
