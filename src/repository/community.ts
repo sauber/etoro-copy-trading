@@ -1,8 +1,10 @@
 import { Backend } from "📚/storage/mod.ts";
-import { DateFormat } from "📚/time/mod.ts";
+import { DateFormat, nextDate } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
+import { Config } from "📚/config/config.ts";
+import { InvestorId } from "📚/repository/mod.ts";
 
 export type Names = Array<string>;
 export type Investors = Array<Investor>;
@@ -10,7 +12,17 @@ type Dates = Array<DateFormat>;
 
 /** Handle Community I/O requests to local repository */
 export class Community {
-  constructor(private readonly repo: Backend) {}
+  private readonly config: Config;
+  constructor(private readonly repo: Backend) {
+    this.config = new Config(repo);
+  }
+
+  /** Name of owner */
+  private async owner(): Promise<string> {
+    const investor = await this.config.get("investor") as InvestorId;
+    const name: string = investor.UserName;
+    return name;
+  }
 
   /** List of all dates in repo */
   private dates(): Promise<Dates> {
@@ -40,6 +52,9 @@ export class Community {
         const [name, _type] = assetname.split(".");
         names.add(name);
       });
+    // Don't include portfolio owner
+    const owner: string = await this.owner();
+    names.delete(owner);
     return Array.from(names);
   }
 
@@ -60,15 +75,6 @@ export class Community {
     }
     return null;
   }
-
-  /**
-   * Confirm that investor has all required properties
-   * TODO
-   */
-  // private validName(_username: string): Promise<boolean> {
-  //   //return this.investor(username).isValid();
-  //   return Promise.resolve(true);
-  // }
 
   /** Test if investor is active at date */
   private async activeName(
@@ -124,9 +130,11 @@ export class Community {
 
   /** Investors on latest date */
   public async latest(): Promise<Investors> {
-    const end = await this.end();
-    if ( ! end ) return [];
-    const names: Names = await this.namesByDate(end);
+    const end: DateFormat | null = await this.end();
+    if (!end) return [];
+    // Charts are two days old
+    const chartend: DateFormat = nextDate(end, -2);
+    const names: Names = await this.namesByDate(chartend);
     return this.load(names);
   }
 
