@@ -13,12 +13,12 @@ function makeParameters(): Parameters {
     new IntegerParameter("Window", 2, 100),
     new IntegerParameter("Buy", 1, 50),
     new IntegerParameter("Sell", 50, 99),
-    new IntegerParameter("Weekday", 1, 5),
+    // new IntegerParameter("Weekday", 1, 5),
   ];
 }
 
 // Values of window, buy, sell, weekday
-type Input = [number, number, number, number];
+type Input = [number, number, number];
 type Output = number;
 
 // Extract array of values from parameters

@@ -41,9 +41,9 @@ export class TradingStrategy implements Strategy {
   public readonly weekday: number = 1;
 
   private readonly technical: Strategy;
+  public readonly window: number = 21;
   public readonly buy: number = 30;
   public readonly sell: number = 70;
-  public readonly window: number = 21;
 
   constructor(params: Partial<TradingStrategy> = {}) {
     Object.assign(this, params);

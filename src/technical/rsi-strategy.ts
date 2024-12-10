@@ -31,7 +31,6 @@ export class RSIStrategy implements Strategy {
     private readonly window: number = 20,
     private readonly buy_threshold: number = 30,
     private readonly sell_threshold: number = 70,
-    private readonly weekday: number = 0,
   ) {}
 
   // Generate RSI chart for instrument

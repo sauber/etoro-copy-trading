@@ -1,11 +1,10 @@
 import { Exchange, Instrument, Instruments } from "@sauber/backtest";
 import { type Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/community.ts";
-import { TrainingData } from "./trainingdata.ts";
 import { Dashboard, Parameters, Status } from "📚/optimize/mod.ts";
 import { Config } from "📚/config/config.ts";
-import { TimingData } from "./model.ts";
-import { Model } from "./model.ts";
+import { TrainingData } from "📚/technical/trainingdata.ts";
+import { TimingData, Model } from "📚/technical/model.ts";
 
 // Sanity check loaded data
 function verify(instruments: Instruments): void {
@@ -56,7 +55,9 @@ const status: Status = (
 const epochs = 100;
 const epsilon = 0.01;
 const iterations = model.optimize(exchange, epochs, epsilon, status);
-console.log(iterations, model.export());
+const exported: TimingData = model.export();
+// await config.set(modelAssetName, exported);
+console.log(iterations, exported);
 // console.log(parameters);
 // runSim(parameters.map((p) => p.value) as Inputs, true);
 // TODO: Display graph of valuation chart

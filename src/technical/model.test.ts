@@ -23,7 +23,7 @@ Deno.test("Generate", () => {
 Deno.test("Export / Import", () => {
   const model = new Model();
   const data: TimingData = model.export();
-  assertEquals(Object.keys(data).length, 4);
+  assertEquals(Object.keys(data).length, 3);
   const i = Model.import(data);
   assertInstanceOf(i, Model);
 });
