@@ -11,8 +11,9 @@ export class Diary<T> {
 
   /** Throw Error if no dates are available */
   private validate(): void {
-    if (this.dates.length < 1)
+    if (this.dates.length < 1) {
       throw new Error("Data is not available at any date");
+    }
   }
 
   /** First date */
@@ -39,13 +40,21 @@ export class Diary<T> {
     return this.cards[this.end];
   }
 
+  /** Data on date */
+  public on(date: DateFormat): T {
+    this.validate();
+    if (date in this.cards) return this.cards[date];
+    throw new Error(`Asset on ${date} doesn't exist`);
+  }
+
   /** Find most recent data at or before date */
   public before(date: DateFormat): T {
     this.validate();
-    if (date < this.start)
+    if (date < this.start) {
       throw new Error(
-        `Searching for asset before ${date} but first date is ${this.start}`
+        `Searching for asset before ${date} but first date is ${this.start}`,
       );
+    }
     for (const d of [...this.dates].reverse()) {
       if (d <= date) return this.cards[d];
     }
@@ -57,10 +66,11 @@ export class Diary<T> {
   /** Find oldest data at or after date */
   public after(date: DateFormat): T {
     this.validate();
-    if (date > this.end)
+    if (date > this.end) {
       throw new Error(
-        `Searching for asset after ${date} but last date is ${this.end}`
+        `Searching for asset after ${date} but last date is ${this.end}`,
       );
+    }
     for (const d of this.dates) {
       if (d >= date) return this.cards[d];
     }
@@ -69,5 +79,7 @@ export class Diary<T> {
     throw new Error("This code should never be reached");
   }
 
-  public get export(): Record<DateFormat, T> { return this.cards };
+  public get export(): Record<DateFormat, T> {
+    return this.cards;
+  }
 }
