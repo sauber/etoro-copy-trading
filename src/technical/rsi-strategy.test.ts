@@ -1,15 +1,18 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { StrategyContext } from "@sauber/backtest";
-import { NullStrategy } from "./testdata.ts";
+import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 
-Deno.test("Do nothing strategy", () => {
-  const strategy = new NullStrategy();
-  assertInstanceOf(strategy, NullStrategy);
+Deno.test("Instance", () => {
+  assertInstanceOf(new RSIStrategy(), RSIStrategy);
+});
+
+Deno.test("Open/Close", () => {
+  const strategy = new RSIStrategy();
   const context: StrategyContext = {
     bar: 0,
     value: 0,
     amount: 0,
-    instruments: [],
+    purchaseorders: [],
     positions: [],
   };
   assertEquals(strategy.open(context), []);

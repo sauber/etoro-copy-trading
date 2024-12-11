@@ -5,7 +5,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { RSIStrategy } from "../technical/rsi-strategy.ts";
+import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
 
 /** Only trade on certain day of week */
@@ -21,9 +21,7 @@ export class WeekdayStrategy implements Strategy {
   }
 
   public open(context: StrategyContext): PurchaseOrders {
-    return this.trading(context.bar)
-      ? context.instruments.map((instrument) => ({ instrument, amount: 1 }))
-      : [];
+    return this.trading(context.bar) ? context.purchaseorders : [];
   }
 }
 
@@ -36,7 +34,7 @@ export class MinMaxStrategy implements Strategy {
 
   public close = (context: StrategyContext): Positions => context.positions;
 
-  public open(context: StrategyContext): PurchaseOrders {
+  public open(_context: StrategyContext): PurchaseOrders {
     return [];
   }
 }
@@ -74,7 +72,7 @@ export class TradingStrategy implements Strategy {
     );
     console.log("  Value", context.value, "Amount", context.amount);
     console.log("  Positions", context.positions.length);
-    console.log("  Instruments", context.instruments.length);
+    console.log("  POs", context.purchaseorders.length);
   }
 
   public close(context: StrategyContext): Positions {

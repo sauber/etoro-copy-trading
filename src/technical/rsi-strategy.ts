@@ -1,4 +1,5 @@
 import {
+Amount,
   Bar,
   Instrument,
   Positions,
@@ -63,13 +64,15 @@ export class RSIStrategy implements Strategy {
   public open(context: StrategyContext): PurchaseOrders {
     const bar: Bar = context.bar + 2; // Charts delayed two days
     const threshold: number = this.buy_threshold;
-    return context.instruments
-      .map((instrument) => {
-        const rsiChart = this.chart(instrument as Instrument);
-        if (!rsiChart.has(bar)) return { instrument, amount: 0 };
-        const rsi = rsiChart.bar(bar);
-        return { instrument, amount: (threshold - rsi) / threshold };
-      })
-      .filter((po: PurchaseOrder) => po.amount > 0);
+    return context.purchaseorders
+      .filter((po: PurchaseOrder) => {
+        const instrument: Instrument = po.instrument;
+        const rsiChart: Chart = this.chart(instrument as Instrument);
+        if (!rsiChart.has(bar)) return false;
+        const rsi: number = rsiChart.bar(bar);
+        if (rsi > threshold) return false;
+        const amount: Amount = (threshold - rsi) / threshold;
+        return { instrument, amount };
+      });
   }
 }

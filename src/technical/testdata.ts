@@ -1,5 +1,4 @@
 import {
-  Amount,
   Positions,
   PurchaseOrders,
   Strategy,
@@ -8,7 +7,7 @@ import {
 import { repo } from "📚/repository/testdata.ts";
 import { Community } from "📚/repository/mod.ts";
 
-export { investorId, } from "📚/repository/testdata.ts";
+export { investorId } from "📚/repository/testdata.ts";
 export { repo } from "📚/repository/testdata.ts";
 export const community = new Community(repo);
 
@@ -26,9 +25,7 @@ export class NullStrategy implements Strategy {
 /** Buy all, sell all */
 export class PassThroughStrategy implements Strategy {
   public open(context: StrategyContext): PurchaseOrders {
-    if (context.instruments.length < 1) return [];
-    const amount: Amount = 1 / context.instruments.length;
-    return context.instruments.map((instrument) => ({ instrument, amount }));
+    return context.purchaseorders;
   }
 
   public close(context: StrategyContext): Positions {
