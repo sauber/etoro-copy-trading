@@ -1,5 +1,14 @@
 import { assertEquals } from "@std/assert";
-import { diffDate, nextDate, range, today } from "📚/time/calendar.ts";
+import { DataFrame } from "@sauber/dataframe";
+import {
+  dateFromWeekday,
+  diffDate,
+  nextDate,
+  range,
+  today,
+  weekdayFromDate,
+} from "📚/time/calendar.ts";
+import { DateFormat } from "📚/time/mod.ts";
 
 Deno.test("today", () => {
   assertEquals(today(), new Date().toISOString().substring(0, 10));
@@ -25,4 +34,15 @@ Deno.test("range", () => {
     "2024-02-29",
     "2024-03-01",
   ]);
+});
+
+Deno.test("Name of weekday", () => {
+  assertEquals(weekdayFromDate("2024-02-26"), "Monday");
+});
+
+Deno.test("Most recent date on weekday", () => {
+  const cur: DateFormat = "2024-02-28"; // Wednesday
+  assertEquals(dateFromWeekday(cur, 1), "2024-02-26"); // Monday
+  assertEquals(dateFromWeekday(cur, 0), "2024-02-25"); // Sunday
+  assertEquals(dateFromWeekday(cur, 6), "2024-02-24"); // Saturday
 });

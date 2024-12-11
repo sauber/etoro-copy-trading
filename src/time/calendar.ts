@@ -94,3 +94,28 @@ export function range(start: DateFormat, end: DateFormat): Array<DateFormat> {
   }
   return dates;
 }
+
+/** Convert date to name of weekday */
+export function weekdayFromDate(dateString: DateFormat): string {
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const date = new Date(dateString);
+  const dayIndex = date.getDay();
+  return daysOfWeek[dayIndex];
+}
+
+/** Find most recent prior date on weekday */
+export function dateFromWeekday(dateString: DateFormat, weekday: number): DateFormat {
+  const date = new Date(dateString);
+  const dayIndex = date.getDay();
+  const offset = (7+dayIndex-weekday) % 7;
+  const wanted: DateFormat = nextDate(dateString, -offset);
+  return wanted;
+}
