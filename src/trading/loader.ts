@@ -6,7 +6,6 @@ import {
   Position,
   PositionID,
   Price,
-  StrategyContext,
 } from "@sauber/backtest";
 import { Positions, PurchaseOrders } from "@sauber/backtest";
 import { type Parameters } from "📚/trading/trading-strategy.ts";
@@ -35,13 +34,11 @@ type Mirrors = Array<Mirror>;
 type Journal = Diary<Mirrors>;
 
 /** Load data to generate Strategy context */
-export class Context {
-  private readonly cached: Record<string, CacheValue> = {};
-  private positionid: PositionID = 0;
-
+export class Loader {
   constructor(private readonly assets: Assets) {}
 
   /** Load data from repo and cache */
+  private readonly cached: Record<string, CacheValue> = {};
   private async cache<T>(
     key: string,
     loader: () => Promise<CacheValue>,
@@ -54,7 +51,7 @@ export class Context {
   }
 
   /** Trading strategy parameters */
-  private settings(): Promise<Parameters> {
+  public settings(): Promise<Parameters> {
     return this.cache<Parameters>(
       "settings",
       async () => (await this.assets.config.get("trading")) as Parameters,
@@ -75,7 +72,7 @@ export class Context {
   }
 
   /** Total value of account */
-  private async value(): Promise<Amount> {
+  public async value(): Promise<Amount> {
     return (await this.account()).Value;
   }
 
@@ -108,7 +105,7 @@ export class Context {
   }
 
   /** tradingDate as Bar */
-  private tradingBar(): Promise<Bar> {
+  public tradingBar(): Promise<Bar> {
     return this.cache<Bar>(
       "tradingBar",
       async () => {
@@ -233,6 +230,7 @@ export class Context {
   }
 
   /** Position for mirror */
+  private positionid: PositionID = 0;
   private position(username: string, amount: Amount): Promise<Position> {
     return this.cache<Position>(
       "position_" + username,
@@ -260,7 +258,7 @@ export class Context {
   }
 
   /** All mirrors of account */
-  private positions(): Promise<Positions> {
+  public positions(): Promise<Positions> {
     return this.cache<Positions>(
       "positions",
       async () => {
@@ -277,7 +275,7 @@ export class Context {
   }
 
   /** Amount available for investing */
-  private amount(): Promise<Amount> {
+  public amount(): Promise<Amount> {
     return this.cache<Amount>(
       "amount",
       async () => {
@@ -294,7 +292,7 @@ export class Context {
   }
 
   /** Assume all investors available for purchase */
-  private purchaseOrders(): Promise<PurchaseOrders> {
+  public purchaseOrders(): Promise<PurchaseOrders> {
     return this.cache<PurchaseOrders>(
       "po",
       async () => {
@@ -307,16 +305,5 @@ export class Context {
         return purchaseOrders;
       },
     );
-  }
-
-  /** Load all data */
-  public async load(): Promise<StrategyContext> {
-    const bar: Bar = await this.tradingBar();
-    const value: Amount = await this.value();
-    const amount: Amount = await this.amount();
-    const purchaseorders: PurchaseOrders = await this.purchaseOrders();
-    const positions: Positions = await this.positions();
-
-    return { bar, value, amount, purchaseorders, positions };
   }
 }
