@@ -20,7 +20,7 @@ export class Community {
   /** Name of owner */
   private async owner(): Promise<string> {
     const investor = await this.config.get("account") as Mirror;
-    if ( investor ) return investor.UserName;
+    if (investor) return investor.UserName;
     return "";
   }
 
@@ -71,7 +71,6 @@ export class Community {
   public async end(): Promise<DateFormat | null> {
     const dates: Dates = await this.dates();
     for (const date of [...dates].reverse()) {
-      console.log("Community End: Looking for names on ", date);
       if ((await this.namesByDate(date)).length) return date;
     }
     return null;
