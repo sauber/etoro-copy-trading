@@ -13,7 +13,9 @@ import type { DateFormat } from "./mod.ts";
 type DateCache = Record<DateFormat, DateFormat>;
 
 declare global {
+  // deno-lint-ignore no-var
   var nextDateCache: DateCache;
+  // deno-lint-ignore no-var
   var prevDateCache: DateCache;
 }
 
@@ -112,10 +114,13 @@ export function weekdayFromDate(dateString: DateFormat): string {
 }
 
 /** Find most recent prior date on weekday */
-export function dateFromWeekday(dateString: DateFormat, weekday: number): DateFormat {
+export function dateFromWeekday(
+  dateString: DateFormat,
+  weekday: number,
+): DateFormat {
   const date = new Date(dateString);
   const dayIndex = date.getDay();
-  const offset = (7+dayIndex-weekday) % 7;
+  const offset = (7 + dayIndex - weekday) % 7;
   const wanted: DateFormat = nextDate(dateString, -offset);
   return wanted;
 }
