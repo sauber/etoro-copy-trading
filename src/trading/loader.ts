@@ -18,15 +18,15 @@ import { sum } from "📚/math/statistics.ts";
 const NOW: DateFormat = today();
 type CacheValue =
   | Amount
-  | Parameters
-  | Mirror
-  | DateFormat
   | Bar
-  | Investor
-  | null
-  | Mirrors
+  | DateFormat
   | Instrument
   | Instruments
+  | Investor
+  | Mirrors
+  | Mirror
+  | null
+  | Parameters
   | Position
   | Positions
   | PurchaseOrders;
@@ -67,7 +67,7 @@ export class Loader {
   }
 
   /** Username of account */
-  private async username(): Promise<string> {
+  public async username(): Promise<string> {
     return (await this.account()).UserName;
   }
 
@@ -93,7 +93,7 @@ export class Loader {
   }
 
   /** Which date of trading weekday is most recent to last date in repo */
-  private tradingDate(): Promise<DateFormat> {
+  public tradingDate(): Promise<DateFormat> {
     return this.cache<DateFormat>(
       "tradingDate",
       async () => {

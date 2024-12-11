@@ -1,19 +1,13 @@
 import {
-assert,
+  assert,
   assertAlmostEquals,
   assertEquals,
   assertInstanceOf,
 } from "@std/assert";
 import { Loader } from "./loader.ts";
 import { assets } from "📚/trading/testdata.ts";
-import {
-  Amount,
-  Bar,
-  Positions,
-  PurchaseOrders,
-  StrategyContext,
-} from "@sauber/backtest";
-import { diffDate, today } from "📚/time/mod.ts";
+import { Amount, Bar, Positions, PurchaseOrders } from "@sauber/backtest";
+import { DateFormat, diffDate, today } from "📚/time/mod.ts";
 import { Mirror } from "📚/repository/mod.ts";
 import { Parameters } from "📚/trading/trading-strategy.ts";
 
@@ -21,10 +15,22 @@ Deno.test("Instance", () => {
   assertInstanceOf(new Loader(assets), Loader);
 });
 
+Deno.test("Username", async () => {
+  const loader = new Loader(assets);
+  const username: string = await loader.username();
+  assertEquals(
+    username,
+    (await assets.config.get("account") as Mirror).UserName,
+  );
+});
+
 Deno.test("Trading Day", async () => {
   const loader = new Loader(assets);
-  const trading: Bar = await loader.tradingBar();
-  assertEquals(trading, diffDate("2022-04-25", today()));
+  const bar: Bar = await loader.tradingBar();
+  assertEquals(bar, diffDate("2022-04-25", today()));
+
+  const date: DateFormat = await loader.tradingDate();
+  assertEquals(date, "2022-04-25");
 });
 
 Deno.test("Value", async () => {
