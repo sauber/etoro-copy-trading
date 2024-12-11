@@ -1,15 +1,14 @@
-import { DiskBackend } from "../storage/disk-backend.ts";
-import { FetchWebBackend } from "./fetch-web.ts";
-import { Refresh } from "./refresh.ts";
+import { DiskBackend } from "📚/storage/disk-backend.ts";
+import { FetchWebBackend } from "📚/repository/fetch-web.ts";
+import { Refresh } from "📚/repository/refresh.ts";
 import { Config } from "📚/config/config.ts";
-import type { DiscoverFilter } from "./mod.ts";
-import type { InvestorId } from "📚/repository/mod.ts";
+import type { Mirror, DiscoverFilter } from "📚/repository/mod.ts";
 
 const path: string = Deno.args[0];
 const repo: DiskBackend = new DiskBackend(path);
 
 const config: Config = new Config(repo);
-const id = await config.get("investor") as InvestorId;
+const id = await config.get("account") as Mirror;
 const filter = await config.get("discover") as DiscoverFilter;
 const rate = await config.get("rate") as number;
 const blacklist = await config.get("blacklist") as Record<string, Record<string, unknown>>;

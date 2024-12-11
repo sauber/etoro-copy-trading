@@ -15,8 +15,8 @@ import {
 import { sum } from "jsr:@sauber/statistics";
 import { Table } from "@sauber/table";
 import { Assets } from "../assets/assets.ts";
-import { TradingStrategy } from "📚/trading/trading-strategy.ts";
-import { Community, InvestorId, Mirror } from "📚/repository/mod.ts";
+import { TradingStrategy, Parameters } from "📚/trading/trading-strategy.ts";
+import { Community, Mirror } from "📚/repository/mod.ts";
 import { TrainingData } from "📚/technical/trainingdata.ts";
 import { nextDate, today } from "📚/time/mod.ts";
 import { Config } from "📚/config/config.ts";
@@ -35,6 +35,10 @@ const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
 const config: Config = repo.config;
+
+// Date
+const settings = await config.get("trading") as Parameters;
+const weekday: string = settings.weekday;
 
 // Instruments
 const exchange = await makeExchange(repo.community);
@@ -55,7 +59,7 @@ const unknownSeries = Array(exchange.start - chartend + 1).fill(10000);
 const value: Amount = await config.get("value") as number;
 
 // Positions
-const username: string = (await config.get("investor") as InvestorId).UserName;
+const username: string = (await config.get("account") as Mirror).UserName;
 const me: Investor = await repo.community.investor(username);
 console.log("My ID:", username);
 const mirrors: Mirror[] = me.mirrors.last;
@@ -83,7 +87,7 @@ const situation: StrategyContext = {
   positions,
 };
 
-const strategy: Strategy = new TradingStrategy({ weekday: 1 });
+const strategy: Strategy = new TradingStrategy({ weekday: 3 });
 
 const close: Positions = strategy.close(situation);
 const portfolio = new Portfolio(close);

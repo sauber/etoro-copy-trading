@@ -1,1 +1,9 @@
-{"investor":{"CustomerId":4657429,"UserName":"GainersQtr"},"discover":{"risk":4,"daily":6,"weekly":11},"value":100000}
+{
+  "account": {
+    "CustomerId": 4657429,
+    "UserName": "GainersQtr",
+    "Value": 100000
+  },
+  "discover": { "risk": 4, "daily": 6, "weekly": 11 },
+  "trading": { "weekday": 1 }
+}

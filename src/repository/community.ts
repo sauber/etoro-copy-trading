@@ -4,7 +4,7 @@ import { Investor } from "📚/investor/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import { Config } from "📚/config/config.ts";
-import { InvestorId } from "📚/repository/mod.ts";
+import { Mirror } from "📚/repository/mod.ts";
 
 export type Names = Array<string>;
 export type Investors = Array<Investor>;
@@ -19,7 +19,7 @@ export class Community {
 
   /** Name of owner */
   private async owner(): Promise<string> {
-    const investor = await this.config.get("investor") as InvestorId;
+    const investor = await this.config.get("account") as Mirror;
     if ( investor ) return investor.UserName;
     return "";
   }

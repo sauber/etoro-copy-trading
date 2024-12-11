@@ -1,5 +1,8 @@
-export { Community } from "📚/repository/community.ts";
-export type { Investors, Names } from "📚/repository/community.ts";
+export {
+  Community,
+  type Investors,
+  type Names,
+} from "📚/repository/community.ts";
 export type { StatsExport } from "📚/repository/stats.ts";
-export type { InvestorId } from "📚/repository/types.ts";
-export { type Mirror } from "./portfolio.ts";
+export type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
+export { type Mirror } from "📚/repository/portfolio.ts";

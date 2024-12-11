@@ -7,6 +7,27 @@ import {
 } from "@sauber/backtest";
 import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
+import { DateFormat } from "📚/time/mod.ts";
+
+export type Parameters = {
+  weekday: number;
+};
+
+/** Convert date to name of weekday */
+function getWeekdayFromDate(dateString: DateFormat): string {
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const date = new Date(dateString);
+  const dayIndex = date.getDay();
+  return daysOfWeek[dayIndex];
+}
 
 /** Only trade on certain day of week */
 export class WeekdayStrategy implements Strategy {
@@ -63,28 +84,25 @@ export class TradingStrategy implements Strategy {
   }
 
   /** Print out conect of Context */
-  private printContext(context: StrategyContext): void {
-    console.log(
-      "Context: Bar",
-      context.bar,
-      "Date",
-      nextDate(today(), -context.bar),
-    );
-    console.log("  Value", context.value, "Amount", context.amount);
-    console.log("  Positions", context.positions.length);
-    console.log("  POs", context.purchaseorders.length);
+  private printContext(strategy: Strategy, context: StrategyContext): void {
+    const date: DateFormat = nextDate(today(), -context.bar);
+    console.log(strategy.constructor.name);
+    console.log("  Bar:", context.bar, "Date:", getWeekdayFromDate(date), date);
+    console.log("  Value:", context.value, "Amount:", context.amount);
+    console.log("  Positions:", context.positions.length);
+    console.log("  POs:", context.purchaseorders.length);
   }
 
   public close(context: StrategyContext): Positions {
     console.log("Closing strategies");
-    this.printContext(context);
+    this.printContext(this, context);
     const strategies: Array<Strategy> = [this.timing, this.technical];
 
     let positions: Positions = [];
     for (const strategy of strategies) {
       positions = strategy.close(context);
       Object.assign(context, { positions });
-      this.printContext(context);
+      this.printContext(strategy, context);
       if (positions.length < 1) return [];
     }
     return positions;
@@ -92,16 +110,16 @@ export class TradingStrategy implements Strategy {
 
   public open(context: StrategyContext): PurchaseOrders {
     console.log("Opening strategies");
-    this.printContext(context);
+    this.printContext(this, context);
     const strategies: Array<Strategy> = [this.timing, this.technical];
 
-    let pos: PurchaseOrders = [];
+    let purchaseorders: PurchaseOrders = [];
     for (const strategy of strategies) {
-      pos = strategy.open(context);
-      Object.assign(context, { instruments: pos.map((po) => po.instrument) });
-      this.printContext(context);
-      if (pos.length < 1) return [];
+      purchaseorders = strategy.open(context);
+      Object.assign(context, { purchaseorders });
+      this.printContext(strategy, context);
+      if (purchaseorders.length < 1) return [];
     }
-    return pos;
+    return purchaseorders;
   }
 }
