@@ -7,27 +7,12 @@ import {
 } from "@sauber/backtest";
 import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
-import { DateFormat } from "📚/time/mod.ts";
+import { DateFormat, weekdayFromDate } from "📚/time/mod.ts";
 
 export type Parameters = {
   weekday: number;
 };
 
-/** Convert date to name of weekday */
-function getWeekdayFromDate(dateString: DateFormat): string {
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const date = new Date(dateString);
-  const dayIndex = date.getDay();
-  return daysOfWeek[dayIndex];
-}
 
 /** Only trade on certain day of week */
 export class WeekdayStrategy implements Strategy {
@@ -87,7 +72,7 @@ export class TradingStrategy implements Strategy {
   private printContext(strategy: Strategy, context: StrategyContext): void {
     const date: DateFormat = nextDate(today(), -context.bar);
     console.log(strategy.constructor.name);
-    console.log("  Bar:", context.bar, "Date:", getWeekdayFromDate(date), date);
+    console.log("  Bar:", context.bar, "Date:", weekdayFromDate(date), date);
     console.log("  Value:", context.value, "Amount:", context.amount);
     console.log("  Positions:", context.positions.length);
     console.log("  POs:", context.purchaseorders.length);

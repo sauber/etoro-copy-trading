@@ -37,8 +37,8 @@ const repo = Assets.disk(path);
 const config: Config = repo.config;
 
 // Date
-const settings = await config.get("trading") as Parameters;
-const weekday: string = settings.weekday;
+// const settings = await config.get("trading") as Parameters;
+// const weekday: string = settings.weekday;
 
 // Instruments
 const exchange = await makeExchange(repo.community);
