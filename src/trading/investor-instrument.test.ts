@@ -8,13 +8,20 @@ Deno.test("Instance", () => {
   assertInstanceOf(new InvestorInstrument(investor), InvestorInstrument);
 });
 
+Deno.test("Start is unchanged", () => {
+  const startDate: DateFormat = investor.chart.start;
+  const investorStart = diffDate(startDate, today());
+  const instr = new InvestorInstrument(investor);
+  const instrumetStart: Bar = instr.start;
+  assertEquals(instrumetStart, investorStart);
+});
+
 Deno.test("Extend End", () => {
   const offset = 2;
   const endDate: DateFormat = investor.chart.end;
   const investorEnd = diffDate(endDate, today());
   const instr = new InvestorInstrument(investor);
   const instrumetEnd: Bar = instr.end;
-  console.log({ investorEnd, instrumetEnd });
   assertEquals(instrumetEnd, investorEnd - offset);
 });
 
