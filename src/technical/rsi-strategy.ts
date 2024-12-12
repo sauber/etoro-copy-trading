@@ -64,15 +64,23 @@ export class RSIStrategy implements Strategy {
   public open(context: StrategyContext): PurchaseOrders {
     const bar: Bar = context.bar;
     const threshold: number = this.buy_threshold;
-    return context.purchaseorders
-      .filter((po: PurchaseOrder) => {
+    const purchaseOrders: PurchaseOrders = context.purchaseorders
+      // Add chart
+      .map((po: PurchaseOrder) =>
+        [po, this.chart(po.instrument)] as [PurchaseOrder, Chart]
+      )
+      // Confirm chart data avilable
+      .filter(([_po, chart]) => chart.has(bar))
+      // Add chart value
+      .map(([po, chart]) => [po, chart.bar(bar)] as [PurchaseOrder, Price])
+      // Confirm chart value below opening threshold
+      .filter(([_po, rsi]) => rsi <= threshold)
+      // Calculate amount
+      .map(([po, rsi]) => {
         const instrument: Instrument = po.instrument;
-        const rsiChart: Chart = this.chart(instrument as Instrument);
-        if (!rsiChart.has(bar)) return false;
-        const rsi: number = rsiChart.bar(bar);
-        if (rsi > threshold) return false;
-        const amount: Amount = (threshold - rsi) / threshold;
+        const amount: Amount = po.amount * (threshold - rsi) / threshold;
         return { instrument, amount };
       });
+    return purchaseOrders;
   }
 }
