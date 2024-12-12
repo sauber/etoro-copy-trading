@@ -4,7 +4,7 @@ import { Community } from "📚/repository/community.ts";
 import { Dashboard, Parameters, Status } from "📚/optimize/mod.ts";
 import { Config } from "📚/config/config.ts";
 import { TrainingData } from "📚/technical/trainingdata.ts";
-import { TimingData, Model } from "📚/technical/model.ts";
+import { TimingData, Optimize } from "./optimize.ts";
 
 // Sanity check loaded data
 function verify(instruments: Instruments): void {
@@ -40,7 +40,7 @@ const exchange: Exchange = new Exchange(instruments);
 // TODO: Integer or float parameter?
 const config = new Config(backend);
 const timingData = await config.get(modelAssetName) as TimingData;
-const model = timingData ? Model.import(timingData) : new Model();
+const model = timingData ? Optimize.import(timingData) : new Optimize();
 
 const dashboard: Dashboard = new Dashboard(38);
 

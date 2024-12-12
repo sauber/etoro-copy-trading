@@ -4,10 +4,9 @@ import {
   assertInstanceOf,
   assertLessOrEqual,
 } from "@std/assert";
+import { Dashboard, Parameters } from "📚/optimize/mod.ts";
 import { Exchange, TestInstrument } from "@sauber/backtest";
-import { Model, TimingData } from "./model.ts";
-import { Dashboard } from "📚/optimize/dashboard.ts";
-import { Parameters } from "📚/optimize/parameter.ts";
+import { Optimize, TimingData } from "📚/trading/optimize.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
@@ -17,31 +16,31 @@ function makeExchange(count: number = 3): Exchange {
 }
 
 Deno.test("Generate", () => {
-  assertInstanceOf(new Model(), Model);
+  assertInstanceOf(new Optimize(), Optimize);
 });
 
 Deno.test("Export / Import", () => {
-  const model = new Model();
-  const data: TimingData = model.export();
-  assertEquals(Object.keys(data).length, 3);
-  const i = Model.import(data);
-  assertInstanceOf(i, Model);
+  const optimize = new Optimize();
+  const data: TimingData = optimize.export();
+  assertEquals(Object.keys(data).length, 4);
+  const i = Optimize.import(data);
+  assertInstanceOf(i, Optimize);
 });
 
 Deno.test("Predict", () => {
   const exchange: Exchange = makeExchange();
-  const model = new Model();
-  const score: number = model.predict(exchange);
+  const optimize = new Optimize();
+  const score: number = optimize.predict(exchange);
   // console.log(score);
   assertEquals(isNaN(score), false);
 });
 
 Deno.test("Optimize", () => {
-  const model = new Model();
+  const optimize = new Optimize();
   const exchange: Exchange = makeExchange();
   const epochs = 10;
   const epsilon = 0.01;
-  const iterations = model.optimize(exchange, epochs, epsilon);
+  const iterations = optimize.optimize(exchange, epochs, epsilon);
   assertGreaterOrEqual(iterations, 1);
   assertLessOrEqual(iterations, epochs);
 });
@@ -58,11 +57,11 @@ Deno.test("Visualized training", { ignore: true }, () => {
     console.log(dashboard.render(parameters));
   }
 
-  const model = new Model();
+  const optimize = new Optimize();
   const exchange: Exchange = makeExchange();
   const epochs = 500;
   const epsilon = 0.01;
-  const iterations = model.optimize(exchange, epochs, epsilon, status);
+  const iterations = optimize.optimize(exchange, epochs, epsilon, status);
   console.log("Iterations:", iterations);
   assertGreaterOrEqual(iterations, 1);
   assertLessOrEqual(iterations, epochs);

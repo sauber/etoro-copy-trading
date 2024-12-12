@@ -6,19 +6,19 @@ import {
   ParameterData,
   Parameters,
 } from "📚/optimize/mod.ts";
-import { RSIStrategy } from "./rsi-strategy.ts";
+import { TradingStrategy } from "📚/trading/trading-strategy.ts";
 
-function makeParameters(): Parameters {
+function makeParameters(value: Array<number> = []): Parameters {
   return [
-    new IntegerParameter("Window", 2, 100),
-    new IntegerParameter("Buy", 1, 50),
-    new IntegerParameter("Sell", 50, 99),
-    // new IntegerParameter("Weekday", 1, 5),
+    new IntegerParameter("window", 2, 100, value[0]),
+    new IntegerParameter("buy", 1, 50, value[1]),
+    new IntegerParameter("sell", 50, 99, value[2]),
+    new IntegerParameter("weekday", 1, 5, value[3]),
   ];
 }
 
 // Values of window, buy, sell, weekday
-type Input = [number, number, number];
+type Input = [number, number, number, number];
 type Output = number;
 
 // Extract array of values from parameters
@@ -38,12 +38,12 @@ export type TimingData = Array<ParameterData>;
 type Samples = Array<{ input: Parameters; output: number }>;
 
 /** Generate and train parameters for timing model */
-export class Model {
+export class Optimize {
   constructor(private readonly parameters: Parameters = makeParameters()) {}
 
   /** Generate model from saved parameters */
-  public static import(data: TimingData): Model {
-    return new Model(data.map((d) => Parameter.import(d)));
+  public static import(data: TimingData): Optimize {
+    return new Optimize(data.map((d) => Parameter.import(d)));
   }
 
   /** Export parameters of model */
@@ -56,7 +56,7 @@ export class Model {
     const result: Samples = Array(count);
     for (let i = 0; i < count; i++) {
       const input: Parameters = makeParameters();
-      const output: number = this.simulation(exchange, values(input));
+      const output: number = this.simulation(exchange, input);
       result[i] = { input, output };
     }
     return result;
@@ -65,7 +65,7 @@ export class Model {
   /** Dump parameters and score */
   private print(exchange: Exchange): string {
     const v = (n: number): string => n.toFixed(4);
-    const score = this.simulation(exchange, values(this.parameters));
+    const score = this.simulation(exchange, this.parameters);
     return `Score: ${v(score)} ` +
       this.parameters.map((p) => p.print()).join(", ");
   }
@@ -73,10 +73,13 @@ export class Model {
   /** Run simulation from input parameters and calculate score */
   private simulation(
     exchange: Exchange,
-    values: Input,
+    parameter: Parameters,
   ): Output {
     // Configure a simulation using input parameters
-    const strategy: Strategy = new RSIStrategy(...values);
+    const settings = Object.fromEntries(
+      parameter.map((p) => [p.name, p.value]),
+    );
+    const strategy: Strategy = new TradingStrategy(settings);
     const simulation = new Simulation(exchange, strategy);
 
     // Run simulation
@@ -122,7 +125,7 @@ export class Model {
 
     // Callback from optimize to model
     const loss = (input: Input): Output => {
-      const score: Output = this.simulation(exchange, input);
+      const score: Output = this.simulation(exchange, makeParameters(input));
       return -score;
     };
 
@@ -142,6 +145,6 @@ export class Model {
   }
 
   public predict(exchange: Exchange): Output {
-    return this.simulation(exchange, values(this.parameters));
+    return this.simulation(exchange, this.parameters);
   }
 }

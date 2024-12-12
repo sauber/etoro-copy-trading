@@ -1,8 +1,8 @@
-import { Model } from "./model.ts";
+import { Optimize } from "../trading/optimize.ts";
 import { Features } from "./features.ts";
 
 export class Ranking {
-  constructor(private readonly model: Model) {}
+  constructor(private readonly model: Optimize) {}
 
   /** Predicted future SharpeRatio for an investor */
   public predict(
