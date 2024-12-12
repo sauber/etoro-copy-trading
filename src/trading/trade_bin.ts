@@ -44,13 +44,15 @@ console.log("Trading Day:", tradingDate);
 const username: string = await loader.username();
 console.log("Account:", username);
 
+// Closing
 const close: Positions = strategy.close(situation);
 const portfolio = new Portfolio(close);
 console.log("Positions to close:", portfolio.toString(bar));
 
+// Opening
 const open: PurchaseOrders = strategy.open(situation);
 const table = new Table();
 table.headers = ["UserName", "Amount"];
-table.rows = open.map((o) => [o.instrument.symbol, o.amount]);
+table.rows = open.map((o) => [o.instrument.symbol, parseFloat(o.amount.toFixed(2))]);
 console.log("Positions to open");
 console.log(table.toString());

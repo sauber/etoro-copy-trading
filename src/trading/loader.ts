@@ -10,13 +10,23 @@ import {
 import { Positions, PurchaseOrders } from "@sauber/backtest";
 import { type Parameters } from "📚/trading/trading-strategy.ts";
 import { Assets } from "📚/assets/mod.ts";
-import { DateFormat, dateFromWeekday, diffDate, today } from "📚/time/mod.ts";
+import {
+  DateFormat,
+  dateFromWeekday,
+  diffDate,
+  nextDate,
+  today,
+} from "📚/time/mod.ts";
 import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 
 const NOW: DateFormat = today();
+
+// Count of days investor data is behind trading date
+const EXTEND = 2;
+
 type CacheValue =
   | Amount
   | Bar
@@ -185,13 +195,14 @@ export class Loader {
     );
   }
 
-  /** Investors available on trading date */
+  /** Investors available on (upto EXTEND days before) trading date */
   private instruments(): Promise<Instruments> {
     return this.cache<Instruments>(
       "instruments",
       async () => {
-        const date: DateFormat = await this.tradingDate();
-        const names: Names = await this.assets.community.active(date);
+        const tradingDate: DateFormat = await this.tradingDate();
+        const activeDate: DateFormat = nextDate(tradingDate, -EXTEND);
+        const names: Names = await this.assets.community.active(activeDate);
         const instruments: Instruments = await Promise.all(
           names.map((name: string) => this.instrument(name)),
         );
@@ -295,11 +306,13 @@ export class Loader {
       "po",
       async () => {
         const instruments: Instruments = await this.instruments();
+        console.log("Instruments loaded: ", instruments.length);
         const total: Amount = await this.amount();
         const amount: Amount = total / instruments.length;
         const purchaseOrders: PurchaseOrders = instruments.map(
           (instrument: Instrument) => ({ instrument, amount }),
         );
+        console.log("Purchase Orders loaded: ", purchaseOrders.length);
         return purchaseOrders;
       },
     );
