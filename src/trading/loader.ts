@@ -174,7 +174,7 @@ export class Loader {
   }
 
   /** Convert investor to instrument */
-  private instrument(username: string): Promise<Instrument> {
+  public instrument(username: string): Promise<Instrument> {
     return this.cache<Instrument>(
       "instrument_" + username,
       async () => {
@@ -306,13 +306,11 @@ export class Loader {
       "po",
       async () => {
         const instruments: Instruments = await this.instruments();
-        console.log("Instruments loaded: ", instruments.length);
         const total: Amount = await this.amount();
         const amount: Amount = total / instruments.length;
         const purchaseOrders: PurchaseOrders = instruments.map(
           (instrument: Instrument) => ({ instrument, amount }),
         );
-        console.log("Purchase Orders loaded: ", purchaseOrders.length);
         return purchaseOrders;
       },
     );

@@ -1,6 +1,7 @@
 import {
   Bar,
   Positions,
+  PurchaseOrder,
   PurchaseOrders,
   Strategy,
   StrategyContext,
@@ -8,6 +9,7 @@ import {
 import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
 import { DateFormat, weekdayFromDate } from "📚/time/mod.ts";
+import { PassThroughStrategy } from "📚/technical/testdata.ts";
 
 export type Parameters = {
   weekday: number;
@@ -46,6 +48,21 @@ export class MinMaxStrategy implements Strategy {
   }
 }
 
+/** Holistic sizing of positions */
+export class SizingStrategy extends PassThroughStrategy {
+  public override open(context: StrategyContext): PurchaseOrders {
+    const po = context.purchaseorders;
+    if (po.length < 1) return [];
+    const sorted: PurchaseOrders = po.sort((a, b) => b.amount - a.amount);
+    const limit: PurchaseOrders = sorted.slice(0, 3);
+
+    return limit.map((po) => ({
+      instrument: po.instrument,
+      amount: context.value * 0.1,
+    }));
+  }
+}
+
 /**
  * Combination of several strategies:
  * - Timing - Is this correct time to trade
@@ -63,10 +80,13 @@ export class TradingStrategy implements Strategy {
   public readonly buy: number = 30;
   public readonly sell: number = 70;
 
+  private readonly sizing: Strategy;
+
   constructor(params: Partial<TradingStrategy> = {}) {
     Object.assign(this, params);
     this.timing = new WeekdayStrategy(this.weekday);
     this.technical = new RSIStrategy(this.window, this.buy, this.sell);
+    this.sizing = new SizingStrategy();
   }
 
   /** Print out conect of Context */
@@ -80,30 +100,34 @@ export class TradingStrategy implements Strategy {
   }
 
   public close(context: StrategyContext): Positions {
-    console.log("Closing strategies");
-    this.printContext(this, context);
+    // console.log("Closing strategies");
+    // this.printContext(this, context);
     const strategies: Array<Strategy> = [this.timing, this.technical];
 
     let positions: Positions = [];
     for (const strategy of strategies) {
       positions = strategy.close(context);
       Object.assign(context, { positions });
-      this.printContext(strategy, context);
+      // this.printContext(strategy, context);
       if (positions.length < 1) return [];
     }
     return positions;
   }
 
   public open(context: StrategyContext): PurchaseOrders {
-    console.log("Opening strategies");
-    this.printContext(this, context);
-    const strategies: Array<Strategy> = [this.timing, this.technical];
+    // console.log("Opening strategies");
+    // this.printContext(this, context);
+    const strategies: Array<Strategy> = [
+      this.timing,
+      this.technical,
+      this.sizing,
+    ];
 
     let purchaseorders: PurchaseOrders = [];
     for (const strategy of strategies) {
       purchaseorders = strategy.open(context);
       Object.assign(context, { purchaseorders });
-      this.printContext(strategy, context);
+      // this.printContext(strategy, context);
       if (purchaseorders.length < 1) return [];
     }
     return purchaseorders;
