@@ -14,6 +14,7 @@ import { DateFormat, dateFromWeekday, diffDate, today } from "📚/time/mod.ts";
 import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
+import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 
 const NOW: DateFormat = today();
 type CacheValue =
@@ -169,10 +170,7 @@ export class Loader {
       async () => {
         const investor: Investor | null = await this.mirror(username);
         if (investor) {
-          // Investor exists
-          const series: Array<Price> = investor.chart.values;
-          const end: Bar = diffDate(investor.chart.end, NOW);
-          return new Instrument(series, end, username, investor.FullName);
+          return new InvestorInstrument(investor);
         } else {
           // Create placeholder instrument
           const start: DateFormat = await this.start();

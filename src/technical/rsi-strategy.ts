@@ -1,5 +1,5 @@
 import {
-Amount,
+  Amount,
   Bar,
   Instrument,
   Positions,
@@ -51,7 +51,7 @@ export class RSIStrategy implements Strategy {
   }
 
   public close(context: StrategyContext): Positions {
-    const bar: Bar = context.bar + 2; // Charts delayed two days
+    const bar: Bar = context.bar;
     return context.positions.filter((position) => {
       const rsiChart = this.chart(position.instrument as Instrument);
       // console.log("Close RSI", position.instrument.symbol, bar, rsiChart.bar(bar));
@@ -62,7 +62,7 @@ export class RSIStrategy implements Strategy {
   }
 
   public open(context: StrategyContext): PurchaseOrders {
-    const bar: Bar = context.bar + 2; // Charts delayed two days
+    const bar: Bar = context.bar;
     const threshold: number = this.buy_threshold;
     return context.purchaseorders
       .filter((po: PurchaseOrder) => {
