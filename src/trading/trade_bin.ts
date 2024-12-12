@@ -46,7 +46,7 @@ console.log("Account:", username);
 
 const close: Positions = strategy.close(situation);
 const portfolio = new Portfolio(close);
-console.log("Positions to close:", portfolio.toString(bar + 2));
+console.log("Positions to close:", portfolio.toString(bar));
 
 const open: PurchaseOrders = strategy.open(situation);
 const table = new Table();

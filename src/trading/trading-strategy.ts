@@ -13,13 +13,14 @@ export type Parameters = {
   weekday: number;
 };
 
-
 /** Only trade on certain day of week */
 export class WeekdayStrategy implements Strategy {
   constructor(private readonly weekday: number) {}
 
   private trading(bar: Bar): boolean {
-    return (this.weekday - bar % 7 === 0);
+    const date: DateFormat = nextDate(today(), -bar);
+    const weekday: number = new Date(date).getDay();
+    return this.weekday === weekday;
   }
 
   public close(context: StrategyContext): Positions {
