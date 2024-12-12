@@ -5,5 +5,5 @@
     "Value": 100000
   },
   "discover": { "risk": 4, "daily": 6, "weekly": 11 },
-  "trading": { "weekday": 1 }
+  "trading": { "weekday": 1, "buy": 60, "sell": 70 }
 }
