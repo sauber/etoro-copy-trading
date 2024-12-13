@@ -3,6 +3,7 @@ import { Assets } from "📚/assets/assets.ts";
 import { Community, Names } from "📚/repository/mod.ts";
 import { TradingStrategy, type Parameters } from "📚/trading/trading-strategy.ts";
 import { Loader } from "📚/trading/loader.ts";
+import { nextDate, today } from "📚/time/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -27,13 +28,20 @@ const exchange: Exchange = new Exchange(instruments);
 const simulation = new Simulation(exchange, strategy);
 simulation.run();
 console.log(simulation.account.toString);
+console.log(simulation.account.plot());
 
 // Evaluation
 const pct = (x: number): string => parseFloat((100*x).toFixed(3)) + "%";
 const stats: Stats = simulation.stats;
+const period: string = [
+  nextDate(today(), -simulation.account.valuation.start),
+  nextDate(today(), -simulation.account.valuation.end),
+].join("..");
 console.log(
+  "Period:", period,
   "Trades:", stats.trades.length,
   "Profit:", pct(stats.profit),
   "Average invested:", pct(stats.InvestedRatio),
   "Win Ratio:", pct(stats.WinRatio),
 );
+
