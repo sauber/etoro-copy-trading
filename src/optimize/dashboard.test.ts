@@ -11,8 +11,8 @@ Deno.test("Instance", () => {
   assertInstanceOf(new Dashboard(), Dashboard);
 });
 
-Deno.test("Render", { ignore: true }, async () => {
-  const d = new Dashboard();
+Deno.test("Render", { ignore: false }, async () => {
+  const d = new Dashboard(100);
   const parameters: Parameters = [
     new Parameter("Low", 0, 1, 0.25),
     new Parameter("High", 0, 1, 0.95),
@@ -26,13 +26,13 @@ Deno.test("Render", { ignore: true }, async () => {
       Math.random() - 0.5,
     ),
   ];
-  const chart: string = d.render(parameters);
+  const chart: string = d.render(parameters, 0);
   console.log(chart);
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 1; i <= 100; i++) {
     await delay(10); // waits for 100 milliseconds
-    parameters[5].set(2 * Math.random() - 1);
-    const update: string = d.render(parameters);
+    parameters.forEach(p=>p.set(p.suggest()));
+    const update: string = d.render(parameters, i);
     console.log(update);
   }
 });

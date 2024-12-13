@@ -1,20 +1,10 @@
-import { Exchange, Instrument, Instruments } from "@sauber/backtest";
+import { Exchange, Instruments } from "@sauber/backtest";
 import { type Backend, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/community.ts";
 import { Dashboard, Parameters, Status } from "📚/optimize/mod.ts";
 import { Config } from "📚/config/config.ts";
 import { TrainingData } from "📚/technical/trainingdata.ts";
-import { TimingData, Optimize } from "./optimize.ts";
-
-// Sanity check loaded data
-function verify(instruments: Instruments): void {
-  instruments.forEach((instrument: Instrument) => {
-    if (isNaN(instrument.start)) {
-      console.log(instrument);
-      throw new Error("Invalid start date for " + instrument.symbol);
-    }
-  });
-}
+import { Optimize, TimingData } from "📚/trading/optimize.ts";
 
 ////////////////////////////////////////////////////////////////////////
 /// Main
@@ -42,17 +32,17 @@ const config = new Config(backend);
 const timingData = await config.get(modelAssetName) as TimingData;
 const model = timingData ? Optimize.import(timingData) : new Optimize();
 
-const dashboard: Dashboard = new Dashboard(38);
+const epochs = 100;
+const dashboard: Dashboard = new Dashboard(epochs, 38);
 
 const status: Status = (
-  _iterations: number,
+  iterations: number,
   _momentum: number,
   parameters: Parameters,
-) => console.log(dashboard.render(parameters));
+) => console.log(dashboard.render(parameters, iterations));
 
 // Run optimizer and print results
 // console.log("start", model.print));
-const epochs = 100;
 const epsilon = 0.01;
 const iterations = model.optimize(exchange, epochs, epsilon, status);
 const exported: TimingData = model.export();

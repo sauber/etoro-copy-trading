@@ -8,6 +8,7 @@ import { Dashboard } from "📚/optimize/dashboard.ts";
 import { Minimize } from "📚/optimize/minimize.ts";
 import { Parameter } from "📚/optimize/parameter.ts";
 import { Inputs, NoisyBumpySlope, Output } from "📚/optimize/testdata.ts";
+import { Status } from "📚/optimize/mod.ts";
 
 Deno.test("Instance", () => {
   const min = new Minimize();
@@ -31,13 +32,15 @@ Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {
   // Dashboard
   const epochs = 20000;
   const width = 74;
-  const dashboard = new Dashboard(
-    width,
-  );
+  const dashboard = new Dashboard(epochs, width);
 
   // Callback to dashboard from training
-  function status(): void {
-    console.log(dashboard.render(parameters));
+  // function status(): void {
+  //   console.log(dashboard.render(parameters));
+  // }
+
+  const status: Status = (iteration: number, _momentum: number, _parameters): void => {
+    console.log(dashboard.render(parameters, iteration));
   }
 
   const minimizer = new Minimize({

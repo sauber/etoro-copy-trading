@@ -1,7 +1,6 @@
 import {
   Bar,
   Positions,
-  PurchaseOrder,
   PurchaseOrders,
   Strategy,
   StrategyContext,
@@ -9,7 +8,7 @@ import {
 import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
 import { DateFormat, weekdayFromDate } from "📚/time/mod.ts";
-import { PassThroughStrategy } from "📚/technical/testdata.ts";
+import { PassThroughStrategy } from "📚/trading/basic-strategies.ts";
 
 export type Parameters = {
   weekday: number;
