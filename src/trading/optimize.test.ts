@@ -47,19 +47,19 @@ Deno.test("Optimize", () => {
 
 Deno.test("Visualized training", { ignore: true }, () => {
   // Dashboard
+  const epochs = 5;
   const console_width = 74;
-  const dashboard: Dashboard = new Dashboard(console_width);
+  const dashboard: Dashboard = new Dashboard(epochs, console_width);
   function status(
     _iterations: number,
     _momentum: number,
     parameters: Parameters,
   ): void {
-    console.log(dashboard.render(parameters));
+    console.log(dashboard.render(parameters, 1));
   }
 
   const optimize = new Optimize();
   const exchange: Exchange = makeExchange();
-  const epochs = 500;
   const epsilon = 0.01;
   const iterations = optimize.optimize(exchange, epochs, epsilon, status);
   console.log("Iterations:", iterations);
