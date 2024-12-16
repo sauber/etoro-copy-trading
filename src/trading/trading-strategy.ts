@@ -1,66 +1,20 @@
 import {
-  Bar,
   Positions,
   PurchaseOrders,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { RSIStrategy } from "📚/technical/rsi-strategy.ts";
 import { nextDate, today } from "📚/time/calendar.ts";
 import { DateFormat, weekdayFromDate } from "📚/time/mod.ts";
-import { PassThroughStrategy } from "📚/trading/basic-strategies.ts";
+import {
+  RSIStrategy,
+  SizingStrategy,
+  WeekdayStrategy,
+} from "📚/strategy/mod.ts";
 
 export type Parameters = {
   weekday: number;
 };
-
-/** Only trade on certain day of week */
-export class WeekdayStrategy implements Strategy {
-  constructor(private readonly weekday: number) {}
-
-  private trading(bar: Bar): boolean {
-    const date: DateFormat = nextDate(today(), -bar);
-    const weekday: number = new Date(date).getDay();
-    return this.weekday === weekday;
-  }
-
-  public close(context: StrategyContext): Positions {
-    return this.trading(context.bar) ? context.positions : [];
-  }
-
-  public open(context: StrategyContext): PurchaseOrders {
-    return this.trading(context.bar) ? context.purchaseorders : [];
-  }
-}
-
-/** Adjust purchase order sizes to maximum and minimum ratio of value */
-export class MinMaxStrategy implements Strategy {
-  constructor(
-    private readonly min: number = 0.01,
-    private readonly max: number = 0.1,
-  ) {}
-
-  public close = (context: StrategyContext): Positions => context.positions;
-
-  public open(_context: StrategyContext): PurchaseOrders {
-    return [];
-  }
-}
-
-/** Holistic sizing of positions */
-export class SizingStrategy extends PassThroughStrategy {
-  public override open(context: StrategyContext): PurchaseOrders {
-    const po = context.purchaseorders;
-    if (po.length < 1) return [];
-    const sorted: PurchaseOrders = po.sort((a, b) => b.amount - a.amount);
-    const limit: PurchaseOrders = sorted.slice(0, 3);
-
-    return limit.map((po) => ({
-      instrument: po.instrument,
-      amount: context.value * 0.1,
-    }));
-  }
-}
 
 /**
  * Combination of several strategies:
