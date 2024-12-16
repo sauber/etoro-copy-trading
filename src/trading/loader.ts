@@ -65,7 +65,9 @@ export class Loader {
   public settings(): Promise<Parameters> {
     return this.cache<Parameters>(
       "settings",
-      async () => (await this.assets.config.get("trading")) as Parameters,
+      async () =>
+        ((await this.assets.config.get("trading")) ||
+          { weekday: 1, buy: 30, sell: 70, window: 21 }) as Parameters,
     );
   }
 
