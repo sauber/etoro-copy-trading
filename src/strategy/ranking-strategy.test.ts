@@ -1,10 +1,13 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import { assertEquals, assertGreater, assertInstanceOf } from "@std/assert";
 import {
   Amount,
   Bar,
+  CloseOrder,
+  CloseOrders,
   Position,
   Price,
   PurchaseOrder,
+  PurchaseOrders,
   StrategyContext,
 } from "@sauber/backtest";
 import { RankingStrategy } from "../strategy/ranking-strategy.ts";
@@ -30,21 +33,40 @@ const position: Position = new Position(
   0,
 );
 const purchaseorder: PurchaseOrder = { instrument, amount };
+const closeorder: CloseOrder = { position, confidence: 1 };
 
 Deno.test("Instance", () => {
   assertInstanceOf(new RankingStrategy(ranking), RankingStrategy);
 });
 
-Deno.test("Open/Close", () => {
+Deno.test("Close", () => {
   const strategy = new RankingStrategy(ranking);
   const context: StrategyContext = {
     bar: end,
     value: amount * 2,
     amount: amount,
     purchaseorders: [purchaseorder],
-    positions: [position],
+    closeorders: [closeorder],
   };
-  // console.log(strategy.close(context));
-  // assertEquals(strategy.open(context), []);
-  // assertEquals(strategy.close(context), []);
+  const closeorders: CloseOrders = strategy.close(context);
+  if (closeorders.length > 0) {
+    const co: CloseOrder = closeorders[0];
+    assertGreater(co.confidence, 0);
+  }
+});
+
+Deno.test("Open", () => {
+  const strategy = new RankingStrategy(ranking);
+  const context: StrategyContext = {
+    bar: end,
+    value: amount * 2,
+    amount: amount,
+    purchaseorders: [purchaseorder],
+    closeorders: [closeorder],
+  };
+  const purchaseorders: PurchaseOrders = strategy.open(context);
+  if (purchaseorders.length > 0) {
+    const po: PurchaseOrder = purchaseorders[0];
+    assertGreater(po.amount, 0);
+  }
 });

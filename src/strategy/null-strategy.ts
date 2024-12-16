@@ -1,5 +1,5 @@
 import {
-  Positions,
+  CloseOrders,
   PurchaseOrders,
   Strategy,
   StrategyContext,
@@ -11,7 +11,7 @@ export class NullStrategy implements Strategy {
     return [];
   }
 
-  public close(_context: StrategyContext): Positions {
+  public close(_context: StrategyContext): CloseOrders {
     return [];
   }
 }

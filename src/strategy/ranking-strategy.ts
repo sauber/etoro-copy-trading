@@ -1,11 +1,11 @@
 import {
-  Position,
+  CloseOrder,
+  CloseOrders,
   PurchaseOrder,
   PurchaseOrders,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { Positions } from "https://jsr.io/@sauber/backtest/0.6.0/src/position.ts";
 import { Ranking } from "📚/ranking/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 
@@ -14,11 +14,15 @@ export class RankingStrategy implements Strategy {
   constructor(private readonly model: Ranking) {}
 
   /** Close positions where ranking score < 0 */
-  public close(context: StrategyContext): Positions {
-    return context.positions.filter((position: Position) => {
-      const instrument = position.instrument as InvestorInstrument;
+  public close(context: StrategyContext): CloseOrders {
+    return context.closeorders.filter((closeorder: CloseOrder) => {
+      const instrument = closeorder.position.instrument as InvestorInstrument;
       const score = this.model.predict(instrument.investor);
-      if (score < 0) return true;
+      // Confidence to close is high if ranking score is low
+      if (score < 0) {
+        Object.assign(closeorder, { confidence: -score });
+        return true;
+      }
     });
   }
 

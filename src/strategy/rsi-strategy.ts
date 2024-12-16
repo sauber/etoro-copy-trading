@@ -1,8 +1,8 @@
 import {
   Amount,
   Bar,
+  CloseOrders,
   Instrument,
-  Positions,
   Price,
   PurchaseOrder,
   PurchaseOrders,
@@ -50,10 +50,10 @@ export class RSIStrategy implements Strategy {
     return this.charts[id];
   }
 
-  public close(context: StrategyContext): Positions {
+  public close(context: StrategyContext): CloseOrders {
     const bar: Bar = context.bar;
-    return context.positions.filter((position) => {
-      const rsiChart = this.chart(position.instrument as Instrument);
+    return context.closeorders.filter((closeorder) => {
+      const rsiChart = this.chart(closeorder.position.instrument as Instrument);
       // console.log("Close RSI", position.instrument.symbol, bar, rsiChart.bar(bar));
       if (!rsiChart.has(bar)) return false;
       if (rsiChart.bar(bar) < this.sell_threshold) return false;

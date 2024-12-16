@@ -1,5 +1,5 @@
 import {
-  Positions,
+  CloseOrders,
   PurchaseOrders,
   Strategy,
   StrategyContext,
@@ -11,7 +11,7 @@ export class PassThroughStrategy implements Strategy {
     return context.purchaseorders;
   }
 
-  public close(context: StrategyContext): Positions {
-    return context.positions;
+  public close(context: StrategyContext): CloseOrders {
+    return context.closeorders;
   }
 }
