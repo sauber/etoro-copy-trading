@@ -1,6 +1,6 @@
 import {
   Bar,
-  Positions,
+  CloseOrders,
   PurchaseOrders,
   Strategy,
   StrategyContext,
@@ -17,8 +17,8 @@ export class WeekdayStrategy implements Strategy {
     return this.weekday === weekday;
   }
 
-  public close(context: StrategyContext): Positions {
-    return this.trading(context.bar) ? context.positions : [];
+  public close(context: StrategyContext): CloseOrders {
+    return this.trading(context.bar) ? context.closeorders : [];
   }
 
   public open(context: StrategyContext): PurchaseOrders {

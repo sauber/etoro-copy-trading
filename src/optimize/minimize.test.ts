@@ -18,7 +18,7 @@ Deno.test("Instance", () => {
 Deno.test("Run", () => {
   const min = new Minimize();
   const iterations = min.run();
-  assertEquals(iterations, 0);
+  assertEquals(iterations, 1);
 });
 
 Deno.test("Optimize parameters for minimal loss", { ignore: true }, () => {

@@ -1,4 +1,5 @@
 import {
+CloseOrders,
   Positions,
   PurchaseOrders,
   Strategy,
@@ -11,6 +12,7 @@ import {
   SizingStrategy,
   WeekdayStrategy,
 } from "📚/strategy/mod.ts";
+import { RankingStrategy } from "📚/strategy/ranking-strategy.ts";
 
 export type Parameters = {
   weekday: number;
@@ -40,6 +42,7 @@ export class TradingStrategy implements Strategy {
     this.timing = new WeekdayStrategy(this.weekday);
     this.technical = new RSIStrategy(this.window, this.buy, this.sell);
     this.sizing = new SizingStrategy();
+    // this.ranking = new RankingStrategy();
   }
 
   /** Print out conect of Context */
@@ -48,23 +51,23 @@ export class TradingStrategy implements Strategy {
     console.log(strategy.constructor.name);
     console.log("  Bar:", context.bar, "Date:", weekdayFromDate(date), date);
     console.log("  Value:", context.value, "Amount:", context.amount);
-    console.log("  Positions:", context.positions.length);
+    console.log("  Positions:", context.closeorders.length);
     console.log("  POs:", context.purchaseorders.length);
   }
 
-  public close(context: StrategyContext): Positions {
+  public close(context: StrategyContext): CloseOrders {
     // console.log("Closing strategies");
     // this.printContext(this, context);
     const strategies: Array<Strategy> = [this.timing, this.technical];
 
-    let positions: Positions = [];
+    let closeorders: CloseOrders = [];
     for (const strategy of strategies) {
-      positions = strategy.close(context);
-      Object.assign(context, { positions });
+      closeorders = strategy.close(context);
+      Object.assign(context, { closeorders });
       // this.printContext(strategy, context);
-      if (positions.length < 1) return [];
+      if (closeorders.length < 1) return [];
     }
-    return positions;
+    return closeorders;
   }
 
   public open(context: StrategyContext): PurchaseOrders {

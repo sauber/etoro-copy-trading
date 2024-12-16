@@ -19,8 +19,9 @@ export class RankingStrategy implements Strategy {
       const instrument = closeorder.position.instrument as InvestorInstrument;
       const score = this.model.predict(instrument.investor);
       // Confidence to close is high if ranking score is low
+      const confidence = -score * closeorder.confidence;
       if (score < 0) {
-        Object.assign(closeorder, { confidence: -score });
+        Object.assign(closeorder, { confidence });
         return true;
       }
     });

@@ -6,7 +6,7 @@ import {
 } from "@std/assert";
 import { Dashboard, Parameters } from "📚/optimize/mod.ts";
 import { Exchange, TestInstrument } from "@sauber/backtest";
-import { Optimize, TimingData } from "📚/trading/optimize.ts";
+import { Optimize, TradingData } from "📚/trading/optimize.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
@@ -21,7 +21,7 @@ Deno.test("Generate", () => {
 
 Deno.test("Export / Import", () => {
   const optimize = new Optimize();
-  const data: TimingData = optimize.export();
+  const data: TradingData = optimize.export();
   assertEquals(Object.keys(data).length, 4);
   const i = Optimize.import(data);
   assertInstanceOf(i, Optimize);
@@ -31,7 +31,6 @@ Deno.test("Predict", () => {
   const exchange: Exchange = makeExchange();
   const optimize = new Optimize();
   const score: number = optimize.predict(exchange);
-  // console.log(score);
   assertEquals(isNaN(score), false);
 });
 
@@ -45,7 +44,7 @@ Deno.test("Optimize", () => {
   assertLessOrEqual(iterations, epochs);
 });
 
-Deno.test("Visualized training", { ignore: true }, () => {
+Deno.test("Visualized training", { ignore: false }, () => {
   // Dashboard
   const epochs = 5;
   const console_width = 74;

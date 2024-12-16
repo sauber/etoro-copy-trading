@@ -59,9 +59,10 @@ export class Minimize {
       const momentum = this.step();
       if (momentum < this.epsilon) {
         this.status(i, momentum, this.parameters);
+        i++;
         break;
       } else if (i % this.every == 0) this.status(i, momentum, this.parameters);
     }
-    return i - 1;
+    return i-1;
   }
 }

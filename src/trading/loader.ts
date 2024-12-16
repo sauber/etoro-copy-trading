@@ -196,7 +196,7 @@ export class Loader {
   }
 
   /** Investors available on (upto EXTEND days before) trading date */
-  private instruments(): Promise<Instruments> {
+  public instruments(): Promise<Instruments> {
     return this.cache<Instruments>(
       "instruments",
       async () => {

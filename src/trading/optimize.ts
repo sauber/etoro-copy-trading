@@ -20,6 +20,12 @@ function makeParameters(value: Array<number> = []): Parameters {
 // Values of window, buy, sell, weekday
 type Input = [number, number, number, number];
 type Output = number;
+export type TradingData = {
+  window: number;
+  buy: number;
+  sell: number;
+  weekday: number;
+};
 
 // Extract array of values from parameters
 function values(parameters: Parameters): Input {
@@ -33,7 +39,7 @@ export type Dashboard = (
 ) => void;
 
 /** Exported data of model */
-export type TimingData = Array<ParameterData>;
+// export type TimingData = Array<ParameterData>;
 
 type Samples = Array<{ input: Parameters; output: number }>;
 
@@ -42,13 +48,28 @@ export class Optimize {
   constructor(private readonly parameters: Parameters = makeParameters()) {}
 
   /** Generate model from saved parameters */
-  public static import(data: TimingData): Optimize {
-    return new Optimize(data.map((d) => Parameter.import(d)));
+  public static import(data: TradingData): Optimize {
+    const names = makeParameters()
+      .map((p) => p.name) as Array<keyof TradingData>;
+    const values = names.map((name) => data[name]) as Input;
+    return new Optimize(makeParameters(values));
   }
 
   /** Export parameters of model */
-  public export(): TimingData {
-    return this.parameters.map((p) => p.export());
+  public export(): TradingData {
+    return Object.fromEntries(
+      this.parameters.map((p) => [p.name, p.value]),
+    ) as TradingData;
+  }
+
+  /** Scan a number of random points, and pick best */
+  public static best(of: number, exchange: Exchange): Optimize {
+    // Find starting point
+    const sampler = new Optimize();
+    const samples: Samples = sampler.samples(exchange, of);
+    samples.sort((a, b) => b.output - a.output);
+    const start = samples[0];
+    return new Optimize(start.input);
   }
 
   /** Get results for a number of inputs */
@@ -117,12 +138,6 @@ export class Optimize {
     epsilon: number = 0.001,
     status: Dashboard = () => undefined,
   ): number {
-    // Find starting point
-    const samples: Samples = this.samples(exchange, 200);
-    samples.sort((a, b) => b.output - a.output);
-    const start = samples[0];
-    start.input.map((p, i) => this.parameters[i].set(p.value));
-
     // Callback from optimize to model
     const loss = (input: Input): Output => {
       const score: Output = this.simulation(exchange, makeParameters(input));
