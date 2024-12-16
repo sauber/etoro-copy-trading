@@ -10,7 +10,7 @@ const EXTEND = 2;
 
 /** Generate instrument from investor */
 export class InvestorInstrument extends Instrument {
-  constructor(investor: Investor) {
+  constructor(public readonly investor: Investor) {
     // Extend series with last value
     const last = investor.chart.last;
     const series: Array<Price> = [
