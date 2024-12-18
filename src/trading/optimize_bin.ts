@@ -17,7 +17,7 @@ const repo: Assets = Assets.disk(path);
 const loader: Loader = new Loader(repo);
 
 // Load training data
-const instruments: Instruments = await loader.instruments();
+const instruments: Instruments = await loader.instrumentSamples(400);
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
 

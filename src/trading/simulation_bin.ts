@@ -13,7 +13,6 @@ import {
 import { Loader } from "📚/trading/loader.ts";
 import { nextDate, today } from "📚/time/mod.ts";
 
-
 // Repo
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
@@ -25,12 +24,14 @@ const settings: Parameters = await loader.settings();
 const strategy: Strategy = new TradingStrategy(settings);
 
 // Exchange
-const instruments: Instruments = await loader.allInstruments();
+const instruments: Instruments = await loader.instrumentSamples(400);
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
+console.log("Exchange created");
 
 // Simulation
 const simulation = new Simulation(exchange, strategy);
+console.log("Simulation starts");
 simulation.run();
 console.log(simulation.account.toString);
 console.log(simulation.account.plot());
@@ -43,9 +44,14 @@ const period: string = [
   nextDate(today(), -simulation.account.valuation.end),
 ].join("..");
 console.log(
-  "Period:", period,
-  "Trades:", stats.trades.length,
-  "Profit:", pct(stats.profit),
-  "Average invested:", pct(stats.InvestedRatio),
-  "Win Ratio:", pct(stats.WinRatio),
+  "Period:",
+  period,
+  "Trades:",
+  stats.trades.length,
+  "Profit:",
+  pct(stats.profit),
+  "Average invested:",
+  pct(stats.InvestedRatio),
+  "Win Ratio:",
+  pct(stats.WinRatio),
 );

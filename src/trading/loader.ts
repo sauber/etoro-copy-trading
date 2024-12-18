@@ -220,18 +220,18 @@ export class Loader {
     );
   }
 
-  /** All Instrument */
-  public allInstruments(): Promise<Instruments> {
-    return this.cache<Instruments>(
-      "all_instruments",
-      async () => {
+  /** Load a number of random Instrument */
+  public async instrumentSamples(count: number): Promise<Instruments> {
+    // return this.cache<Instruments>(
+    //   "instruments_samples_" + count.toString(),
+    //   async () => {
         const names: Names = await this.assets.community.allNames();
         console.log("Names:", names.length);
-        const sample: Names = shuffleArray(names).slice(0,500);
+        const sample: Names = shuffleArray(names).slice(0, count);
         console.log("Samples:", sample.length);
         return this.instruments(sample);
-      },
-    );
+    //   },
+    // );
   }
 
   /** Start date of position.
