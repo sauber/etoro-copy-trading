@@ -1,7 +1,6 @@
-import { Chart } from "📚/chart/mod.ts";
+import { Bar, Chart } from "@sauber/backtest";
 import { Diary } from "📚/investor/diary.ts";
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
-import type { DateFormat } from "📚/time/mod.ts";
 
 export class Investor {
   constructor(
@@ -13,10 +12,9 @@ export class Investor {
     public readonly stats: Diary<StatsExport>,
   ) {}
 
-  /** Confirm if investor has chart data on this date */
-  public active(date: DateFormat): boolean {
-    if (this.chart.start <= date && this.chart.end >= date) return true;
-    else return false;
+  /** Confirm if investor has chart data at this bar */
+  public isActive(bar: Bar): boolean {
+    return this.chart.has(bar);
   }
 
   /** Is Fund? */

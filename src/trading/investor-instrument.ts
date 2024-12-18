@@ -1,26 +1,23 @@
-import { Bar, Buffer, Instrument } from "@sauber/backtest";
+import { Bar, Instrument, Price } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
-import { diffDate, today } from "📚/time/mod.ts";
-
-// Today's date
-const NOW = today();
 
 // Maximum numbr of days chart data can be delayed
 const EXTEND = 2;
 
 /** Generate instrument from investor */
 export class InvestorInstrument extends Instrument {
+  public override readonly end: Bar;
   constructor(public readonly investor: Investor) {
-    // Extend series with last value
-    const last = investor.chart.last;
-    const series: Buffer = new Float32Array([
-      ...investor.chart.values,
-      ...Array(EXTEND).fill(last),
-    ]);
-
-    // Extend end
-    const end: Bar = diffDate(investor.chart.end, NOW) - EXTEND;
+    const end = investor.chart.end;
     const username = investor.UserName;
-    super(series, end, username, investor.FullName);
+    super(investor.chart.values, end, username, investor.FullName);
+    this.end = end - EXTEND;
+  }
+
+  public override price(bar: Bar): Price {
+    const shift: number = Math.max(0, bar - this.end);
+    const index: number = this.buffer.length - bar + this.end - 1 + shift;
+    const value: Price = this.buffer[index];
+    return value;
   }
 }

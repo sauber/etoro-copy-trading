@@ -2,7 +2,7 @@ import { Investor } from "📚/investor/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 import { diffDate } from "📚/time/mod.ts";
 import { Features } from "📚/ranking/features.ts";
-import { Chart } from "📚/chart/mod.ts";
+import { Bar, Chart } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";
 
 // Combine input and output records
@@ -30,8 +30,11 @@ export class TrainingData {
   public features(investor: Investor): Samples {
     const samples: Samples = [];
     const dates: DateFormat[] = investor.stats.dates;
-    const chart: Chart = investor.chart.trim;
-    const end: DateFormat = chart.end;
+    // const chart: Chart = investor.chart.trim; TODO
+
+
+    const chart: Chart = investor.chart;
+    const end: Bar = chart.end;
 
     // Test if each date of where stats are available have
     // enough data available for calculating SharpeRatio

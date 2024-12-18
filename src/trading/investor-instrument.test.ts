@@ -1,7 +1,10 @@
-import { assertAlmostEquals, assertEquals, assertInstanceOf } from "@std/assert";
+import {
+  assertAlmostEquals,
+  assertEquals,
+  assertInstanceOf,
+} from "@std/assert";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { investor } from "📚/trading/testdata.ts";
-import { DateFormat, diffDate, today } from "📚/time/mod.ts";
 import { Bar, Price } from "@sauber/backtest";
 
 Deno.test("Instance", () => {
@@ -9,26 +12,23 @@ Deno.test("Instance", () => {
 });
 
 Deno.test("Start is unchanged", () => {
-  const startDate: DateFormat = investor.chart.start;
-  const investorStart = diffDate(startDate, today());
+  const start: Bar = investor.chart.start;
   const instr = new InvestorInstrument(investor);
   const instrumetStart: Bar = instr.start;
-  assertEquals(instrumetStart, investorStart);
+  assertEquals(instrumetStart, start);
 });
 
 Deno.test("Extend End", () => {
   const offset = 2;
-  const endDate: DateFormat = investor.chart.end;
-  const investorEnd = diffDate(endDate, today());
+  const end: Bar = investor.chart.end;
   const instr = new InvestorInstrument(investor);
   const instrumetEnd: Bar = instr.end;
-  assertEquals(instrumetEnd, investorEnd - offset);
+  assertEquals(instrumetEnd, end - offset);
 });
 
 Deno.test("Confirm price availability to offset", () => {
-  const endDate: DateFormat = investor.chart.end;
+  const investorEnd: Bar = investor.chart.end;
   const price: Price = investor.chart.last;
-  const investorEnd = diffDate(endDate, today());
   const instr = new InvestorInstrument(investor);
   const instrumetEnd: Bar = instr.end;
 

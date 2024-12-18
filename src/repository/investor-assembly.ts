@@ -1,10 +1,12 @@
 import { type DateFormat, diffDate } from "📚/time/mod.ts";
 import { JournaledAsset, Backend } from "📚/storage/mod.ts";
 import { Chart as CompiledChart } from "📚/chart/mod.ts";
+import { Chart as BackTestChart, Bar } from "@sauber/backtest";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
 import { InvestorId } from "📚/repository/types.ts";
 import { Chart, type ChartData } from "📚/repository/chart.ts";
+// import { Chart } from "@sauber/backtest";
 import {
   type Mirror,
   Portfolio,
@@ -16,6 +18,7 @@ import {
   type StatsExport,
 } from "📚/repository/stats.ts";
 import type { Names } from "📚/repository/mod.ts";
+import { today } from "📚/time/calendar.ts";
 
 type MirrorsByDate = Record<DateFormat, Mirror[]>;
 type StatsByDate = Record<DateFormat, StatsExport>;
@@ -317,11 +320,13 @@ export class InvestorAssembly {
 
   /** Generate investor object from raw data */
   private generate(data: InvestorExport): Investor {
+    const end: Bar = diffDate(data.chartend, today());
+    const chart = new BackTestChart(new Float32Array(data.chart), end);
     return new Investor(
       this.UserName,
       data.customerid,
       data.fullname,
-      new CompiledChart(data.chart, data.chartend),
+      chart,
       new Diary(data.mirrors),
       new Diary(data.stats),
     );

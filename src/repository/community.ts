@@ -1,11 +1,12 @@
 import { Backend } from "📚/storage/mod.ts";
-import { DateFormat, nextDate } from "📚/time/mod.ts";
+import { DateFormat, diffDate, nextDate } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { Chart } from "📚/chart/mod.ts";
+import { Bar, Chart } from "@sauber/backtest";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import { Config } from "📚/config/config.ts";
 import { Mirror } from "📚/repository/mod.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
+import { today } from "📚/time/calendar.ts";
 
 export type Names = Array<string>;
 export type Investors = Array<Investor>;
@@ -84,13 +85,14 @@ export class Community {
     return null;
   }
 
-  /** Test if investor is active at date */
+  /** Test if investor is active at bar */
   private async activeName(
     username: string,
     date: DateFormat,
   ): Promise<boolean> {
     const investor = await this.investor(username);
-    return investor.active(date);
+    const bar: Bar = diffDate(date, today());
+    return investor.isActive(bar);
   }
 
   /** Names of investors where date is within active range */
