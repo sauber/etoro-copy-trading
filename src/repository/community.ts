@@ -5,6 +5,7 @@ import { Chart } from "📚/chart/mod.ts";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import { Config } from "📚/config/config.ts";
 import { Mirror } from "📚/repository/mod.ts";
+import shuffleArray from "@hugoalh/shuffle-array";
 
 export type Names = Array<string>;
 export type Investors = Array<Investor>;
@@ -29,16 +30,6 @@ export class Community {
     return this.repo.dirs();
   }
 
-  /** Unique set of names across all dates */
-  public async allNames(): Promise<Names> {
-    const dates: Dates = await this.dates();
-    const allNames: Names[] = await Promise.all(
-      dates.map((date) => this.namesByDate(date)),
-    );
-    const merged = new Set(allNames.flat());
-    return Array.from(merged);
-  }
-
   /** Identify all investor names on a date */
   public async namesByDate(date: DateFormat): Promise<Names> {
     const assets: string[] = await (await this.repo.sub(date)).names();
@@ -56,6 +47,23 @@ export class Community {
     const owner: string = await this.owner();
     names.delete(owner);
     return Array.from(names);
+  }
+
+  /** Unique set of names across all dates */
+  public async allNames(): Promise<Names> {
+    const dates: Dates = await this.dates();
+    const allNames: Names[] = await Promise.all(
+      dates.map((date) => this.namesByDate(date)),
+    );
+    const merged = new Set(allNames.flat());
+    return Array.from(merged);
+  }
+
+  /** A set of investor names */
+  public async samples(count: number): Promise<Names> {
+    const all: Names = await this.allNames();
+    const some: Names = shuffleArray(all).slice(0, count);
+    return some;
   }
 
   /** The first directory where names exists */

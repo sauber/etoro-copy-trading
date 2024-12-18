@@ -222,16 +222,8 @@ export class Loader {
 
   /** Load a number of random Instrument */
   public async instrumentSamples(count: number): Promise<Instruments> {
-    // return this.cache<Instruments>(
-    //   "instruments_samples_" + count.toString(),
-    //   async () => {
-        const names: Names = await this.assets.community.allNames();
-        console.log("Names:", names.length);
-        const sample: Names = shuffleArray(names).slice(0, count);
-        console.log("Samples:", sample.length);
-        return this.instruments(sample);
-    //   },
-    // );
+    const names: Names = await this.assets.community.samples(count);
+    return this.instruments(names);
   }
 
   /** Start date of position.
