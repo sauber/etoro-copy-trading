@@ -13,6 +13,7 @@ import {
 import { Loader } from "📚/trading/loader.ts";
 import { nextDate, today } from "📚/time/mod.ts";
 
+
 // Repo
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
@@ -24,7 +25,7 @@ const settings: Parameters = await loader.settings();
 const strategy: Strategy = new TradingStrategy(settings);
 
 // Exchange
-const instruments: Instruments = await loader.instruments();
+const instruments: Instruments = await loader.allInstruments();
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
 

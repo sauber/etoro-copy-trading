@@ -21,6 +21,7 @@ import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
+import shuffleArray from "@hugoalh/shuffle-array";
 
 const NOW: DateFormat = today();
 
@@ -57,6 +58,7 @@ export class Loader {
     if (!(key in this.cache)) {
       const value: CacheValue = await loader();
       this.cached[key] = value;
+      return value as T;
     }
     return this.cached[key] as T;
   }
@@ -197,18 +199,37 @@ export class Loader {
     );
   }
 
+  /** Load instruments by list of investor names */
+  private async instruments(names: string[]): Promise<Instruments> {
+    const instruments: Instruments = await Promise.all(
+      names.map((name: string) => this.instrument(name)),
+    );
+    return instruments;
+  }
+
   /** Investors available on (upto EXTEND days before) trading date */
-  public instruments(): Promise<Instruments> {
+  public tradingInstruments(): Promise<Instruments> {
     return this.cache<Instruments>(
-      "instruments",
+      "trading_instruments",
       async () => {
         const tradingDate: DateFormat = await this.tradingDate();
         const activeDate: DateFormat = nextDate(tradingDate, -EXTEND);
         const names: Names = await this.assets.community.active(activeDate);
-        const instruments: Instruments = await Promise.all(
-          names.map((name: string) => this.instrument(name)),
-        );
-        return instruments;
+        return this.instruments(names);
+      },
+    );
+  }
+
+  /** All Instrument */
+  public allInstruments(): Promise<Instruments> {
+    return this.cache<Instruments>(
+      "all_instruments",
+      async () => {
+        const names: Names = await this.assets.community.allNames();
+        console.log("Names:", names.length);
+        const sample: Names = shuffleArray(names).slice(0,500);
+        console.log("Samples:", sample.length);
+        return this.instruments(sample);
       },
     );
   }
@@ -307,7 +328,7 @@ export class Loader {
     return this.cache<PurchaseOrders>(
       "po",
       async () => {
-        const instruments: Instruments = await this.instruments();
+        const instruments: Instruments = await this.tradingInstruments();
         const total: Amount = await this.amount();
         const amount: Amount = total / instruments.length;
         const purchaseOrders: PurchaseOrders = instruments.map(
