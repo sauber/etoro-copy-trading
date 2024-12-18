@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { StrategyContext } from "@sauber/backtest";
-import { RSIStrategy } from "../strategy/rsi-strategy.ts";
+import { RSIStrategy } from "📚/strategy/rsi-strategy.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new RSIStrategy(), RSIStrategy);

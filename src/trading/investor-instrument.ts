@@ -1,4 +1,4 @@
-import { Bar, Instrument, Price } from "@sauber/backtest";
+import { Bar, Buffer, Instrument } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
 import { diffDate, today } from "📚/time/mod.ts";
 
@@ -13,10 +13,10 @@ export class InvestorInstrument extends Instrument {
   constructor(public readonly investor: Investor) {
     // Extend series with last value
     const last = investor.chart.last;
-    const series: Array<Price> = [
+    const series: Buffer = new Float32Array([
       ...investor.chart.values,
       ...Array(EXTEND).fill(last),
-    ];
+    ]);
 
     // Extend end
     const end: Bar = diffDate(investor.chart.end, NOW) - EXTEND;

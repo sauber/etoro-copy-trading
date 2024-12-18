@@ -6,23 +6,12 @@ import {
   Price,
   PurchaseOrder,
   PurchaseOrders,
-  Series,
+  Buffer,
   Strategy,
   StrategyContext,
+  Chart
 } from "@sauber/backtest";
 import { RSI } from "@debut/indicators";
-
-/** Lookup Series by Bar */
-class Chart {
-  constructor(private readonly series: Series, private readonly end: Bar) {}
-  public has(bar: Bar): boolean {
-    return bar >= this.end && bar <= this.end + this.series.length &&
-      this.series.length > 0;
-  }
-  public bar(bar: Bar): Price {
-    return this.series[bar - this.end];
-  }
-}
 
 export class RSIStrategy implements Strategy {
   // Weekday of today
@@ -40,7 +29,7 @@ export class RSIStrategy implements Strategy {
     const id = instrument.symbol;
     if (!this.charts[id]) {
       const end: Bar = instrument.end;
-      const source: Series = instrument.series;
+      const source: Buffer = instrument.buffer;
       const rsi = new RSI(this.window);
       const series = source.map((v) => rsi.nextValue(v)).filter((v) =>
         v !== undefined && !isNaN(v)

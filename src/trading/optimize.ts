@@ -1,11 +1,5 @@
-import { Exchange, Simulation, Stats, Strategy } from "@sauber/backtest";
-import {
-  IntegerParameter,
-  Minimize,
-  Parameter,
-  ParameterData,
-  Parameters,
-} from "📚/optimize/mod.ts";
+import { Exchange, Simulation, Strategy } from "@sauber/backtest";
+import { IntegerParameter, Minimize, Parameters } from "📚/optimize/mod.ts";
 import { TradingStrategy } from "📚/trading/trading-strategy.ts";
 
 function makeParameters(value: Array<number> = []): Parameters {
@@ -26,11 +20,6 @@ export type TradingData = {
   sell: number;
   weekday: number;
 };
-
-// Extract array of values from parameters
-function values(parameters: Parameters): Input {
-  return parameters.map((p) => p.value) as Input;
-}
 
 export type Dashboard = (
   iteration: number,
@@ -107,17 +96,17 @@ export class Optimize {
     simulation.run();
 
     // Extract score
-    const stats: Stats = simulation.stats;
-    const trades: number = stats.trades.length;
-    const profit: number = stats.profit;
-    const invested: number = stats.InvestedRatio;
-    const win: number = stats.WinRatio;
+    // const stats: Stats = simulation.stats;
+    const trades: number = simulation.account.trades.length;
+    const profit: number = simulation.account.profit;
+    const invested: number = simulation.account.InvestedRatio;
+    const win: number = simulation.account.WinRatio;
 
     const scale: number = Math.abs(profit);
     // Normalize costs: 0=no cost, 1=worst cost
     // The more trades the worse
     const trades_cost: number = Math.tanh(
-      trades / simulation.account.valuation.length,
+      trades / simulation.account.bars,
     );
     // The more uninvested cash invested the worse
     const cash_cost = 1 - invested;

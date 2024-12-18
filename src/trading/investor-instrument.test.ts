@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import { assertAlmostEquals, assertEquals, assertInstanceOf } from "@std/assert";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { investor } from "📚/trading/testdata.ts";
 import { DateFormat, diffDate, today } from "📚/time/mod.ts";
@@ -33,6 +33,6 @@ Deno.test("Confirm price availability to offset", () => {
   const instrumetEnd: Bar = instr.end;
 
   for (let bar = investorEnd; bar >= instrumetEnd; bar--) {
-    assertEquals(instr.price(bar), price);
+    assertAlmostEquals(instr.price(bar), price);
   }
 });

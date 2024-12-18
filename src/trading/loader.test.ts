@@ -4,11 +4,17 @@ import {
   assertEquals,
   assertInstanceOf,
 } from "@std/assert";
-import { Loader } from "./loader.ts";
-import { assets } from "📚/trading/testdata.ts";
-import { Amount, Bar, Positions, PurchaseOrders } from "@sauber/backtest";
+import {
+  Amount,
+  Bar,
+  CloseOrders,
+  PurchaseOrders,
+  StrategyContext,
+} from "@sauber/backtest";
 import { DateFormat, diffDate, today } from "📚/time/mod.ts";
 import { Mirror } from "📚/repository/mod.ts";
+import { Loader } from "📚/trading/loader.ts";
+import { assets } from "📚/trading/testdata.ts";
 import { Parameters } from "📚/trading/trading-strategy.ts";
 
 Deno.test("Instance", () => {
@@ -33,31 +39,22 @@ Deno.test("Trading Day", async () => {
   assertEquals(date, "2022-04-25");
 });
 
-Deno.test("Value", async () => {
+Deno.test("Trading Context", async () => {
   const loader = new Loader(assets);
-  const value: Amount = await loader.value();
-  assertEquals(value, (await assets.config.get("account") as Mirror).Value);
-});
+  const context: StrategyContext = await loader.strategyContext();
+  const value: Amount = (await assets.config.get("account") as Mirror).Value;
+  assertEquals(context.value, value);
+  assertAlmostEquals(context.amount, 12.5);
 
-Deno.test("Amount", async () => {
-  const loader = new Loader(assets);
-  const amount: Amount = await loader.amount();
-  assertAlmostEquals(amount, 12.5);
-});
+  // Purchase Orders
+  const po: PurchaseOrders = context.purchaseorders;
+  assertEquals(po.length, 13);
+  po.forEach((p) => assertEquals(p.amount, context.amount / po.length));
 
-Deno.test("Purchase Orders", async () => {
-  const loader = new Loader(assets);
-  const po: PurchaseOrders = await loader.purchaseOrders();
-  const count: number = po.length;
-  assertEquals(count, 13);
-  const amount: Amount = (await loader.amount()) / count;
-  po.forEach((p) => assertEquals(p.amount, amount));
-});
-
-Deno.test("Positions", async () => {
-  const loader = new Loader(assets);
-  const positions: Positions = await loader.positions();
-  assertEquals(positions.length, 20);
+  // Close Orders
+  const co: CloseOrders = context.closeorders;
+  assertEquals(co.length, 20);
+  co.forEach((c) => assertEquals(c.confidence, 1));
 });
 
 Deno.test("Settings", async () => {

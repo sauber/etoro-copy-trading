@@ -1,8 +1,7 @@
 import {
-  Amount,
-  Bar,
-  Portfolio,
-  Positions,
+  CloseOrder,
+  CloseOrders,
+  PurchaseOrder,
   PurchaseOrders,
   Strategy,
   StrategyContext,
@@ -10,9 +9,8 @@ import {
 import { Table } from "@sauber/table";
 import { DateFormat } from "📚/time/mod.ts";
 import { Assets } from "📚/assets/assets.ts";
-import { TradingStrategy } from "📚/trading/trading-strategy.ts";
+import { TradingStrategy, type Parameters } from "📚/trading/trading-strategy.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { type Parameters } from "📚/trading/trading-strategy.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -25,34 +23,32 @@ const settings: Parameters = await loader.settings();
 const strategy: Strategy = new TradingStrategy(settings);
 
 // Strategy Context
-const value: Amount = await loader.value();
-const amount: Amount = await loader.amount();
-const bar: Bar = await loader.tradingBar();
-const positions: Positions = await loader.positions();
-const purchaseorders: PurchaseOrders = await loader.purchaseOrders();
-const situation: StrategyContext = {
-  bar,
-  value,
-  amount,
-  purchaseorders,
-  positions,
-};
+const situation: StrategyContext = await loader.strategyContext();
 
+// Account
 const tradingDate: DateFormat = await loader.tradingDate();
 console.log("Trading Day:", tradingDate);
 
+// Trading Day
 const username: string = await loader.username();
 console.log("Account:", username);
 
 // Closing
-const close: Positions = strategy.close(situation);
-const portfolio = new Portfolio(close);
-console.log("Positions to close:", portfolio.toString(bar));
+const close: CloseOrders = strategy.close(situation);
+const ctable = new Table();
+ctable.headers = ["UserName", "Amount"];
+ctable.rows = close.map((
+  c: CloseOrder,
+) => [c.position.instrument.symbol, parseFloat(c.position.amount.toFixed(2))]);
+console.log("Positions to close:");
+console.log(ctable.toString());
 
 // Opening
 const open: PurchaseOrders = strategy.open(situation);
-const table = new Table();
-table.headers = ["UserName", "Amount"];
-table.rows = open.map((o) => [o.instrument.symbol, parseFloat(o.amount.toFixed(2))]);
-console.log("Positions to open");
-console.log(table.toString());
+const otable = new Table();
+otable.headers = ["UserName", "Amount"];
+otable.rows = open.map((
+  o: PurchaseOrder,
+) => [o.instrument.symbol, parseFloat(o.amount.toFixed(2))]);
+console.log("Positions to open:");
+console.log(otable.toString());

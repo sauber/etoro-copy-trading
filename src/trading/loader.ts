@@ -1,11 +1,14 @@
 import {
   Amount,
   Bar,
+  Buffer,
+  CloseOrders,
   Instrument,
   Instruments,
   Position,
   PositionID,
   Price,
+  StrategyContext,
 } from "@sauber/backtest";
 import { Positions, PurchaseOrders } from "@sauber/backtest";
 import { type Parameters } from "📚/trading/trading-strategy.ts";
@@ -21,7 +24,6 @@ import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
-import shuffleArray from "@hugoalh/shuffle-array";
 
 const NOW: DateFormat = today();
 
@@ -31,6 +33,7 @@ const EXTEND = 2;
 type CacheValue =
   | Amount
   | Bar
+  | CloseOrders
   | DateFormat
   | Instrument
   | Instruments
@@ -189,9 +192,10 @@ export class Loader {
           // Create placeholder instrument
           const start: DateFormat = await this.start();
           const end: DateFormat = await this.end();
-          const series: Array<Price> = Array(diffDate(start, end) + 1).fill(
-            10000,
-          );
+          const series: Buffer = new Float32Array(diffDate(start, end) + 1)
+            .fill(
+              10000,
+            );
           const bar: Bar = diffDate(end, NOW);
           return new Instrument(series, bar, username, "Placeholder");
         }
@@ -282,7 +286,7 @@ export class Loader {
   }
 
   /** All mirrors of account */
-  public positions(): Promise<Positions> {
+  private positions(): Promise<Positions> {
     return this.cache<Positions>(
       "positions",
       async () => {
@@ -299,7 +303,7 @@ export class Loader {
   }
 
   /** Amount available for investing */
-  public amount(): Promise<Amount> {
+  private amount(): Promise<Amount> {
     return this.cache<Amount>(
       "amount",
       async () => {
@@ -315,8 +319,8 @@ export class Loader {
     );
   }
 
-  /** Assume all investors available for purchase */
-  public purchaseOrders(): Promise<PurchaseOrders> {
+  /** Investors available for purchase */
+  private purchaseOrders(): Promise<PurchaseOrders> {
     return this.cache<PurchaseOrders>(
       "po",
       async () => {
@@ -329,5 +333,33 @@ export class Loader {
         return purchaseOrders;
       },
     );
+  }
+
+  /** Investors available for purchase */
+  private closeOrders(): Promise<CloseOrders> {
+    return this.cache<CloseOrders>(
+      "co",
+      async () => {
+        const positions: Positions = await this.positions();
+        const closeOrders: CloseOrders = positions.map(
+          (position: Position) => ({ position, confidence: 1 }),
+        );
+        return closeOrders;
+      },
+    );
+  }
+
+  /** Context for trading strategy */
+  public async strategyContext(): Promise<StrategyContext> {
+    const [bar, value, amount, purchaseorders, closeorders] = await Promise.all(
+      [
+        this.tradingBar(),
+        this.value(),
+        this.amount(),
+        this.purchaseOrders(),
+        this.closeOrders(),
+      ],
+    ) as [Bar, Amount, Amount, PurchaseOrders, CloseOrders];
+    return { bar, value, amount, purchaseorders, closeorders };
   }
 }

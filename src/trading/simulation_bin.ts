@@ -1,4 +1,5 @@
 import {
+  Account,
   Exchange,
   Instruments,
   Simulation,
@@ -24,10 +25,10 @@ const settings: Parameters = await loader.settings();
 const strategy: Strategy = new TradingStrategy(settings);
 
 // Exchange
-const instruments: Instruments = await loader.instrumentSamples(400);
+const instruments: Instruments = await loader.instrumentSamples(4);
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
-console.log("Exchange created");
+console.log("Exchange created", exchange);
 
 // Simulation
 const simulation = new Simulation(exchange, strategy);
@@ -38,20 +39,14 @@ console.log(simulation.account.plot());
 
 // Evaluation
 const pct = (x: number): string => parseFloat((100 * x).toFixed(3)) + "%";
-const stats: Stats = simulation.stats;
-const period: string = [
-  nextDate(today(), -simulation.account.valuation.start),
-  nextDate(today(), -simulation.account.valuation.end),
-].join("..");
+const account: Account = simulation.account;
 console.log(
-  "Period:",
-  period,
   "Trades:",
-  stats.trades.length,
+  account.trades.length,
   "Profit:",
-  pct(stats.profit),
+  pct(account.profit),
   "Average invested:",
-  pct(stats.InvestedRatio),
+  pct(account.InvestedRatio),
   "Win Ratio:",
-  pct(stats.WinRatio),
+  pct(account.WinRatio),
 );
