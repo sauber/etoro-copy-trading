@@ -31,11 +31,8 @@ export class CachingBackend implements Backend {
     return;
   }
 
-  private readonly _assets: Record<string, JSONObject> = {};
-  public async retrieve(assetname: string): Promise<JSONObject> {
-    if (!(assetname in this._assets))
-      this._assets[assetname] = await this.parent.retrieve(assetname);
-    return this._assets[assetname];
+  public retrieve(assetname: string): Promise<JSONObject> {
+    return this.parent.retrieve(assetname);
   }
 
   public async has(assetname: string): Promise<boolean> {
@@ -52,7 +49,6 @@ export class CachingBackend implements Backend {
 
   public async delete(assetname: string): Promise<void> {
     await this.parent.delete(assetname);
-    delete this._assets[assetname];
     delete this._age[assetname];
     this._names = null;
   }
