@@ -1,6 +1,6 @@
 import { Investor } from "📚/investor/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
-import { diffDate } from "📚/time/mod.ts";
+import { diffDate, today } from "📚/time/mod.ts";
 import { Features } from "📚/ranking/features.ts";
 import { Bar, Chart } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";
@@ -39,11 +39,12 @@ export class TrainingData {
     // Test if each date of where stats are available have
     // enough data available for calculating SharpeRatio
     dates
-      .filter((date: DateFormat) => diffDate(date, end) >= this.window)
-      .forEach((date: DateFormat) => {
+      .map((date: DateFormat) => diffDate(date, today()))
+      .filter((bar: Bar) => end - bar >= this.window)
+      .forEach((bar: Bar) => {
         const features: Features = new Features(investor);
-        const input: Input = features.input(date);
-        const output: Output = features.output(date);
+        const input: Input = features.input(bar);
+        const output: Output = features.output(bar);
         if ( isFinite(output.SharpeRatio)) samples.push({ input, output });
       });
 
