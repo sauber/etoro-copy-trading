@@ -124,3 +124,11 @@ export function dateFromWeekday(
   const wanted: DateFormat = nextDate(dateString, -offset);
   return wanted;
 }
+
+export function dateToBar(date: DateFormat): number {
+  return diffDate(date, today());
+}
+
+export function barToDate(bar: number): DateFormat {
+  return nextDate(today(), -bar);
+}
