@@ -38,7 +38,7 @@ export class Features {
     // const chart: Chart = this.investor.chart.from(start);
     const start: number = buffer.length - (bar - end) + 1;
     const subchart: Buffer = buffer.slice(start);
-    console.log(buffer.length, subchart.length);
+    // console.log(buffer.length, subchart.length);
     // if (this.investor.UserName === "bendri00") {
     //   console.log(chart);
     //   Deno.exit(143);

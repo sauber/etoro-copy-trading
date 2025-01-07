@@ -1,4 +1,4 @@
-import { assertInstanceOf } from "@std/assert/instance-of";
+import { assertInstanceOf } from "@std/assert";
 import { Config } from "📚/config/config.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Assets } from "./assets.ts";

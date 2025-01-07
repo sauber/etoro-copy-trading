@@ -1,8 +1,8 @@
 import { assertInstanceOf, assertNotEquals } from "@std/assert";
-import { DateFormat } from "📚/time/mod.ts";
 import { HeapBackend } from "📚/storage/mod.ts";
 import { Ranking } from "📚/ranking/ranking.ts";
 import { investor } from "📚/ranking/testdata.ts";
+import { Bar } from "@sauber/backtest";
 
 const repo = new HeapBackend();
 
@@ -11,15 +11,9 @@ Deno.test("Initialize", () => {
   assertInstanceOf(rank, Ranking);
 });
 
-Deno.test("Predict recent", () => {
-  const rank = new Ranking(repo).generate();
-  const out: number = rank.predict(investor);
-  assertNotEquals(out, 0);
-});
-
 Deno.test("Predict at date", () => {
   const rank = new Ranking(repo).generate();
-  const end: DateFormat = investor.chart.end;
+  const end: Bar = investor.chart.end;
   const out = rank.predict(investor, end);
   assertNotEquals(out, 0);
 });

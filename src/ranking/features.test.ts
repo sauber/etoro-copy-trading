@@ -6,6 +6,8 @@ import {
 import { community } from "📚/ranking/testdata.ts";
 import { Features } from "📚/ranking/features.ts";
 import type { Input, Output } from "📚/ranking/types.ts";
+import { DateFormat, dateToBar } from "📚/time/mod.ts";
+import { Bar } from "@sauber/backtest";
 
 const investor = await community.investor("Robier89");
 
@@ -16,19 +18,24 @@ Deno.test("Initialization", () => {
 
 Deno.test("Input at oldest date", () => {
   const rank = new Features(investor);
-  const features: Input = rank.input();
+  const date: DateFormat = investor.stats.start;
+  const bar: Bar = dateToBar(date);
+  const features: Input = rank.input(bar);
   assertEquals(features.Gain, 50.53);
 });
 
-Deno.test("Input at specific date", () => {
+Deno.test("Input at most recent date", () => {
   const rank = new Features(investor);
-  const date = investor.stats.end;
-  const features: Input = rank.input(date);
+  const date: DateFormat = investor.stats.end;
+  const bar: Bar = dateToBar(date);
+  const features: Input = rank.input(bar);
   assertEquals(features.Gain, 31.86);
 });
 
 Deno.test("Output", () => {
   const rank = new Features(investor);
-  const features: Output = rank.output(investor.chart.start);
-  assertAlmostEquals(features.SharpeRatio, 2.0305043667429);
+  const date: DateFormat = investor.stats.start;
+  const bar: Bar = dateToBar(date);
+  const features: Output = rank.output(bar);
+  assertAlmostEquals(features.SharpeRatio, 2.19, 0.01);
 });

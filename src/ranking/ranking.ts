@@ -9,6 +9,7 @@ import { type Input, input_labels, type Output } from "📚/ranking/types.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Train } from "📚/ranking/train.ts";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
+import { Bar } from "@sauber/backtest";
 
 export class Ranking {
   public static readonly assetName = "ranking.network";
@@ -41,10 +42,10 @@ export class Ranking {
   /** Predicted future SharpeRatio for an investor */
   public predict(
     investor: Investor,
-    date?: DateFormat,
+    bar: Bar,
   ): number {
     if (!this.model) throw new Error("Error: Model not defined, cannot predict.");
-    const input: Input = new Features(investor).input(date);
+    const input: Input = new Features(investor).input(bar);
     const prediction: Output = this.model.predict(input);
     return prediction.SharpeRatio;
   }

@@ -19,6 +19,7 @@ Deno.test("Initialization", () => {
 
 Deno.test("Properties", () => {
   const investor = new Investor(username, id, fullname, chart, mirrors, stats);
+  // console.log(investor);
 
   assertEquals(investor.isActive(end), true);
   assertEquals(investor.isFund, false);

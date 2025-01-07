@@ -116,12 +116,15 @@ export class Train {
       const samples: Samples = [];
 
       for (const investor of this.investors) {
-        samples.push(...td.features(investor));
+        const features: Samples = td.features(investor);
+        // console.log("Investor", investor.UserName, features);
+        samples.push(...features);
       }
       const records = samples.map((s) => Object.assign(s.input, s.output));
+      // console.log("Records", {records});
       const df = DataFrame.fromRecords(records);
       const trimmed = outlierFilter(df);
-      console.log("Training sample loaded:", trimmed.length);
+      // console.log("Training sample loaded:", trimmed.length);
       this._data = trimmed;
     }
     return this._data;
@@ -180,7 +183,7 @@ export class Train {
       : () => {};
 
     // Training
-    console.log("Training...");
+    // console.log("Training...");
     const iterations = this.epochs;
     const results = this.model.train(
       inputs.records as Inputs,
@@ -192,7 +195,7 @@ export class Train {
     );
 
     if (dashboard) console.log(dashboard.finish());
-    console.log(results);
+    // console.log(results);
     // validation(this.model, data, 5);
     return results.iterations;
   }

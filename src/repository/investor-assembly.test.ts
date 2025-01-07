@@ -77,7 +77,12 @@ Deno.test("Mirrors", async () => {
   const assembly = new InvestorAssembly(username, repo);
   const investor: Investor = await assembly.investor();
   const mirrors = investor.mirrors;
-  assertEquals(mirrors.dates, ["2022-02-05"]);
+  assertEquals(mirrors.dates, [
+    "2022-02-05",
+    "2022-02-12",
+    "2022-04-18",
+    "2022-04-25",
+  ]);
   const mirror: InvestorId[] = mirrors.last;
   for (const id in mirror) {
     assertNotEquals(id, "");

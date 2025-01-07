@@ -1,12 +1,10 @@
 import { type DateFormat, diffDate } from "📚/time/mod.ts";
-import { JournaledAsset, Backend } from "📚/storage/mod.ts";
+import { Backend, JournaledAsset } from "📚/storage/mod.ts";
 import { Chart as CompiledChart } from "📚/chart/mod.ts";
-import { Chart as BackTestChart, Bar } from "@sauber/backtest";
+import { Bar, Chart as BackTestChart } from "@sauber/backtest";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
-import { InvestorId } from "📚/repository/types.ts";
 import { Chart, type ChartData } from "📚/repository/chart.ts";
-// import { Chart } from "@sauber/backtest";
 import {
   type Mirror,
   Portfolio,
@@ -17,7 +15,6 @@ import {
   type StatsData,
   type StatsExport,
 } from "📚/repository/stats.ts";
-import type { Names } from "📚/repository/mod.ts";
 import { today } from "📚/time/calendar.ts";
 
 type MirrorsByDate = Record<DateFormat, Mirror[]>;
@@ -72,12 +69,18 @@ export class InvestorAssembly {
   private readonly compiledAsset: JournaledAsset<InvestorExport>;
 
   constructor(public readonly UserName: string, readonly repo: Backend) {
-    this.chartAsset = new JournaledAsset<ChartData>(this.UserName + ".chart", repo);
+    this.chartAsset = new JournaledAsset<ChartData>(
+      this.UserName + ".chart",
+      repo,
+    );
     this.portfolioAsset = new JournaledAsset<PortfolioData>(
       this.UserName + ".portfolio",
       repo,
     );
-    this.statsAsset = new JournaledAsset<StatsData>(this.UserName + ".stats", repo);
+    this.statsAsset = new JournaledAsset<StatsData>(
+      this.UserName + ".stats",
+      repo,
+    );
     this.compiledAsset = new JournaledAsset<InvestorExport>(
       this.UserName + ".compiled",
       repo,
@@ -236,11 +239,11 @@ export class InvestorAssembly {
       // Skip if same as before
       // TODO: Code below is broken. All data is missing after empty mirrors list.
       // if (index > 0 && prev.reduce((a, b) => a && curnames.includes(b), true)) {
-        // false;
+      // false;
       // } // Keep
       // else {
-        zip[date] = cur;
-        // prev = cur.map((id: InvestorId) => id.UserName);
+      zip[date] = cur;
+      // prev = cur.map((id: InvestorId) => id.UserName);
       // }
     });
 

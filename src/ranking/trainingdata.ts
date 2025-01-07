@@ -30,6 +30,7 @@ export class TrainingData {
   public features(investor: Investor): Samples {
     const samples: Samples = [];
     const dates: DateFormat[] = investor.stats.dates;
+    // console.log("Investor dates", investor.UserName, dates);
     // const chart: Chart = investor.chart.trim; TODO
 
 
@@ -40,11 +41,17 @@ export class TrainingData {
     // enough data available for calculating SharpeRatio
     dates
       .map((date: DateFormat) => diffDate(date, today()))
-      .filter((bar: Bar) => end - bar >= this.window)
+      // .map((bar: Bar) => {
+      //   console.log(investor.UserName, {bar, end});
+      //   return bar
+      // })
+      .filter((bar: Bar) => bar - end >= this.window)
       .forEach((bar: Bar) => {
         const features: Features = new Features(investor);
         const input: Input = features.input(bar);
         const output: Output = features.output(bar);
+        const sr: number = output.SharpeRatio;
+        // console.log("Investor", investor.UserName, { bar, sr });
         if ( isFinite(output.SharpeRatio)) samples.push({ input, output });
       });
 
