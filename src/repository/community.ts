@@ -1,4 +1,4 @@
-import { Backend } from "📚/storage/mod.ts";
+import { AssetNames, Backend } from "📚/storage/mod.ts";
 import { DateFormat, diffDate, nextDate } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Bar, Chart } from "@sauber/backtest";
@@ -33,12 +33,12 @@ export class Community {
 
   /** Identify all investor names on a date */
   public async namesByDate(date: DateFormat): Promise<Names> {
-    const assets: string[] = await (await this.repo.sub(date)).names();
+    const assets: AssetNames = await (await this.repo.sub(date)).names();
     const valid = /(chart|portfolio|stats)$/;
 
     // Catalog which file type exist for each investor name
     const names = new Set<string>();
-    assets
+    assets.values()
       .filter((assetname: string) => assetname.match(valid) != null)
       .forEach((assetname: string) => {
         const [name, _type] = assetname.split(".");

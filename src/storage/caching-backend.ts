@@ -1,5 +1,5 @@
 import { Backend } from "📚/storage/backend.ts";
-import { AssetNames, JSONObject } from "./mod.ts";
+import { AssetName, AssetNames, JSONObject } from "📚/storage/mod.ts";
 
 export class CachingBackend implements Backend {
   constructor(private readonly parent: Backend) {}
@@ -19,9 +19,9 @@ export class CachingBackend implements Backend {
     return this._dirs;
   }
 
-  private _names: string[] | null = null;
+  private _names: Set<AssetName> | null = null;
   public async names(): Promise<AssetNames> {
-    if (this._names === null) this._names = await this.parent.names();
+    if (this._names === null) this._names = new Set(await this.parent.names());
     return this._names;
   }
 
@@ -37,7 +37,7 @@ export class CachingBackend implements Backend {
 
   public async has(assetname: string): Promise<boolean> {
     const names: AssetNames = await this.names();
-    return names.includes(assetname);
+    return names.has(assetname);
   }
 
   private readonly _age: Record<string, number> = {};

@@ -13,7 +13,7 @@ Deno.test("Initialization", () => {
 Deno.test("Create", async () => {
   const repo: HeapBackend = new HeapBackend();
   const names = await repo.names();
-  assertEquals(names.length, 0);
+  assertEquals(names.size, 0);
 });
 
 Deno.test("Store and Retrieve Asset", async () => {
@@ -22,8 +22,8 @@ Deno.test("Store and Retrieve Asset", async () => {
   const result = await repo.store(name, data);
   assertEquals(result, undefined);
   const names: AssetNames = await repo.names();
-  assertEquals(names.length, 1);
-  assertEquals(names, [name]);
+  assertEquals(names.size, 1);
+  assertEquals(names, new Set<AssetName>([name]));
 
   const investor: JSONObject = await repo.retrieve(name);
   assertEquals(investor, data);

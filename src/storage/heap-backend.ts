@@ -38,7 +38,7 @@ export class HeapBackend implements Backend {
   }
 
   public names(): Promise<AssetNames> {
-    return Promise.resolve(Object.keys(this.heap));
+    return Promise.resolve(new Set(Object.keys(this.heap)));
   }
 
   public delete(assetname: string): Promise<void> {

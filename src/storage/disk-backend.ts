@@ -83,9 +83,9 @@ export class DiskBackend implements Backend {
       const assetnames: string[] = filenames.map((FileName: string) =>
         this.assetname(FileName)
       );
-      return assetnames;
+      return new Set<AssetName>(assetnames);
     } catch (_err) {
-      return [];
+      return new Set<AssetName>();
     }
   }
 

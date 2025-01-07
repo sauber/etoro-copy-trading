@@ -19,4 +19,5 @@ export type JSONObject = {
 };
 
 export type AssetName = string;
-export type AssetNames = Array<AssetName>;
+// export type AssetNames = Array<AssetName>;
+export type AssetNames = Set<AssetName>;

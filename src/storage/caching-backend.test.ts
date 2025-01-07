@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { HeapBackend } from "📚/storage/heap-backend.ts";
 import { CachingBackend } from "📚/storage/caching-backend.ts";
-import type { JSONObject } from "📚/storage/mod.ts";
+import type { AssetName, JSONObject } from "📚/storage/mod.ts";
 import { Backend } from "📚/storage/backend.ts";
 
 const assetname = "foo";
@@ -15,7 +15,7 @@ Deno.test("Initialization", () => {
 Deno.test("Create and delete Repo", async () => {
   const repo: CachingBackend = new CachingBackend(new HeapBackend());
   const names = await repo.names();
-  assertEquals(names.length, 0);
+  assertEquals(names.size, 0);
 });
 
 Deno.test("Store and Retrieve", async () => {
@@ -24,8 +24,8 @@ Deno.test("Store and Retrieve", async () => {
   const result = await repo.store(assetname, content);
   assertEquals(result, undefined);
   const names = await repo.names();
-  assertEquals(names.length, 1);
-  assertEquals(names, [assetname]);
+  assertEquals(names.size, 1);
+  assertEquals(names, new Set<AssetName>([assetname]));
 
   const investor: JSONObject = await repo.retrieve(assetname);
   assertEquals(investor, content);
@@ -38,5 +38,5 @@ Deno.test("Partition", async () => {
   const repo: CachingBackend = new CachingBackend(new HeapBackend());
   const sub: Backend = await repo.sub("sub");
   const names = await sub.names();
-  assertEquals(names.length, 0);
+  assertEquals(names.size, 0);
 });
