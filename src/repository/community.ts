@@ -8,7 +8,7 @@ import { Mirror } from "📚/repository/mod.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
 import { today } from "📚/time/calendar.ts";
 
-export type Names = Array<string>;
+export type Names = Set<string>;
 export type Investors = Array<Investor>;
 type Dates = Array<DateFormat>;
 
@@ -47,7 +47,8 @@ export class Community {
     // Don't include portfolio owner
     const owner: string = await this.owner();
     names.delete(owner);
-    return Array.from(names);
+    // return Array.from(names);
+    return names;
   }
 
   /** Unique set of names across all dates */
@@ -56,14 +57,23 @@ export class Community {
     const allNames: Names[] = await Promise.all(
       dates.map((date) => this.namesByDate(date)),
     );
-    const merged = new Set(allNames.flat());
-    return Array.from(merged);
+
+    // const merged = new Set<string>(allNames.flat());
+    // return Array.from(merged);
+
+    const merged = new Set<string>();
+    for (const names of allNames) {
+      for (const name of names) {
+        merged.add(name);
+      }
+    }
+    return merged;
   }
 
   /** A set of investor names */
   public async samples(count: number): Promise<Names> {
     const all: Names = await this.allNames();
-    const some: Names = shuffleArray(all).slice(0, count);
+    const some: Names = new Set<string>(shuffleArray([...all]).slice(0, count));
     return some;
   }
 
@@ -71,7 +81,7 @@ export class Community {
   public async start(): Promise<DateFormat | null> {
     const dates: Dates = await this.dates();
     for (const date of [...dates]) {
-      if ((await this.namesByDate(date)).length) return date;
+      if ((await this.namesByDate(date)).size) return date;
     }
     return null;
   }
@@ -80,7 +90,7 @@ export class Community {
   public async end(): Promise<DateFormat | null> {
     const dates: Dates = await this.dates();
     for (const date of [...dates].reverse()) {
-      if ((await this.namesByDate(date)).length) return date;
+      if ((await this.namesByDate(date)).size) return date;
     }
     return null;
   }
@@ -99,12 +109,13 @@ export class Community {
   public async active(date: DateFormat): Promise<Names> {
     const allNames: Names = await this.allNames();
     const validVector: Array<boolean> = await Promise.all(
-      allNames.map((name) => this.activeName(name, date)),
+      allNames.values().map((name) => this.activeName(name, date)),
     );
-    const validNames: string[] = allNames.filter(
+    const validNames: string[] = [...allNames].filter(
       (_name, index) => validVector[index],
     );
-    const names: Names = Array.from(validNames);
+    // const names: Names = Array.from(validNames);
+    const names: Names = new Set<string>(validNames);
     return names;
   }
 
@@ -121,15 +132,15 @@ export class Community {
   /** Get one random investor */
   public async any(): Promise<Investor> {
     const names: Names = await this.allNames();
-    const count: number = names.length;
+    const count: number = names.size;
     const index: number = Math.floor(Math.random() * count);
-    const name: string = names[index];
+    const name: string = Array.from(names)[index];
     return this.investor(name);
   }
 
   /** Load a list of investors from list of names */
   private load(names: Names): Promise<Investors> {
-    return Promise.all(names.map((name) => this.investor(name)));
+    return Promise.all(Array.from(names).map((name) => this.investor(name)));
   }
 
   /** All investor */
@@ -151,7 +162,7 @@ export class Community {
   /** Load a list of investor charts from list of names */
   private loadCharts(names: Names): Promise<Array<Chart>> {
     return Promise.all(
-      names.map((name) => this.investor(name).then((i) => i.chart)),
+      Array.from(names).map((name) => this.investor(name).then((i) => i.chart)),
     );
   }
 

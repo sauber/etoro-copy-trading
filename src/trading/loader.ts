@@ -144,8 +144,8 @@ export class Loader {
     return this.cache<Investor | null>(
       "mirror_" + username,
       async () => {
-        const names: Array<string> = await this.assets.community.allNames();
-        return names.includes(username) ? await this.investor(username) : null;
+        const names: Set<string> = await this.assets.community.allNames();
+        return names.has(username) ? await this.investor(username) : null;
       },
     );
   }
@@ -204,9 +204,9 @@ export class Loader {
   }
 
   /** Load instruments by list of investor names */
-  private async instruments(names: string[]): Promise<Instruments> {
+  private async instruments(names: Names): Promise<Instruments> {
     const instruments: Instruments = await Promise.all(
-      names.map((name: string) => this.instrument(name)),
+      Array.from(names).map((name: string) => this.instrument(name)),
     );
     return instruments;
   }

@@ -22,8 +22,8 @@ Deno.test("Heap repo", async (t) => {
       new JournaledAsset(`${name}.chart`, repo).store({}),
       new JournaledAsset(`${name}.portfolio`, repo).store({}),
     ]);
-    const names: string[] = await community.namesByDate(date);
-    assertEquals(names, [name]);
+    const names: Set<string> = await community.namesByDate(date);
+    assertEquals(names, new Set([name]));
   });
 
   await t.step("complete write", async () => {
@@ -41,13 +41,13 @@ Deno.test("Heap repo", async (t) => {
       new JournaledAsset(`${name}.stats`, repo).store({ Data: { CustomerId: name } }),
       new JournaledAsset(`${name}.portfolio`, repo).store({ AggregatedMirrors: [] }),
     ]);
-    const names: string[] = await community.namesByDate(date);
-    assertEquals(names, [name]);
+    const names: Set<string> = await community.namesByDate(date);
+    assertEquals(names, new Set([name]));
   });
 
   await t.step("all names", async () => {
-    const names: string[] = await community.allNames();
-    assertEquals(names, [name]);
+    const names: Set<string> = await community.allNames();
+    assertEquals(names, new Set([name]));
   });
 
   await t.step("last date", async () => {
