@@ -232,7 +232,7 @@ export class Loader {
 
   /** Start date of position.
    * If previous list of mirrors exists, and mirror is missing, then assume it was opened here.
-   * Otherwise assume opened at beginning of all time.
+   * Otherwise assume opened at beginning of time.
    */
   private positionStart(username: string): Promise<DateFormat> {
     return this.cache<DateFormat>(

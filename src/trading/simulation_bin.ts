@@ -3,7 +3,6 @@ import {
   Exchange,
   Instruments,
   Simulation,
-  Stats,
   Strategy,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
@@ -12,7 +11,6 @@ import {
   TradingStrategy,
 } from "📚/trading/trading-strategy.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { nextDate, today } from "📚/time/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
