@@ -11,6 +11,7 @@ import {
   TradingStrategy,
 } from "📚/trading/trading-strategy.ts";
 import { Loader } from "📚/trading/loader.ts";
+import { Ranking } from "📚/ranking/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -18,8 +19,12 @@ if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
 const loader = new Loader(repo);
 
+// Ranking model
+const model: Ranking = await loader.rankingModel();
+
 // Strategy
 const settings: Parameters = await loader.settings();
+settings.model = model;
 const strategy: Strategy = new TradingStrategy(settings);
 
 // Exchange

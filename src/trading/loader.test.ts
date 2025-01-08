@@ -16,6 +16,7 @@ import { Mirror } from "📚/repository/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
 import { Parameters } from "📚/trading/trading-strategy.ts";
+import { Ranking } from "📚/ranking/mod.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Loader(assets), Loader);
@@ -61,4 +62,10 @@ Deno.test("Settings", async () => {
   const loader = new Loader(assets);
   const settings: Parameters = await loader.settings();
   assert("weekday" in settings);
+});
+
+Deno.test("Ranking Model", async () => {
+  const loader = new Loader(assets);
+  const model: Ranking = await loader.rankingModel();
+  assert(model);
 });

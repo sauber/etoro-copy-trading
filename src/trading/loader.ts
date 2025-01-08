@@ -24,6 +24,7 @@ import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
+import { Ranking } from "📚/ranking/mod.ts";
 
 const NOW: DateFormat = today();
 
@@ -361,5 +362,12 @@ export class Loader {
       ],
     ) as [Bar, Amount, Amount, PurchaseOrders, CloseOrders];
     return { bar, value, amount, purchaseorders, closeorders };
+  }
+
+  // Ranking model
+  public async rankingModel(): Promise<Ranking> {
+    const model: Ranking = this.assets.ranking
+    if (!await model.load()) model.generate();
+    return model;
   }
 }

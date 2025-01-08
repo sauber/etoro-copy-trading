@@ -10,11 +10,13 @@ import {
   RSIStrategy,
   SizingStrategy,
   WeekdayStrategy,
+  RankingStrategy
 } from "📚/strategy/mod.ts";
-import { RankingStrategy } from "📚/strategy/ranking-strategy.ts";
+import { Ranking } from "📚/ranking/mod.ts";
 
 export type Parameters = {
   weekday: number;
+  model: Ranking;
 };
 
 /**
@@ -36,12 +38,14 @@ export class TradingStrategy implements Strategy {
 
   private readonly sizing: Strategy;
 
-  constructor(params: Partial<TradingStrategy> = {}) {
+  private readonly ranking: Strategy;
+
+  constructor(params: Partial<TradingStrategy> & { model: Ranking }) {
     Object.assign(this, params);
     this.timing = new WeekdayStrategy(this.weekday);
     this.technical = new RSIStrategy(this.window, this.buy, this.sell);
     this.sizing = new SizingStrategy();
-    // this.ranking = new RankingStrategy();
+    this.ranking = new RankingStrategy(params.model);
   }
 
   /** Print out conect of Context */
@@ -73,6 +77,7 @@ export class TradingStrategy implements Strategy {
     // console.log("Opening strategies");
     // this.printContext(this, context);
     const strategies: Array<Strategy> = [
+      this.ranking,
       this.timing,
       this.technical,
       this.sizing,
