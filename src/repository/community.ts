@@ -58,9 +58,6 @@ export class Community {
       dates.map((date) => this.namesByDate(date)),
     );
 
-    // const merged = new Set<string>(allNames.flat());
-    // return Array.from(merged);
-
     const merged = new Set<string>();
     for (const names of allNames) {
       for (const name of names) {
@@ -114,7 +111,6 @@ export class Community {
     const validNames: string[] = [...allNames].filter(
       (_name, index) => validVector[index],
     );
-    // const names: Names = Array.from(validNames);
     const names: Names = new Set<string>(validNames);
     return names;
   }
@@ -132,9 +128,8 @@ export class Community {
   /** Get one random investor */
   public async any(): Promise<Investor> {
     const names: Names = await this.allNames();
-    const count: number = names.size;
-    const index: number = Math.floor(Math.random() * count);
-    const name: string = Array.from(names)[index];
+    const name: string =
+      Array.from(names)[Math.floor(Math.random() * names.size)];
     return this.investor(name);
   }
 
