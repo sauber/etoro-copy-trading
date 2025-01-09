@@ -31,7 +31,7 @@ const strategy: Strategy = new TradingStrategy(settings);
 const instruments: Instruments = await loader.instrumentSamples(4);
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
-console.log("Exchange created", exchange);
+// console.log("Exchange created", exchange);
 
 // Simulation
 const simulation = new Simulation(exchange, strategy);

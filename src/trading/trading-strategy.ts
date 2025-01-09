@@ -77,8 +77,8 @@ export class TradingStrategy implements Strategy {
     // console.log("Opening strategies");
     // this.printContext(this, context);
     const strategies: Array<Strategy> = [
-      this.ranking,
       this.timing,
+      this.ranking,
       this.technical,
       this.sizing,
     ];
@@ -86,10 +86,18 @@ export class TradingStrategy implements Strategy {
     let purchaseorders: PurchaseOrders = [];
     for (const strategy of strategies) {
       purchaseorders = strategy.open(context);
+      // console.log("Bar", context.bar, "Strategy", strategy.constructor.name, "POs", purchaseorders.length);
+      // for ( const po of purchaseorders) {
+      //   console.log("  ", po.instrument.symbol, po.amount, po.instrument.price(context.bar));
+      // }
       Object.assign(context, { purchaseorders });
       // this.printContext(strategy, context);
       if (purchaseorders.length < 1) return [];
     }
+    // console.log("Bar", context.bar, "POs", purchaseorders.length, "Amount:", context.amount);
+    // for ( const po of purchaseorders) {
+    //   console.log("  ", po.instrument.symbol, po.amount, po.instrument.price(context.bar));
+    // }
     return purchaseorders;
   }
 }
