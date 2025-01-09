@@ -97,6 +97,7 @@ export class TradingStrategy implements Strategy {
     // console.log("Bar", context.bar, "POs", purchaseorders.length, "Amount:", context.amount);
     // for ( const po of purchaseorders) {
     //   console.log("  ", po.instrument.symbol, po.amount, po.instrument.price(context.bar));
+    //   // console.log(po.instrument);
     // }
     return purchaseorders;
   }

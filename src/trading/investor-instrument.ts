@@ -15,7 +15,7 @@ export class InvestorInstrument extends Instrument {
   }
 
   public override price(bar: Bar): Price {
-    const index: number = this.start - bar;
+    const index: number = Math.min(this.start - bar, this.length-1);
     const value: Price = this.buffer[index];
     // console.log("Price", this.symbol, "start", this.start, "bar", bar, "end", this.end, "length", this.buffer.length);
     // console.log("   ", "index", index, "value", value);
