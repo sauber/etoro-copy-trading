@@ -26,6 +26,22 @@ Deno.test("Extend End", () => {
   assertEquals(instrumetEnd, end - offset);
 });
 
+Deno.test("Look up prices", () => {
+  const instr = new InvestorInstrument(investor);
+
+  const first: Price = investor.chart.first;
+  const start: Bar = investor.chart.start;
+  const startPrice: Price = instr.price(start);
+  assertEquals(startPrice, first);
+
+  const secondPrice: Price = instr.price(start-1);
+  assertEquals(secondPrice, instr.buffer[1]);
+
+  const end: Bar = investor.chart.end;
+  const lastPrice: Price = instr.price(end);
+  assertEquals(lastPrice, instr.buffer[start-end]);
+});
+
 Deno.test("Confirm price availability to offset", () => {
   const investorEnd: Bar = investor.chart.end;
   const price: Price = investor.chart.last;
