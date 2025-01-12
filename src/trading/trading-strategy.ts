@@ -62,7 +62,7 @@ export class TradingStrategy implements Strategy {
     // console.log("Closing strategies");
     // this.printContext(this, context);
     // throw "Printing Context";
-    const strategies: Array<Strategy> = [this.timing, this.technical];
+    const strategies: Array<Strategy> = [this.timing, this.ranking, this.technical];
 
     let closeorders: CloseOrders = [];
     for (const strategy of strategies) {
