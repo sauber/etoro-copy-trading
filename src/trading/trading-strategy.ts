@@ -61,6 +61,7 @@ export class TradingStrategy implements Strategy {
   public close(context: StrategyContext): CloseOrders {
     // console.log("Closing strategies");
     // this.printContext(this, context);
+    // throw "Printing Context";
     const strategies: Array<Strategy> = [this.timing, this.technical];
 
     let closeorders: CloseOrders = [];
@@ -76,6 +77,7 @@ export class TradingStrategy implements Strategy {
   public open(context: StrategyContext): PurchaseOrders {
     // console.log("Opening strategies");
     // this.printContext(this, context);
+    // throw "Printing Context";
     const strategies: Array<Strategy> = [
       this.timing,
       this.ranking,

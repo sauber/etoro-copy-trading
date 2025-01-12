@@ -11,7 +11,7 @@ export class SizingStrategy extends PassThroughStrategy {
 
     return limit.map((po) => ({
       instrument: po.instrument,
-      amount: context.amount * 0.1,
+      amount: context.value * 0.1,
     }));
   }
 }
