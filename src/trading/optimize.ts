@@ -1,6 +1,11 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { IntegerParameter, Minimize, Parameters } from "📚/optimize/mod.ts";
-import { TradingStrategy } from "📚/trading/trading-strategy.ts";
+import {
+  CascadeStrategy,
+  RSIStrategy,
+  SizingStrategy,
+  WeekdayStrategy,
+} from "📚/strategy/mod.ts";
 
 function makeParameters(value: Array<number> = []): Parameters {
   return [
@@ -89,7 +94,12 @@ export class Optimize {
     const settings = Object.fromEntries(
       parameter.map((p) => [p.name, p.value]),
     );
-    const strategy: Strategy = new TradingStrategy(settings);
+    const strategy: Strategy = new CascadeStrategy([
+      new WeekdayStrategy(settings.weekday),
+      new RSIStrategy(settings.window, settings.buy, settings.sell),
+      new SizingStrategy(),
+    ]);
+
     const simulation = new Simulation(exchange, strategy);
 
     // Run simulation

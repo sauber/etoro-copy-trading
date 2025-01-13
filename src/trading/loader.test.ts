@@ -15,7 +15,7 @@ import { DateFormat, diffDate, today } from "📚/time/mod.ts";
 import { Mirror } from "📚/repository/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
-import { Parameters } from "📚/trading/trading-strategy.ts";
+import { Parameters } from "📚/trading/types.ts";
 import { Ranking } from "📚/ranking/mod.ts";
 
 Deno.test("Instance", () => {
