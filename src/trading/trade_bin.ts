@@ -11,14 +11,9 @@ import { DateFormat } from "📚/time/mod.ts";
 import { Assets } from "📚/assets/assets.ts";
 import { type Parameters } from "📚/trading/types.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { Ranking } from "📚/ranking/mod.ts";
-import {
-  CascadeStrategy,
-  RankingStrategy,
-  RSIStrategy,
-  SizingStrategy,
-  WeekdayStrategy,
-} from "📚/strategy/mod.ts";
+import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
+import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
+import { RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
