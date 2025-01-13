@@ -6,7 +6,7 @@ import {
 } from "@std/assert";
 import { Dashboard, Parameters } from "📚/optimize/mod.ts";
 import { Exchange, TestInstrument } from "@sauber/backtest";
-import { Optimize, TradingData } from "📚/trading/optimize.ts";
+import { Optimize, TradingData } from "📚/timing/optimize.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
