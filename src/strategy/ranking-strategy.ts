@@ -17,6 +17,10 @@ export class RankingStrategy implements Strategy {
   public close(context: StrategyContext): CloseOrders {
     return context.closeorders.filter((closeorder: CloseOrder) => {
       const instrument = closeorder.position.instrument as InvestorInstrument;
+
+      // Only rank investors, not other instruments
+      if (!instrument.investor) return false
+      
       const score = this.model.predict(instrument.investor, instrument.end);
       // Confidence to close is high if ranking score is low
       const confidence = -score * closeorder.confidence;

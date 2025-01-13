@@ -9,12 +9,16 @@ import {
 import { Table } from "@sauber/table";
 import { DateFormat } from "📚/time/mod.ts";
 import { Assets } from "📚/assets/assets.ts";
-import {
-  type Parameters,
-  TradingStrategy,
-} from "📚/trading/trading-strategy.ts";
+import { type Parameters } from "📚/trading/types.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { Ranking } from "📚/ranking/mod.ts";
+import {
+  CascadeStrategy,
+  RankingStrategy,
+  RSIStrategy,
+  SizingStrategy,
+  WeekdayStrategy,
+} from "📚/strategy/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -27,8 +31,12 @@ const model: Ranking = await loader.rankingModel();
 
 // Strategy
 const settings: Parameters = await loader.settings();
-settings.model = model;
-const strategy: Strategy = new TradingStrategy(settings);
+const strategy: Strategy = new CascadeStrategy([
+  new WeekdayStrategy(settings.weekday),
+  new RankingStrategy(model),
+  new RSIStrategy(settings.window, settings.buy, settings.sell),
+  new SizingStrategy(),
+]);
 
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();
