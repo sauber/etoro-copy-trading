@@ -1,11 +1,8 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { IntegerParameter, Minimize, Parameters } from "📚/optimize/mod.ts";
-import {
-  CascadeStrategy,
-  RSIStrategy,
-  SizingStrategy,
-  WeekdayStrategy,
-} from "📚/strategy/mod.ts";
+import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
+import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
+import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
 
 function makeParameters(value: Array<number> = []): Parameters {
   return [
