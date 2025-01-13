@@ -1,6 +1,7 @@
 import {
   CloseOrder,
   CloseOrders,
+  Instrument,
   PurchaseOrder,
   PurchaseOrders,
   Strategy,
@@ -8,6 +9,7 @@ import {
 } from "@sauber/backtest";
 import { Ranking } from "📚/ranking/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
+import { Investor } from "📚/investor/mod.ts";
 
 /** Lookup ranking of each investor */
 export class RankingStrategy implements Strategy {
@@ -16,18 +18,25 @@ export class RankingStrategy implements Strategy {
   /** Close positions where ranking score < 0 */
   public close(context: StrategyContext): CloseOrders {
     return context.closeorders.filter((closeorder: CloseOrder) => {
-      const instrument = closeorder.position.instrument as InvestorInstrument;
+      const instrument: Instrument = closeorder.position.instrument;
 
-      // Only rank investors, not other instruments
-      if (!instrument.investor) return false
-      
-      const score = this.model.predict(instrument.investor, instrument.end);
-      // Confidence to close is high if ranking score is low
-      const confidence = -score * closeorder.confidence;
-      if (score < 0) {
-        Object.assign(closeorder, { confidence });
-        return true;
-      }
+      // Portfolio may have items which are not investors, or investors which have no
+      // data in repository. Pass through those instruments.
+      if ("investor" in instrument) {
+        const investor: Investor = instrument.investor as Investor;
+
+        const score = this.model.predict(investor, instrument.end);
+        // Confidence to close is high if ranking score is low
+        const confidence = -score * closeorder.confidence;
+        if (score < 0) {
+          Object.assign(closeorder, { confidence });
+          return true;
+        } else {
+          // Don't close if ranking score is positive
+          return false;
+        }
+      } // Only rank investors, not other instruments
+      else return true;
     });
   }
 
@@ -37,7 +46,10 @@ export class RankingStrategy implements Strategy {
       // Add ranking score
       .map((po: PurchaseOrder) => {
         const instrument = po.instrument as InvestorInstrument;
-        const score: number = this.model.predict(instrument.investor, instrument.end);
+        const score: number = this.model.predict(
+          instrument.investor,
+          instrument.end,
+        );
         return [po, score] as [PurchaseOrder, number];
       })
       // Ensure score > 0
