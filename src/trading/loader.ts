@@ -11,7 +11,7 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { Positions, PurchaseOrders } from "@sauber/backtest";
-import { type Parameters } from "📚/trading/trading-strategy.ts";
+import { type Parameters } from "📚/trading/types.ts";
 import { Assets } from "📚/assets/mod.ts";
 import {
   DateFormat,
@@ -72,7 +72,7 @@ export class Loader {
     return this.cache<Parameters>(
       "settings",
       async () =>
-        ((await this.assets.config.get("trading")) ||
+        ((await this.assets.config.get("trading")) as unknown ||
           { weekday: 1, buy: 30, sell: 70, window: 21 }) as Parameters,
     );
   }
