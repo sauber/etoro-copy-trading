@@ -40,7 +40,7 @@ export class Refresh {
   /** Min and max acceptable count of investors */
   private readonly discover_count = {
     min: 70,
-    max: 200,
+    max: 300,
   } as Range;
 
   /** For how long time are old version valid */
