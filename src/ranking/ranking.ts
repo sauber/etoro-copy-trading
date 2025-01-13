@@ -1,6 +1,5 @@
 import { Network, NetworkData } from "@sauber/neurons";
 import { Investor } from "📚/investor/mod.ts";
-import type { DateFormat } from "📚/time/mod.ts";
 import { Asset, Backend } from "📚/storage/mod.ts";
 
 import { Model } from "📚/ranking/model.ts";
@@ -44,7 +43,9 @@ export class Ranking {
     investor: Investor,
     bar: Bar,
   ): number {
-    if (!this.model) throw new Error("Error: Model not defined, cannot predict.");
+    if (!this.model) {
+      throw new Error("Error: Model not defined, cannot predict.");
+    }
     const input: Input = new Features(investor).input(bar);
     const prediction: Output = this.model.predict(input);
     return prediction.SharpeRatio;
