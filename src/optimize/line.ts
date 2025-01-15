@@ -11,7 +11,9 @@ export class Line {
   private insert(label: string, position: number): this {
     // Confirm label within line
     if (position < 0 || position + label.length > this.line.length) {
-      throw new Error(`Invalid position: ${position}`);
+      throw new Error(
+        `Invalid position: ${position}, label: "${label}", line: "${this.line}"`,
+      );
     }
 
     this.line = this.line.substring(0, position) + label +

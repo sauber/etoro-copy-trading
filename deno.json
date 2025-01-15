@@ -23,6 +23,7 @@
     "@std/datetime": "jsr:@std/datetime@^0.225.2",
     "@std/fmt": "jsr:@std/fmt@^1.0.2",
     "@std/path": "jsr:@std/path@^1.0.6",
+    "asciichart": "npm:asciichart@^1.5.25",
     "semaphore": "https://deno.land/x/semaphore@v1.1.2/semaphore.ts",
     "📚/": "./src/"
   }
