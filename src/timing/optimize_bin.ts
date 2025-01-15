@@ -25,10 +25,12 @@ const exchange: Exchange = new Exchange(instruments);
 // Load Parameters into model
 const config = repo.config;
 const settings = await config.get(modelAssetName) as TradingData;
-console.log("Loaded settings:", settings);
-const model = settings
+const loaded: boolean = settings !== null;
+const model = loaded
   ? Optimize.import(settings)
   : Optimize.best(200, exchange);
+if (loaded) console.log("Loaded settings:", settings);
+else console.log("No settings found, starting from", model.export());
 
 // Dashboard
 const epochs = 100;
@@ -38,7 +40,7 @@ const status: Status = (
   iterations: number,
   _momentum: number,
   parameters: Parameters,
-  loss: number[]
+  loss: number[],
 ) => console.log(dashboard.render(parameters, iterations, loss));
 
 // Run optimizer and save results
