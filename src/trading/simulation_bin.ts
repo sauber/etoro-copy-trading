@@ -31,7 +31,7 @@ const strategy: Strategy = new CascadeStrategy([
 ]);
 
 // Exchange
-const instruments: Instruments = await loader.instrumentSamples(4);
+const instruments: Instruments = await loader.instrumentSamples(200);
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
 

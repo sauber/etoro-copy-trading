@@ -8,8 +8,8 @@ import { Status } from "📚/optimize/types.d.ts";
 function makeParameters(value: Array<number> = []): Parameters {
   return [
     new IntegerParameter("window", 2, 100, value[0]),
-    new IntegerParameter("buy", 1, 50, value[1]),
-    new IntegerParameter("sell", 50, 99, value[2]),
+    new IntegerParameter("buy", 15, 35, value[1]),
+    new IntegerParameter("sell", 65, 85, value[2]),
     new IntegerParameter("weekday", 1, 5, value[3]),
   ];
 }
