@@ -89,22 +89,26 @@ export class Dashboard {
     return lines;
   }
 
-  private loss(loss: Array<Output>, width: number, height: number): string[] {
+  private reward(
+    reward: Array<Output>,
+    width: number,
+    height: number,
+  ): string[] {
     // Not enough numbers for chart
-    if (loss.length < 2) {
+    if (reward.length < 2) {
       const blank = " ".repeat(width);
       return Array(height).fill(blank);
     }
 
     // Max width of Y axis labels
     const labelWidth: number = Math.max(
-      ...[loss[0], loss[loss.length - 1]].map((l) =>
+      ...[reward[0], reward[reward.length - 1]].map((l) =>
         l.toFixed(2).toString().length
       ),
     );
     const padding: string = " ".repeat(labelWidth);
     const config = { padding, height, width };
-    const downsampled: number[] = downsample(loss, width - labelWidth);
+    const downsampled: number[] = downsample(reward, width - labelWidth);
 
     return plot(downsampled, config).split("\n");
   }
@@ -113,7 +117,7 @@ export class Dashboard {
   public render(
     parameters: Parameters,
     iteration: number,
-    loss: Array<Output>,
+    reward: Array<Output>,
   ): string {
     // Vertical Seperator
     const seperator = " ‖ ";
@@ -121,11 +125,13 @@ export class Dashboard {
     // Get each component
     const width: number = Math.floor((this.width - seperator.length) / 2);
     const gauges: string[] = this.gauges(parameters, width);
-    const chart: string[] = this.loss(loss, width, gauges.length - 1);
+    const chart: string[] = this.reward(reward, width, gauges.length - 1);
     const eta: string = this.progress.render(iteration);
 
     // Combine components
-    const lines: string[] = gauges.map((g, index) => g + seperator + chart[index]);
+    const lines: string[] = gauges.map((g, index) =>
+      g + seperator + chart[index]
+    );
     const up: string = this.first
       ? ""
       : ESC + (lines.length + 1).toString() + LINEUP;

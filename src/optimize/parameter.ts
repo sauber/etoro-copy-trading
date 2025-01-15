@@ -98,7 +98,7 @@ export class Parameter {
   /** Adjust value according to gradient */
   public update(): void {
     const grad = this.gradient;
-    const update = this.optimizer.update(grad);
+    const update = this.optimizer.update(-grad);
     this.changed = update;
     this.set(this._value + update);
   }

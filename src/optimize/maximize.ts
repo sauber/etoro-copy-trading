@@ -2,8 +2,8 @@ import { Parameters } from "📚/optimize/parameter.ts";
 import { sum } from "📚/math/statistics.ts";
 import { Inputs, Output, Status } from "📚/optimize/types.d.ts";
 
-/** Using Adam optimizer find combination of parameter values for lowest output from agent */
-export class Minimize {
+/** Using Adam optimizer find combination of parameter values for highest output from agent */
+export class Maximize {
   /** Set of parameters to optimize */
   public readonly parameters: Parameters = [];
 
@@ -28,7 +28,7 @@ export class Minimize {
   /** History of loss */
   private history: Array<Output> = [];
 
-  constructor(params: Partial<Minimize> = {}) {
+  constructor(params: Partial<Maximize> = {}) {
     Object.assign(this, params);
   }
 
