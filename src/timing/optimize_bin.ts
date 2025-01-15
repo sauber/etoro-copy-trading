@@ -1,8 +1,9 @@
 import { Exchange, Instruments } from "@sauber/backtest";
-import { Dashboard, Parameters, Status } from "📚/optimize/mod.ts";
+import { Dashboard, Parameters } from "📚/optimize/mod.ts";
 import { Optimize, TradingData } from "../timing/optimize.ts";
 import { Assets } from "📚/assets/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
+import { Status } from "📚/optimize/types.d.ts";
 
 ////////////////////////////////////////////////////////////////////////
 /// Main
@@ -31,12 +32,14 @@ const model = settings
 
 // Dashboard
 const epochs = 100;
-const dashboard: Dashboard = new Dashboard(epochs, 38);
+const console_width = 82;
+const dashboard: Dashboard = new Dashboard(epochs, console_width);
 const status: Status = (
   iterations: number,
   _momentum: number,
   parameters: Parameters,
-) => console.log(dashboard.render(parameters, iterations));
+  loss: number[]
+) => console.log(dashboard.render(parameters, iterations, loss));
 
 // Run optimizer and save results
 const epsilon = 0.01;

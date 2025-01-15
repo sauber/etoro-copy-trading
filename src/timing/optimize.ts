@@ -3,6 +3,7 @@ import { IntegerParameter, Minimize, Parameters } from "📚/optimize/mod.ts";
 import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
 import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
+import { Status } from "📚/optimize/types.d.ts";
 
 function makeParameters(value: Array<number> = []): Parameters {
   return [
@@ -22,15 +23,6 @@ export type TradingData = {
   sell: number;
   weekday: number;
 };
-
-export type Dashboard = (
-  iteration: number,
-  momentum: number,
-  parameters: Parameters,
-) => void;
-
-/** Exported data of model */
-// export type TimingData = Array<ParameterData>;
 
 type Samples = Array<{ input: Parameters; output: number }>;
 
@@ -136,7 +128,7 @@ export class Optimize {
     exchange: Exchange,
     epochs: number = 500,
     epsilon: number = 0.001,
-    status: Dashboard = () => undefined,
+    status: Status = () => undefined,
   ): number {
     // Callback from optimize to model
     const loss = (input: Input): Output => {
@@ -147,7 +139,7 @@ export class Optimize {
     // Configure minimizer
     const minimizer = new Minimize({
       parameters: this.parameters,
-      fn: loss as (inputs: Array<number>) => number,
+      agent: loss as (inputs: Array<number>) => number,
       epochs,
       status,
       every: 10,
