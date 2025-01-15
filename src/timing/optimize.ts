@@ -54,10 +54,10 @@ export class Optimize {
   }
 
   /** Scan a number of random points, and pick best */
-  public static best(of: number, exchange: Exchange): Optimize {
+  public static best(count: number, exchange: Exchange): Optimize {
     // Find starting point
     const sampler = new Optimize();
-    const samples: Samples = sampler.samples(exchange, of);
+    const samples: Samples = sampler.samples(exchange, count);
     samples.sort((a, b) => b.output - a.output);
     const start = samples[0];
     return new Optimize(start.input);
@@ -82,28 +82,9 @@ export class Optimize {
       this.parameters.map((p) => p.print()).join(", ");
   }
 
-  /** Run simulation from input parameters and calculate score */
-  private simulation(
-    exchange: Exchange,
-    parameter: Parameters,
-  ): Output {
-    // Configure a simulation using input parameters
-    const settings = Object.fromEntries(
-      parameter.map((p) => [p.name, p.value]),
-    );
-    const strategy: Strategy = new CascadeStrategy([
-      new WeekdayStrategy(settings.weekday),
-      new RSIStrategy(settings.window, settings.buy, settings.sell),
-      new SizingStrategy(),
-    ]);
-
-    const simulation = new Simulation(exchange, strategy);
-
-    // Run simulation
-    simulation.run();
-
-    // Extract score
-    // const stats: Stats = simulation.stats;
+  /** Calculate score of simulation */
+  // TODO: Factor in some sort of stability measure
+  private score(simulation: Simulation): number {
     const trades: number = simulation.account.trades.length;
     const profit: number = simulation.account.profit;
     const invested: number = simulation.account.InvestedRatio;
@@ -125,6 +106,29 @@ export class Optimize {
     const score = profit - costs;
 
     return score;
+  }
+
+  /** Run simulation from input parameters and calculate score */
+  private simulation(
+    exchange: Exchange,
+    parameter: Parameters,
+  ): Output {
+    // Configure a simulation using input parameters
+    const settings = Object.fromEntries(
+      parameter.map((p) => [p.name, p.value]),
+    );
+    const strategy: Strategy = new CascadeStrategy([
+      new WeekdayStrategy(settings.weekday),
+      new RSIStrategy(settings.window, settings.buy, settings.sell),
+      new SizingStrategy(),
+    ]);
+    const simulation = new Simulation(exchange, strategy);
+
+    // Run simulation
+    simulation.run();
+
+    // Extract score
+    return this.score(simulation);
   }
 
   /** Train model */
