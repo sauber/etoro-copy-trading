@@ -1,11 +1,10 @@
-import { DateFormat, nextDate } from "📚/time/mod.ts";
+import { barToDate, DateFormat } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
 import { input_labels } from "📚/ranking/types.ts";
 import type { Input, Output } from "📚/ranking/types.ts";
 import { Bar, Buffer } from "@sauber/backtest";
 import { sharpe_ratio } from "📚/math/sharperatio.ts";
-import { today } from "📚/time/calendar.ts";
 
 export class Features {
   constructor(private readonly investor: Investor) {}
@@ -15,8 +14,8 @@ export class Features {
     if (this.investor.stats.dates.length < 1) {
       throw new Error(`Investor ${this.investor.UserName} has no stats`);
     }
-    const date: DateFormat = nextDate(today(), -bar);
-    const values: StatsExport = date
+    const date: DateFormat = barToDate(bar);
+    const values: StatsExport = ( date && this.investor.stats.start <= date )
       ? this.investor.stats.before(date)
       : this.investor.stats.first;
 
