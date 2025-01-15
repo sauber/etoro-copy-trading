@@ -7,6 +7,7 @@ import {
 import { Dashboard, Parameters } from "📚/optimize/mod.ts";
 import { Exchange, TestInstrument } from "@sauber/backtest";
 import { Optimize, TradingData } from "📚/timing/optimize.ts";
+import { Output } from "📚/optimize/types.d.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
@@ -50,11 +51,12 @@ Deno.test("Visualized training", { ignore: false }, () => {
   const console_width = 74;
   const dashboard: Dashboard = new Dashboard(epochs, console_width);
   function status(
-    _iterations: number,
+    iterations: number,
     _momentum: number,
     parameters: Parameters,
+    reward: Output[]
   ): void {
-    console.log(dashboard.render(parameters, 1));
+    console.log(dashboard.render(parameters, iterations, reward));
   }
 
   const optimize = new Optimize();

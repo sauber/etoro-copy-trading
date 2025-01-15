@@ -1,5 +1,5 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
-import { IntegerParameter, Minimize, Parameters } from "📚/optimize/mod.ts";
+import { IntegerParameter, Maximize, Parameters } from "📚/optimize/mod.ts";
 import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
 import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
@@ -131,15 +131,15 @@ export class Optimize {
     status: Status = () => undefined,
   ): number {
     // Callback from optimize to model
-    const loss = (input: Input): Output => {
+    const reward = (input: Input): Output => {
       const score: Output = this.simulation(exchange, makeParameters(input));
-      return -score;
+      return score;
     };
 
     // Configure minimizer
-    const minimizer = new Minimize({
+    const minimizer = new Maximize({
       parameters: this.parameters,
-      agent: loss as (inputs: Array<number>) => number,
+      agent: reward as (inputs: Array<number>) => number,
       epochs,
       status,
       every: 10,

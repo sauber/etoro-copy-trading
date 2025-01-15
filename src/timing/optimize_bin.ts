@@ -40,8 +40,8 @@ const status: Status = (
   iterations: number,
   _momentum: number,
   parameters: Parameters,
-  loss: number[],
-) => console.log(dashboard.render(parameters, iterations, loss));
+  reward: number[],
+) => console.log(dashboard.render(parameters, iterations, reward));
 
 // Run optimizer and save results
 const epsilon = 0.01;
