@@ -81,6 +81,7 @@ export class Optimize {
     const profit: number = simulation.account.profit;
     const invested: number = simulation.account.InvestedRatio;
     const win: number = simulation.account.WinRatio;
+    const frag: number = simulation.account.fragility;
 
     const scale: number = Math.abs(profit);
     // Normalize costs: 0=no cost, 1=worst cost
@@ -93,7 +94,7 @@ export class Optimize {
     // The more losses the worse
     const lose_cost = 1 - win;
     // Scale each cost to profit
-    const costs = scale * (trades_cost + cash_cost + lose_cost) / 3;
+    const costs = scale * (trades_cost + cash_cost + lose_cost + frag) / 4;
     // Subtract cost from profit;
     const score = profit - costs;
 
