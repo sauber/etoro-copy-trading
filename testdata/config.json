@@ -7,3 +7,4 @@
   "discover": { "risk": 4, "daily": 6, "weekly": 11 },
   "trading": { "window": 2, "buy": 50, "sell": 80, "weekday": 1 }
 }
+
