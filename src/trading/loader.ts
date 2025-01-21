@@ -92,6 +92,8 @@ export class Loader {
 
   /** Total value of account */
   public async value(): Promise<Amount> {
+    const value: number = (await this.account()).Value;
+    if ( value == null) throw new Error("Account Value is null");
     return (await this.account()).Value;
   }
 
