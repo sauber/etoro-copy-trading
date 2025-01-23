@@ -1,28 +1,36 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
-import { IntegerParameter, Maximize, Parameters } from "📚/optimize/mod.ts";
+import {
+  IntegerParameter,
+  Maximize,
+  Parameter,
+  Parameters,
+} from "📚/optimize/mod.ts";
 import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
 import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
 import { Status } from "📚/optimize/types.d.ts";
 import { DelayStrategy } from "📚/timing/mod.ts";
+import { FutureStrategy } from "📚/strategy/future-strategy.ts";
 
 function makeParameters(value: Array<number> = []): Parameters {
   return [
     new IntegerParameter("window", 2, 100, value[0]),
-    new IntegerParameter("buy", 15, 35, value[1]),
-    new IntegerParameter("sell", 65, 85, value[2]),
-    new IntegerParameter("weekday", 1, 5, value[3]),
+    new IntegerParameter("buy", 10, 40, value[1]),
+    new IntegerParameter("sell", 60, 90, value[2]),
+    new IntegerParameter("weekday", 1, 1, value[3]),
+    new Parameter("size", 0.01, 0.05, value[4]),
   ];
 }
 
 // Values of window, buy, sell, weekday
-type Input = [number, number, number, number];
+type Input = [number, number, number, number, number];
 type Output = number;
 export type TradingData = {
   window: number;
   buy: number;
   sell: number;
   weekday: number;
+  size: number;
 };
 
 type Samples = Array<{ input: Parameters; output: number }>;
@@ -113,11 +121,12 @@ export class Optimize {
     );
     const strategy: Strategy = new CascadeStrategy([
       new WeekdayStrategy(settings.weekday),
+      new FutureStrategy(180),
       new DelayStrategy(
         2,
         new RSIStrategy(settings.window, settings.buy, settings.sell),
       ),
-      new SizingStrategy(),
+      new SizingStrategy(settings.size),
     ]);
     const simulation = new Simulation(exchange, strategy);
 

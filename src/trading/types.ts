@@ -3,4 +3,5 @@ export type Parameters = {
   buy: number;
   sell: number;
   window: number;
+  size: number;
 };

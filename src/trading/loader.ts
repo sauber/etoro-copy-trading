@@ -388,7 +388,7 @@ export class Loader {
         2,
         new RSIStrategy(settings.window, settings.buy, settings.sell),
       ),
-      new SizingStrategy(),
+      new SizingStrategy(settings.size),
     ]);
   }
 }

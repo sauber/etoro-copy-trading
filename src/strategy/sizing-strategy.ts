@@ -6,6 +6,10 @@ import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
 
 /** Holistic sizing of positions */
 export class SizingStrategy extends PassThroughStrategy {
+  constructor(private readonly ratio: number = 0.1) {
+    super();
+  }
+
   public override open(context: StrategyContext): PurchaseOrders {
     const po = context.purchaseorders;
     if (po.length < 1) return [];
@@ -14,7 +18,7 @@ export class SizingStrategy extends PassThroughStrategy {
 
     return limit.map((po) => ({
       instrument: po.instrument,
-      amount: context.value * 0.1,
+      amount: context.value * this.ratio,
     }));
   }
 }

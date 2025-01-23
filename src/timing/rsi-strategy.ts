@@ -43,7 +43,7 @@ export class RSIStrategy implements Strategy {
     const bar: Bar = context.bar;
     return context.closeorders.filter((closeorder) => {
       const rsiChart = this.chart(closeorder.position.instrument as Instrument);
-      // console.log("Close RSI", position.instrument.symbol, bar, rsiChart.bar(bar));
+      // console.log("Close RSI", closeorder.position.instrument.symbol, bar, rsiChart.bar(bar));
       if (!rsiChart.has(bar)) return false;
       if (rsiChart.bar(bar) < this.sell_threshold) return false;
       return true;
