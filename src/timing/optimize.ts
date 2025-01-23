@@ -4,6 +4,7 @@ import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
 import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
 import { Status } from "📚/optimize/types.d.ts";
+import { DelayStrategy } from "📚/timing/mod.ts";
 
 function makeParameters(value: Array<number> = []): Parameters {
   return [
@@ -112,7 +113,10 @@ export class Optimize {
     );
     const strategy: Strategy = new CascadeStrategy([
       new WeekdayStrategy(settings.weekday),
-      new RSIStrategy(settings.window, settings.buy, settings.sell),
+      new DelayStrategy(
+        2,
+        new RSIStrategy(settings.window, settings.buy, settings.sell),
+      ),
       new SizingStrategy(),
     ]);
     const simulation = new Simulation(exchange, strategy);
