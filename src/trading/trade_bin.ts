@@ -9,12 +9,7 @@ import {
 import { Table } from "@sauber/table";
 import { DateFormat } from "📚/time/mod.ts";
 import { Assets } from "📚/assets/assets.ts";
-import { type Parameters } from "📚/trading/types.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
-import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
-import { RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
-import { DelayStrategy } from "📚/timing/delay-strategy.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -22,17 +17,8 @@ if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
 const loader = new Loader(repo);
 
-// Ranking model
-const model: Ranking = await loader.rankingModel();
-
 // Strategy
-const settings: Parameters = await loader.settings();
-const strategy: Strategy = new CascadeStrategy([
-  new WeekdayStrategy(settings.weekday),
-  new RankingStrategy(model),
-  new DelayStrategy(2, new RSIStrategy(settings.window, settings.buy, settings.sell)),
-  new SizingStrategy(),
-]);
+const strategy: Strategy = await loader.strategy();
 
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();

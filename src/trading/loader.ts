@@ -8,6 +8,7 @@ import {
   Position,
   PositionID,
   Price,
+  Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { Positions, PurchaseOrders } from "@sauber/backtest";
@@ -24,7 +25,9 @@ import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
+import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
+import { DelayStrategy, RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
 
 const NOW: DateFormat = today();
 
@@ -93,7 +96,7 @@ export class Loader {
   /** Total value of account */
   public async value(): Promise<Amount> {
     const value: number = (await this.account()).Value;
-    if ( value == null) throw new Error("Account Value is null");
+    if (value == null) throw new Error("Account Value is null");
     return (await this.account()).Value;
   }
 
@@ -315,7 +318,7 @@ export class Loader {
         const value: Amount = await this.value();
         const positions: Positions = await this.positions();
         const invested: Amount = sum(
-          positions.map((p: Position) => p.value(bar+EXTEND)),
+          positions.map((p: Position) => p.value(bar + EXTEND)),
         );
         const amount: Amount = value - invested;
         return amount;
@@ -369,8 +372,23 @@ export class Loader {
 
   // Ranking model
   public async rankingModel(): Promise<Ranking> {
-    const model: Ranking = this.assets.ranking
+    const model: Ranking = this.assets.ranking;
     if (!await model.load()) model.generate();
     return model;
+  }
+
+  /** Trading Strategy, combination of strategies */
+  public async strategy(): Promise<Strategy> {
+    const model: Ranking = await this.rankingModel();
+    const settings: Parameters = await this.settings();
+    return new CascadeStrategy([
+      new WeekdayStrategy(settings.weekday),
+      new RankingStrategy(model),
+      new DelayStrategy(
+        2,
+        new RSIStrategy(settings.window, settings.buy, settings.sell),
+      ),
+      new SizingStrategy(),
+    ]);
   }
 }
