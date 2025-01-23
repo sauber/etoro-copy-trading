@@ -18,7 +18,7 @@ const loader = new Loader(repo);
 const strategy: Strategy = await loader.simulation_strategy();
 
 // Exchange
-const instruments: Instruments = await loader.instrumentSamples(200);
+const instruments: Instruments = await loader.instrumentSamples(400);
 console.log("Instruments loaded:", instruments.length);
 const exchange: Exchange = new Exchange(instruments);
 

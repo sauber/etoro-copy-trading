@@ -374,7 +374,8 @@ export class Loader {
   // Ranking model
   public async rankingModel(): Promise<Ranking> {
     const model: Ranking = this.assets.ranking;
-    if (!await model.load()) model.generate();
+    const loaded: boolean = await model.load();
+    if ( ! loaded ) throw new Error("Ranking model not found");
     return model;
   }
 
