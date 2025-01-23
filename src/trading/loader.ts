@@ -268,9 +268,10 @@ export class Loader {
       async () => {
         const instrument = await this.instrument(username);
         const startDate: DateFormat = await this.positionStart(username);
-        const tradingDate: DateFormat = await this.tradingDate();
+        // const tradingDate: DateFormat = await this.tradingDate();
         const startBar: Bar = diffDate(startDate, NOW);
-        const endBar: Bar = diffDate(tradingDate, NOW);
+        // const endBar: Bar = diffDate(tradingDate, NOW);
+        const endBar: Bar = instrument.end;
         const startPrice: Price = instrument.price(startBar);
         const endPrice: Price = instrument.price(endBar);
         const startAmount: Amount = startPrice / endPrice * amount;
@@ -314,7 +315,7 @@ export class Loader {
         const value: Amount = await this.value();
         const positions: Positions = await this.positions();
         const invested: Amount = sum(
-          positions.map((p: Position) => p.value(bar)),
+          positions.map((p: Position) => p.value(bar+EXTEND)),
         );
         const amount: Amount = value - invested;
         return amount;

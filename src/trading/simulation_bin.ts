@@ -10,7 +10,7 @@ import { type Parameters } from "📚/trading/types.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
 import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
-import { RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
+import { DelayStrategy, RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -26,7 +26,7 @@ const settings: Parameters = await loader.settings();
 const strategy: Strategy = new CascadeStrategy([
   new WeekdayStrategy(settings.weekday),
   new RankingStrategy(model),
-  new RSIStrategy(settings.window, settings.buy, settings.sell),
+  new DelayStrategy(2, new RSIStrategy(settings.window, settings.buy, settings.sell)),
   new SizingStrategy(),
 ]);
 
