@@ -4,3 +4,8 @@
   relative rank is maintained, than absolute position.
 - Make progressbar an external module. Perhaps use from @sauber/ml-dashboard module.
 - Discover Min/Max in config.json file
+- StopLoss Strategy
+- Strategy to don't increase position in investor above maximum
+- Strategy to limit count of trades per session
+- More verbose reasoning for trades
+

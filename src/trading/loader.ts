@@ -28,6 +28,7 @@ import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
 import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
 import { DelayStrategy, RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
+import { FutureStrategy } from "📚/strategy/future-strategy.ts";
 
 const NOW: DateFormat = today();
 
@@ -377,12 +378,28 @@ export class Loader {
     return model;
   }
 
-  /** Trading Strategy, combination of strategies */
+  /** Trading Strategy, a combination of strategies */
   public async strategy(): Promise<Strategy> {
     const model: Ranking = await this.rankingModel();
     const settings: Parameters = await this.settings();
     return new CascadeStrategy([
       new WeekdayStrategy(settings.weekday),
+      new RankingStrategy(model),
+      new DelayStrategy(
+        2,
+        new RSIStrategy(settings.window, settings.buy, settings.sell),
+      ),
+      new SizingStrategy(settings.size),
+    ]);
+  }
+
+  /** Simulation Strategy, same as trading, but ensuring data available to hold positions open */
+  public async simulation_strategy(): Promise<Strategy> {
+    const model: Ranking = await this.rankingModel();
+    const settings: Parameters = await this.settings();
+    return new CascadeStrategy([
+      new WeekdayStrategy(settings.weekday),
+      new FutureStrategy(180),
       new RankingStrategy(model),
       new DelayStrategy(
         2,

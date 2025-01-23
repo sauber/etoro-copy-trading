@@ -88,7 +88,7 @@ export class Optimize {
   private score(simulation: Simulation): number {
     const trades: number = simulation.account.trades.length;
     const profit: number = simulation.account.profit;
-    const invested: number = simulation.account.InvestedRatio;
+    // const invested: number = simulation.account.InvestedRatio;
     const win: number = simulation.account.WinRatio;
     const frag: number = simulation.account.fragility;
 
@@ -99,11 +99,11 @@ export class Optimize {
       trades / simulation.account.bars,
     );
     // The more uninvested cash invested the worse
-    const cash_cost = 1 - invested;
+    // const cash_cost = 1 - invested;
     // The more losses the worse
     const lose_cost = 1 - win;
     // Scale each cost to profit
-    const costs = scale * (trades_cost + cash_cost + lose_cost + frag) / 4;
+    const costs = scale * (trades_cost + lose_cost + frag) / 3;
     // Subtract cost from profit;
     const score = profit - costs;
 
