@@ -8,4 +8,6 @@
 - Strategy to don't increase position in investor above maximum
 - Strategy to limit count of trades per session
 - More verbose reasoning for trades
+- Favor positions closing instead of expiring, when optimizing
+
 
