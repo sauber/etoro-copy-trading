@@ -1,20 +1,17 @@
 import {
-  CloseOrder,
-  CloseOrders,
-  Instrument,
   PurchaseOrder,
   PurchaseOrders,
-  Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { Ranking } from "📚/ranking/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
-import { Investor } from "📚/investor/mod.ts";
 import { PassThroughStrategy } from "📚/strategy/mod.ts";
 
 /** Lookup ranking of each investor */
 export class RankingStrategy extends PassThroughStrategy {
-  constructor(private readonly model: Ranking) {super()}
+  constructor(private readonly model: Ranking) {
+    super();
+  }
 
   // TODO: Identify 50% lowest ranking investors and close their positions
   /** Close positions where ranking score < 0 */
@@ -43,7 +40,7 @@ export class RankingStrategy extends PassThroughStrategy {
   // }
 
   /** Open positions where ranking score > 0 */
-  public open(context: StrategyContext): PurchaseOrders {
+  public override open(context: StrategyContext): PurchaseOrders {
     return context.purchaseorders
       // Add ranking score
       .map((po: PurchaseOrder) => {
