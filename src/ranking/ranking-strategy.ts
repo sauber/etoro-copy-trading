@@ -10,35 +10,37 @@ import {
 import { Ranking } from "📚/ranking/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { Investor } from "📚/investor/mod.ts";
+import { PassThroughStrategy } from "📚/strategy/mod.ts";
 
 /** Lookup ranking of each investor */
-export class RankingStrategy implements Strategy {
-  constructor(private readonly model: Ranking) {}
+export class RankingStrategy extends PassThroughStrategy {
+  constructor(private readonly model: Ranking) {super()}
 
+  // TODO: Identify 50% lowest ranking investors and close their positions
   /** Close positions where ranking score < 0 */
-  public close(context: StrategyContext): CloseOrders {
-    return context.closeorders.filter((closeorder: CloseOrder) => {
-      const instrument: Instrument = closeorder.position.instrument;
+  // public close(context: StrategyContext): CloseOrders {
+  //   return context.closeorders.filter((closeorder: CloseOrder) => {
+  //     const instrument: Instrument = closeorder.position.instrument;
 
-      // Portfolio may have items which are not investors, or investors which have no
-      // data in repository. Pass through those instruments.
-      if ("investor" in instrument) {
-        const investor: Investor = instrument.investor as Investor;
+  //     // Portfolio may have items which are not investors, or investors which have no
+  //     // data in repository. Pass through those instruments.
+  //     if ("investor" in instrument) {
+  //       const investor: Investor = instrument.investor as Investor;
 
-        const score = this.model.predict(investor, instrument.end);
-        // Confidence to close is high if ranking score is low
-        const confidence = -score * closeorder.confidence;
-        if (score < 0) {
-          Object.assign(closeorder, { confidence });
-          return true;
-        } else {
-          // Don't close if ranking score is positive
-          return false;
-        }
-      } // Only rank investors, not other instruments
-      else return true;
-    });
-  }
+  //       const score = this.model.predict(investor, instrument.end);
+  //       // Confidence to close is high if ranking score is low
+  //       const confidence = -score * closeorder.confidence;
+  //       if (score < 0) {
+  //         Object.assign(closeorder, { confidence });
+  //         return true;
+  //       } else {
+  //         // Don't close if ranking score is positive
+  //         return false;
+  //       }
+  //     } // Only rank investors, not other instruments
+  //     else return true;
+  //   });
+  // }
 
   /** Open positions where ranking score > 0 */
   public open(context: StrategyContext): PurchaseOrders {
