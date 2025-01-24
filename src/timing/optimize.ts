@@ -92,7 +92,6 @@ export class Optimize {
     const win: number = simulation.account.WinRatio;
     const frag: number = simulation.account.fragility;
 
-    const scale: number = Math.abs(profit);
     // Normalize costs: 0=no cost, 1=worst cost
     // The more trades the worse
     const trades_cost: number = Math.tanh(
@@ -102,8 +101,13 @@ export class Optimize {
     // const cash_cost = 1 - invested;
     // The more losses the worse
     const lose_cost = 1 - win;
+
+    // Favor more closes than expirations
+    const expire = simulation.account.expireRatio;
+
     // Scale each cost to profit
-    const costs = scale * (trades_cost + lose_cost + frag) / 3;
+    const scale: number = Math.abs(profit);
+    const costs = scale * (trades_cost + lose_cost + frag + expire) / 4;
     // Subtract cost from profit;
     const score = profit - costs;
 

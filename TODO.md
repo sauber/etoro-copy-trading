@@ -9,5 +9,6 @@
 - Strategy to limit count of trades per session
 - More verbose reasoning for trades
 - Favor positions closing instead of expiring, when optimizing
+- Define minimum profit to avoid selling at loss
 
 
