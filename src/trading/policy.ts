@@ -138,12 +138,13 @@ export class Policy implements Strategy {
     // - Combine with the purchase orders
     // - Sort by gap
 
-    df.join
-
     const cdf = DataFrame.fromRecords(crec);
     cdf.digits(8).print(
-      "Close Orders Bar " + context.bar + " Value " + context.value,
+      "Gaps of open positions " + context.bar + " Value " + context.value,
     );
+
+    const combined = df.join(cdf, "UserName");
+    combined.print("Combined");
 
     return df.values("PurchaseOrder") as PurchaseOrders;
   }
