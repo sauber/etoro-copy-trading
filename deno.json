@@ -13,7 +13,7 @@
     "@debut/indicators": "npm:@debut/indicators@^1.3.22",
     "@hugoalh/shuffle-array": "jsr:@hugoalh/shuffle-array@^2.0.4",
     "@sauber/backtest": "jsr:@sauber/backtest@^1.4.1",
-    "@sauber/dataframe": "jsr:@sauber/dataframe@^0.3.2",
+    "@sauber/dataframe": "jsr:@sauber/dataframe@^0.4.0",
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.6.1",
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
     "@sauber/statistics": "jsr:@sauber/statistics@^0.4.0",
