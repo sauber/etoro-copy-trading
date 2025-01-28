@@ -31,7 +31,7 @@ export class Parameter {
   /** Amount value has changed */
   public changed: number = 0;
 
-  private readonly optimizer = new Adam();
+  protected readonly optimizer = new Adam();
 
   // Current float value of parameter
   protected _value: number;
@@ -123,6 +123,43 @@ export class IntegerParameter extends Parameter {
 
   public override suggest(): number {
     return Math.round(super.suggest());
+  }
+}
+
+/** Value is not changable */
+export class StaticParameter extends Parameter {
+  protected override readonly optimizer = new Object() as Adam;
+  
+  constructor(name: string, value: number) {
+    super(name, value, value, value);
+  }
+
+  public override get value(): number {
+    return this._value;
+  }
+
+  public override get random(): number {
+    return this._value;
+  }
+
+  public override suggest(): number {
+    return this._value;
+  }
+
+  public override learn(_x: number, _y: number): void {
+    // Do nothing
+  }
+
+  public override get gradient(): number {
+    return 0;
+  }
+
+  public override update(): void {
+    // Do nothing
+  }
+
+  public override print(): string {
+    return `${this.name}: v=${this._value} g=0`;
   }
 }
 

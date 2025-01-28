@@ -12,6 +12,7 @@ import {
   IntegerParameter,
   Parameter,
   ParameterData,
+  StaticParameter,
 } from "📚/optimize/parameter.ts";
 
 Deno.test("Instance", () => {
@@ -77,7 +78,7 @@ Deno.test("Learning", () => {
   const updated: number = p.value;
   assertNotEquals(updated, initial);
   assertAlmostEquals(updated, initial, 0.1);
-  assertAlmostEquals(p.changed, updated-initial, 0.1);
+  assertAlmostEquals(p.changed, updated - initial, 0.1);
 });
 
 Deno.test("Integer Instance", () => {
@@ -92,4 +93,11 @@ Deno.test("Integer Parameter", () => {
   const s = int.suggest();
   assertGreaterOrEqual(s, int.value - 1);
   assertLessOrEqual(s, int.value + 1);
+});
+
+Deno.test("Static Parameter", () => {
+  const int = new StaticParameter("", 1);
+  assertEquals(int.value, Math.round(int.value));
+  assertEquals(int.suggest(), int.value);
+  assertEquals(int.gradient, 0);
 });

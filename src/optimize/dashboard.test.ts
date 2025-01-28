@@ -4,6 +4,7 @@ import {
   IntegerParameter,
   Parameter,
   Parameters,
+  StaticParameter,
 } from "📚/optimize/parameter.ts";
 import { delay } from "jsr:@std/async/delay";
 
@@ -27,6 +28,7 @@ Deno.test("Render", { ignore: false }, async () => {
       1 + Math.random(),
       Math.random() - 0.5,
     ),
+    new StaticParameter("Static", 0.5),
   ];
   const loss: Array<number> = [];
   const chart: string = d.render(parameters, 0, loss);
@@ -34,7 +36,7 @@ Deno.test("Render", { ignore: false }, async () => {
 
   for (let i = 1; i <= iterations; i++) {
     await delay(10); // wait
-    parameters.forEach(p=>p.set(p.suggest()));
+    parameters.forEach((p) => p.set(p.suggest()));
     loss.push(Math.random());
     const update: string = d.render(parameters, i, loss);
     console.log(update);
