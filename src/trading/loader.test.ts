@@ -18,6 +18,7 @@ import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
 import { Parameters } from "📚/trading/types.ts";
 import { Ranking } from "📚/ranking/mod.ts";
+import { Timing } from "📚/timing/mod.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Loader(assets), Loader);
@@ -68,6 +69,12 @@ Deno.test("Settings", async () => {
 Deno.test("Ranking Model", async () => {
   const loader = new Loader(assets);
   const model: Ranking = await loader.rankingModel();
+  assert(model);
+});
+
+Deno.test("Timing Model", async () => {
+  const loader = new Loader(assets);
+  const model: Timing = await loader.timingModel();
   assert(model);
 });
 

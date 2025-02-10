@@ -8,10 +8,8 @@ import {
 } from "@sauber/backtest";
 import { Table } from "@sauber/table";
 import { DateFormat } from "📚/time/mod.ts";
-import { Assets } from "📚/assets/assets.ts";
+import { Assets } from "📚/assets/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { Policy } from "📚/trading/policy.ts";
-import { Ranking } from "📚/ranking/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -20,9 +18,7 @@ const repo = Assets.disk(path);
 const loader = new Loader(repo);
 
 // Strategy
-// const strategy: Strategy = await loader.strategy();
-const ranking: Ranking = await loader.rankingModel();
-const strategy: Strategy = new Policy(ranking);
+const strategy: Strategy = await loader.strategy();
 
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();
