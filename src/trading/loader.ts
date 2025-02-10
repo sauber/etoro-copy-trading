@@ -7,12 +7,12 @@ import {
   Instruments,
   Position,
   PositionID,
+  Positions,
   Price,
+  PurchaseOrders,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { Positions, PurchaseOrders } from "@sauber/backtest";
-import { type Parameters } from "📚/trading/types.ts";
 import { Assets } from "📚/assets/mod.ts";
 import {
   DateFormat,
@@ -24,11 +24,21 @@ import {
 import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
-import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
-import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
-import { DelayStrategy, RSIStrategy, WeekdayStrategy } from "📚/timing/mod.ts";
-import { FutureStrategy } from "📚/strategy/future-strategy.ts";
+import {
+  CascadeStrategy,
+  FutureStrategy,
+  SizingStrategy,
+} from "📚/strategy/mod.ts";
+import {
+  DelayStrategy,
+  RSIStrategy,
+  Timing,
+  WeekdayStrategy,
+} from "📚/timing/mod.ts";
+import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
+import { type Parameters } from "📚/trading/types.ts";
+import { Policy } from "📚/trading/policy.ts";
 
 const NOW: DateFormat = today();
 
@@ -371,16 +381,36 @@ export class Loader {
     return { bar, value, amount, purchaseorders, closeorders };
   }
 
-  // Ranking model
+  /** Ranking model */
   public async rankingModel(): Promise<Ranking> {
     const model: Ranking = this.assets.ranking;
     const loaded: boolean = await model.load();
-    if ( ! loaded ) throw new Error("Ranking model not found");
+    if (!loaded) throw new Error("Ranking model not found");
     return model;
   }
 
+  /** Timing Model */
+  public async timingModel(): Promise<Timing> {
+    const settings: Parameters = await this.settings();
+    // TODO: Different window size for buying and selling
+    const model = new Timing(
+      settings.window,
+      settings.buy,
+      settings.window,
+      settings.sell,
+    );
+    return model;
+  }
+
+  /** Target size of positions */
+  public async positionSize(): Promise<Amount> {
+    const settings: Parameters = await this.settings();
+    return settings.size;
+  }
+
   /** Trading Strategy, a combination of strategies */
-  public async strategy(): Promise<Strategy> {
+  // TODO: Not used
+  public async cascade_strategy(): Promise<Strategy> {
     const model: Ranking = await this.rankingModel();
     const settings: Parameters = await this.settings();
     return new CascadeStrategy([
@@ -408,5 +438,28 @@ export class Loader {
       ),
       new SizingStrategy(settings.size),
     ]);
+  }
+
+  /** Trading Policy */
+  public async strategy(): Promise<Strategy> {
+    const positionSize: Amount = await this.positionSize();
+    const ranking: Ranking = await this.rankingModel();
+    const timing: Timing = await this.timingModel();
+
+    // Callback to identify rank of investor
+    const ranker = (instrument: Instrument, bar: Bar) =>
+      ("investor" in instrument)
+        ? Math.tanh(ranking.predict(instrument.investor as Investor, bar))
+        : 0;
+
+    // Callback to identify timing of investor
+    const timer = (instrument: Instrument, bar: Bar) => {
+      if (instrument.active(bar + 2)) {
+        return timing.predict(instrument, bar);
+      } else return 0;
+    };
+
+    const policy = new Policy(ranker, timer, positionSize);
+    return policy;
   }
 }
