@@ -5,6 +5,12 @@
     "Value": 100000
   },
   "discover": { "risk": 4, "daily": 6, "weekly": 11 },
-  "trading": { "window": 2, "buy": 50, "sell": 80, "weekday": 1 }
+  "trading": {
+    "buy_window": 2,
+    "buy_threshold": 50,
+    "sell_window": 2,
+    "sell_threshold": 80,
+    "weekday": 1,
+    "position_size": 0.1
+  }
 }
-

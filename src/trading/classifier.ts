@@ -3,14 +3,17 @@ import {
   Bar,
   CloseOrders,
   Instrument,
+  Position,
   PurchaseOrder,
   PurchaseOrders,
   StrategyContext,
 } from "@sauber/backtest";
+import { assert } from "@std/assert";
 import { Candidate, CandidateExport } from "📚/trading/candidate.ts";
+import { Rater } from "📚/trading/raters.ts";
 
 /** Rater function type to assess ranking or timing of instruments */
-export type Rater = (instrument: Instrument, bar: Bar) => number;
+// export type Rater = (instrument: Instrument, bar: Bar) => number;
 
 type Rank = number;
 type Timing = number;
@@ -26,6 +29,10 @@ export class Classifier {
     readonly timing: Rater,
     readonly positionSize: number,
   ) {
+    assert(
+      positionSize > 0 && positionSize <= 1,
+      `positionSize out of range (0,1]: ${positionSize}`,
+    );
     const target: Amount = context.value * positionSize;
     const bar = context.bar;
 
@@ -44,20 +51,23 @@ export class Classifier {
       this.candidates.set(username, candidate);
     });
 
+    // TODO; Add all open positions to candidates
+    // context.positions.foreach(ps=>{});
+
     // Add all open positions to candidates
-    context.closeorders.forEach((co) => {
-      const username: string = co.position.instrument.symbol;
+    context.positions.forEach((position) => {
+      const username: string = position.instrument.symbol;
       const candidate = this.candidates.get(username);
-      if (candidate) candidate.addCloseOrder(co);
+      if (candidate) candidate.addPosition(position);
       else {
         const c = new Candidate(
-          co.position.instrument,
+          position.instrument,
           bar,
-          ranking(co.position.instrument, bar),
-          timing(co.position.instrument, bar),
+          ranking(position.instrument, bar),
+          timing(position.instrument, bar),
           target,
         );
-        c.addCloseOrder(co);
+        c.addPosition(position);
         this.candidates.set(username, c);
       }
     });
@@ -89,8 +99,10 @@ export class Classifier {
 
   /** List of positions to close */
   public close(): CloseOrders {
-    return this.all.filter((c: Candidate) => c.isSell).map((c: Candidate) =>
-      c.closeorders
-    ).flat();
+    return this.all
+      .filter((c: Candidate) => c.isSell)
+      .map((c: Candidate) => c.positions)
+      .flat()
+      .map((position: Position) => ({ position, confidence: 1 }));
   }
 }

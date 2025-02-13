@@ -16,6 +16,7 @@ const context: StrategyContext = {
   amount: 0,
   purchaseorders: [],
   closeorders: [],
+  positions: []
 };
 
 Deno.test("Instance", () => {

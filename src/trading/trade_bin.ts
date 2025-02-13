@@ -1,52 +1,49 @@
-import {
-  CloseOrder,
-  CloseOrders,
-  PurchaseOrder,
-  PurchaseOrders,
-  Strategy,
-  StrategyContext,
-} from "@sauber/backtest";
-import { Table } from "@sauber/table";
+import { StrategyContext } from "@sauber/backtest";
+import { DataFrame } from "@sauber/dataframe";
 import { DateFormat } from "📚/time/mod.ts";
-import { Assets } from "📚/assets/mod.ts";
+import { Assets } from "📚/assets/assets.ts";
 import { Loader } from "📚/trading/loader.ts";
+import { Ranking } from "📚/ranking/mod.ts";
+import { Classifier } from "📚/trading/classifier.ts";
+import { Timing } from "📚/timing/mod.ts";
+import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
 
 // Repo
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
-const loader = new Loader(repo);
+let loader: Loader | null = new Loader(repo);
 
-// Strategy
-const strategy: Strategy = await loader.strategy();
+// Models
+const ranking: Ranking = await loader.rankingModel();
+const ranker: Rater = makeRanker(ranking);
+const timing: Timing = await loader.timingModel();
+const timer: Rater = makeTimer(timing);
+
+// const strategy: Strategy = new Policy(ranking);
 
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();
 
-// Account
+// Settings
 const tradingDate: DateFormat = await loader.tradingDate();
-console.log("Trading Day:", tradingDate);
-
-// Trading Day
 const username: string = await loader.username();
-console.log("Account:", username);
+const positionSize: number = await loader.positionSize();
+console.log("Account:", username, "Trading Day:", tradingDate, "Cash:", situation.amount.toFixed(2));
 
-// Closing
-const close: CloseOrders = strategy.close(situation);
-const ctable = new Table();
-ctable.headers = ["UserName", "Amount"];
-ctable.rows = close.map((
-  c: CloseOrder,
-) => [c.position.instrument.symbol, parseFloat(c.position.amount.toFixed(2))]);
-console.log("Positions to close:");
-console.log(ctable.toString());
+// Loading finished, free cache memory
+loader = null;
 
-// Opening
-const open: PurchaseOrders = strategy.open(situation);
-const otable = new Table();
-otable.headers = ["UserName", "Amount"];
-otable.rows = open.map((
-  o: PurchaseOrder,
-) => [o.instrument.symbol, parseFloat(o.amount.toFixed(2))]);
-console.log("Positions to open:");
-console.log(otable.toString());
+const classifier = new Classifier(situation, ranker, timer, positionSize);
+const records = classifier.records;
+// console.log(records);
+const df = DataFrame.fromRecords(records);
+df
+  .select((r) => r["Action"] != undefined)
+  .sort("Timing", false)
+  .sort("Rank", false)
+  .sort("Value")
+  .sort("Sell")
+  .sort("Buy", false)
+  .digits(2)
+  .print("Candidates");

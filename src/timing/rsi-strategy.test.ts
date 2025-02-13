@@ -14,6 +14,7 @@ Deno.test("Open/Close", () => {
     amount: 0,
     purchaseorders: [],
     closeorders: [],
+    positions: []
   };
   assertEquals(strategy.open(context), []);
   assertEquals(strategy.close(context), []);

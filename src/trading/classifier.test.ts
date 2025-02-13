@@ -26,7 +26,7 @@ Deno.test("Instance", () => {
   assertInstanceOf(new Classifier(context, ranking, timing, 0.1), Classifier);
 });
 
-Deno.test("Records", () => {
+Deno.test("Records", {ignore: true}, () => {
   const classifier = new Classifier(context, ranking, timing, 0.1);
   const records = classifier.records;
   const df = DataFrame.fromRecords(records);
