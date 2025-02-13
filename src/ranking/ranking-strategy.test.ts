@@ -47,6 +47,7 @@ Deno.test("Close", () => {
     amount: amount,
     purchaseorders: [purchaseorder],
     closeorders: [closeorder],
+    positions: [position],
   };
   const closeorders: CloseOrders = strategy.close(context);
   if (closeorders.length > 0) {
@@ -63,6 +64,7 @@ Deno.test("Open", () => {
     amount: amount,
     purchaseorders: [purchaseorder],
     closeorders: [closeorder],
+    positions: [position],
   };
   const purchaseorders: PurchaseOrders = strategy.open(context);
   if (purchaseorders.length > 0) {

@@ -10,16 +10,17 @@ await rankModel.load();
 const loader = new Loader(assets);
 export const context: StrategyContext = await loader.strategyContext();
 export const instrument = (await loader.instrumentSamples(1))[0];
+export const timeModel = await assets.timing();
 
 // Calculate a dummy ranking score based on length of username.
-export const ranking = (instr: Instrument) => {
+export const test_ranking = (instr: Instrument) => {
   const score: number = (instr.symbol.length - 11) * 0.2;
   // console.log(instr.symbol, "ranking score is", score);
   return score;
 };
 
 // Calculate a dummy timing score based on first letter
-export const timing = (instr: Instrument) => {
+export const test_timing = (instr: Instrument) => {
   const score: number = (instr.symbol.toUpperCase().charCodeAt(0) - 78) / 13;
   // console.log(instr.symbol, "timing score is", score);
   return score;

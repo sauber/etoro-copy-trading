@@ -1,9 +1,9 @@
 import {
   Amount,
   Bar,
-  CloseOrder,
-  CloseOrders,
   Instrument,
+  Position,
+  Positions,
   PurchaseOrder,
   PurchaseOrders,
   Symbol,
@@ -71,7 +71,7 @@ export type CandidateExport =
 /** Combination of purchase potential and existing open positions */
 export class Candidate {
   /** List of already open positions */
-  public readonly closeorders: CloseOrders = [];
+  public readonly positions: Positions = [];
 
   /** List of purchase orders available */
   public readonly purchaseorders: PurchaseOrders = [];
@@ -86,8 +86,8 @@ export class Candidate {
   ) {}
 
   /** Add a CloseOrder to list */
-  public addCloseOrder(closeorder: CloseOrder): void {
-    this.closeorders.push(closeorder);
+  public addPosition(position: Position): void {
+    this.positions.push(position);
   }
   /** Add a PurchaseOrder to list */
   public addPurchaseOrder(purchaseorder: PurchaseOrder): void {
@@ -101,18 +101,18 @@ export class Candidate {
 
   /** Bar when first position opened */
   public get start(): Bar | undefined {
-    if (this.closeorders.length < 1) return undefined;
-    return Math.max(...this.closeorders.map((co) => co.position.start));
+    if (this.positions.length < 1) return undefined;
+    return Math.max(...this.positions.map((position) => position.start));
   }
 
   /** Total amount invested */
   public get invested(): Amount {
-    return this.closeorders.reduce((sum, co) => sum + co.position.amount, 0);
+    return this.positions.reduce((sum, position) => sum + position.amount, 0);
   }
 
   /** Total amount of units opened */
   public get units(): Amount {
-    return this.closeorders.reduce((sum, co) => co.position.units + sum, 0);
+    return this.positions.reduce((sum, position) => position.units + sum, 0);
   }
 
   /** Total value at bar */
@@ -179,9 +179,15 @@ export class Candidate {
         return sell;
       } // Opportunity to buy more
       else if (this.rank > 0 && this.timing > 0 && this.value < this.target) {
-        const amount: { Score: number; Buy: Amount; Action: "Increase" } = {
+        const amount: {
+          Score: number;
+          Target: number;
+          Buy: Amount;
+          Action: "Increase";
+        } = {
           Score: this.score,
-          Buy: (this.target - this.value) * this.score,
+          Target: this.target,
+          Buy: Math.min(this.target * this.score, this.target - this.value),
           Action: "Increase",
         };
         const increase: IncreaseCandidate = Object.assign({}, open, amount);

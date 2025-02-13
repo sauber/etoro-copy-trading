@@ -28,9 +28,11 @@ console.log("Simulation starts");
 simulation.run();
 console.log(simulation.account.toString);
 console.log(simulation.account.plot());
+console.log(simulation.account.portfolio.toString(exchange.end));
 
 // Evaluation
 const pct = (x: number): string => parseFloat((100 * x).toFixed(3)) + "%";
+console.log("Start:", exchange.start, "End:", exchange.end);
 const account: Account = simulation.account;
 console.log(
   "Trades:",

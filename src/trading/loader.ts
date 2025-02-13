@@ -28,6 +28,7 @@ import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
 import {
   CascadeStrategy,
   FutureStrategy,
+  RoundingStrategy,
   SizingStrategy,
 } from "📚/strategy/mod.ts";
 import {
@@ -37,8 +38,9 @@ import {
   WeekdayStrategy,
 } from "📚/timing/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
-import { type Parameters } from "📚/trading/types.ts";
+import { default_parameters, type ParameterData } from "📚/trading/parameters.ts";
 import { Policy } from "📚/trading/policy.ts";
+import { makeRanker, makeTimer } from "📚/trading/raters.ts";
 
 const NOW: DateFormat = today();
 
@@ -56,7 +58,7 @@ type CacheValue =
   | Mirrors
   | Mirror
   | null
-  | Parameters
+  | ParameterData
   | Position
   | Positions
   | PurchaseOrders;
@@ -82,12 +84,13 @@ export class Loader {
   }
 
   /** Trading strategy parameters */
-  public settings(): Promise<Parameters> {
-    return this.cache<Parameters>(
+  public settings(): Promise<ParameterData> {
+    return this.cache<ParameterData>(
       "settings",
-      async () =>
-        ((await this.assets.config.get("trading")) as unknown ||
-          { weekday: 1, buy: 30, sell: 70, window: 21 }) as Parameters,
+      async () => (
+        (await this.assets.config.get("trading")) as ParameterData ||
+        default_parameters
+      ),
     );
   }
 
@@ -369,16 +372,18 @@ export class Loader {
 
   /** Context for trading strategy */
   public async strategyContext(): Promise<StrategyContext> {
-    const [bar, value, amount, purchaseorders, closeorders] = await Promise.all(
-      [
-        this.tradingBar(),
-        this.value(),
-        this.amount(),
-        this.purchaseOrders(),
-        this.closeOrders(),
-      ],
-    ) as [Bar, Amount, Amount, PurchaseOrders, CloseOrders];
-    return { bar, value, amount, purchaseorders, closeorders };
+    const [bar, value, amount, purchaseorders, closeorders, positions] =
+      await Promise.all(
+        [
+          this.tradingBar(),
+          this.value(),
+          this.amount(),
+          this.purchaseOrders(),
+          this.closeOrders(),
+          this.positions(),
+        ],
+      ) as [Bar, Amount, Amount, PurchaseOrders, CloseOrders, Positions];
+    return { bar, value, amount, purchaseorders, closeorders, positions };
   }
 
   /** Ranking model */
@@ -390,76 +395,77 @@ export class Loader {
   }
 
   /** Timing Model */
-  public async timingModel(): Promise<Timing> {
-    const settings: Parameters = await this.settings();
-    // TODO: Different window size for buying and selling
-    const model = new Timing(
-      settings.window,
-      settings.buy,
-      settings.window,
-      settings.sell,
-    );
-    return model;
+  public timingModel(): Promise<Timing> {
+    // const settings: ParameterData = await this.settings();
+    // // TODO: Different window size for buying and selling
+    // const model = new Timing(
+    //   settings.window,
+    //   settings.buy,
+    //   settings.window,
+    //   settings.sell,
+    // );
+    // return model;
+    return this.assets.timing();
   }
 
   /** Target size of positions */
   public async positionSize(): Promise<Amount> {
-    const settings: Parameters = await this.settings();
-    return settings.size;
+    const settings: ParameterData = await this.settings();
+    const size = settings.position_size;
+    if (isNaN(size)) throw new Error("Position Size missing in settings");
+    return size;
   }
 
   /** Trading Strategy, a combination of strategies */
   // TODO: Not used
-  public async cascade_strategy(): Promise<Strategy> {
-    const model: Ranking = await this.rankingModel();
-    const settings: Parameters = await this.settings();
-    return new CascadeStrategy([
-      new WeekdayStrategy(settings.weekday),
-      new RankingStrategy(model),
-      new DelayStrategy(
-        2,
-        new RSIStrategy(settings.window, settings.buy, settings.sell),
-      ),
-      new SizingStrategy(settings.size),
-    ]);
-  }
+  // public async cascade_strategy(): Promise<Strategy> {
+  //   const model: Ranking = await this.rankingModel();
+  //   const settings: ParameterData = await this.settings();
+  //   return new CascadeStrategy([
+  //     new WeekdayStrategy(settings.weekday),
+  //     new RankingStrategy(model),
+  //     new DelayStrategy(
+  //       2,
+  //       new RSIStrategy(settings.window, settings.buy, settings.sell),
+  //     ),
+  //     new SizingStrategy(settings.size),
+  //   ]);
+  // }
 
   /** Simulation Strategy, same as trading, but ensuring data available to hold positions open */
-  public async simulation_strategy(): Promise<Strategy> {
-    const model: Ranking = await this.rankingModel();
-    const settings: Parameters = await this.settings();
-    return new CascadeStrategy([
-      new WeekdayStrategy(settings.weekday),
-      new FutureStrategy(180),
-      new RankingStrategy(model),
-      new DelayStrategy(
-        2,
-        new RSIStrategy(settings.window, settings.buy, settings.sell),
-      ),
-      new SizingStrategy(settings.size),
-    ]);
-  }
+  // public async simulation_strategy(): Promise<Strategy> {
+  //   const model: Ranking = await this.rankingModel();
+  //   const settings: ParameterData = await this.settings();
+  //   return new CascadeStrategy([
+  //     new WeekdayStrategy(settings.weekday),
+  //     new FutureStrategy(180),
+  //     new RankingStrategy(model),
+  //     new DelayStrategy(
+  //       2,
+  //       new RSIStrategy(settings.window, settings.buy, settings.sell),
+  //     ),
+  //     new SizingStrategy(settings.size),
+  //   ]);
+  // }
 
   /** Trading Policy */
   public async strategy(): Promise<Strategy> {
-    const positionSize: Amount = await this.positionSize();
+    const settings: ParameterData = await this.settings();
     const ranking: Ranking = await this.rankingModel();
     const timing: Timing = await this.timingModel();
+    const ranker = makeRanker(ranking);
+    const timer = makeTimer(timing);
 
-    // Callback to identify rank of investor
-    const ranker = (instrument: Instrument, bar: Bar) =>
-      ("investor" in instrument)
-        ? Math.tanh(ranking.predict(instrument.investor as Investor, bar))
-        : 0;
+    const policy = new Policy(ranker, timer, settings.position_size);
+    const cascade = new CascadeStrategy([
+      new WeekdayStrategy(settings.weekday),
+      // new DebugStrategy(),
+      new FutureStrategy(180),
+      policy,
+      new RoundingStrategy(200),
+      // new DebugStrategy(),
+    ]);
 
-    // Callback to identify timing of investor
-    const timer = (instrument: Instrument, bar: Bar) => {
-      if (instrument.active(bar + 2)) {
-        return timing.predict(instrument, bar);
-      } else return 0;
-    };
-
-    const policy = new Policy(ranker, timer, positionSize);
-    return policy;
+    return cascade;
   }
 }

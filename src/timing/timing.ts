@@ -1,5 +1,6 @@
 import { Bar, Buffer, Chart, Instrument } from "@sauber/backtest";
 import { RSI } from "@debut/indicators";
+import { assert } from "@std/assert";
 
 type ChartCache = Map<string, Chart>;
 
@@ -12,7 +13,18 @@ export class Timing {
     private readonly buy_threshold: number,
     private readonly sell_window: number,
     private readonly sell_threshold: number,
-  ) {}
+  ) {
+    assert(buy_window > 1, "buy_window out of range");
+    assert(
+      buy_threshold > 0 && buy_threshold <= 50,
+      "buy_threshold out of range",
+    );
+    assert(sell_window > 1, "sell_window out of range");
+    assert(
+      sell_threshold > 50 && sell_threshold < 100,
+      "sell_threshold out of range",
+    );
+  }
 
   /** Create chart with custom RSI window */
   private static create_chart(instrument: Instrument, window: number): Chart {

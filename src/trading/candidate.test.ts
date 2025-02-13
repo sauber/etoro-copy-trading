@@ -1,27 +1,16 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import {
-  Amount,
-  Bar,
-  CloseOrder,
-  Position,
-  Price,
-  PurchaseOrder,
-} from "@sauber/backtest";
-import { context, instrument, ranking, timing } from "📚/trading/testdata.ts";
+import { Amount, Bar, Position, Price, PurchaseOrder } from "@sauber/backtest";
+import { context, instrument, test_ranking, test_timing } from "📚/trading/testdata.ts";
 import { Candidate } from "📚/trading/candidate.ts";
 
 const start: Bar = instrument.start;
-const end: Bar = instrument.end;
 const first: Price = instrument.price(start);
-const last: Price = instrument.price(end);
 const amount: Amount = 100;
 const target: Amount = 200;
 const units1 = first / amount;
-const units2 = last / amount;
 const pos1 = new Position(instrument, amount, first, units1, start, 1);
-const pos2 = new Position(instrument, amount, last, units2, end, 2);
-const rank: number = ranking(instrument);
-const opportunity: number = timing(instrument);
+const rank: number = test_ranking(instrument);
+const opportunity: number = test_timing(instrument);
 
 // Generate Candidate Object
 function makeCandidate(): Candidate {
@@ -35,10 +24,10 @@ Deno.test("Instance", () => {
   );
 });
 
-Deno.test("Add CloseOrder", () => {
+Deno.test("Add Position", () => {
   const ca = makeCandidate();
-  const co: CloseOrder = context.closeorders[0];
-  ca.addCloseOrder(co);
+  const po: Position = context.positions[0];
+  ca.addPosition(po);
 });
 
 Deno.test("Add PurchaseOrder", () => {
@@ -55,7 +44,7 @@ Deno.test("Instrument Name", () => {
 Deno.test("Bar when opened", () => {
   const ca = makeCandidate();
   assertEquals(ca.start, undefined);
-  ca.addCloseOrder({ position: pos1, confidence: 1 });
+  ca.addPosition(pos1);
   assertEquals(ca.start, start);
 });
 
