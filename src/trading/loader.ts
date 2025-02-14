@@ -24,7 +24,7 @@ import {
 import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
-import { Ranking, RankingStrategy } from "📚/ranking/mod.ts";
+import { InvestorRanking, RankingStrategy } from "📚/ranking/mod.ts";
 import {
   CascadeStrategy,
   FutureStrategy,
@@ -387,8 +387,8 @@ export class Loader {
   }
 
   /** Ranking model */
-  public async rankingModel(): Promise<Ranking> {
-    const model: Ranking = this.assets.ranking;
+  public async rankingModel(): Promise<InvestorRanking> {
+    const model: InvestorRanking = this.assets.ranking;
     const loaded: boolean = await model.load();
     if (!loaded) throw new Error("Ranking model not found");
     return model;
@@ -451,7 +451,7 @@ export class Loader {
   /** Trading Policy */
   public async strategy(): Promise<Strategy> {
     const settings: ParameterData = await this.settings();
-    const ranking: Ranking = await this.rankingModel();
+    const ranking: InvestorRanking = await this.rankingModel();
     const timing: Timing = await this.timingModel();
     const ranker = makeRanker(ranking);
     const timer = makeTimer(timing);

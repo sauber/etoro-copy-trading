@@ -17,7 +17,7 @@ import { Mirror } from "📚/repository/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
 import { ParameterData } from "📚/trading/parameters.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Timing } from "📚/timing/mod.ts";
 
 Deno.test("Instance", () => {
@@ -68,7 +68,7 @@ Deno.test("Settings", async () => {
 
 Deno.test("Ranking Model", async () => {
   const loader = new Loader(assets);
-  const model: Ranking = await loader.rankingModel();
+  const model: InvestorRanking = await loader.rankingModel();
   assert(model);
 });
 
