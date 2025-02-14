@@ -193,7 +193,7 @@ export class Loader {
         const journal: Journal = await this.mirrorJournal();
         const dates: Array<DateFormat> = journal.dates;
         const start: DateFormat = dates[0];
-        const recent: DateFormat = dates.findLast((d) => d < trading) || start;
+        const recent: DateFormat = dates.findLast((d) => d <= trading) || start;
         const mirrors: Mirrors = journal.before(recent);
         return mirrors;
       },
@@ -331,6 +331,10 @@ export class Loader {
         const bar: Bar = await this.tradingBar();
         const value: Amount = await this.value();
         const positions: Positions = await this.positions();
+        // Confirm all positions have available value data
+        // positions.forEach((p: Position)=>{
+        //  console.log("Position", p.instrument.symbol, p.amount, p.instrument.end);
+        // });
         const invested: Amount = sum(
           positions.map((p: Position) => p.value(bar + EXTEND)),
         );
