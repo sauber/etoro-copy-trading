@@ -20,7 +20,8 @@ const strategy: Strategy = await loader.strategy();
 // Exchange
 const instruments: Instruments = await loader.instrumentSamples(400);
 console.log("Instruments loaded:", instruments.length);
-const exchange: Exchange = new Exchange(instruments);
+const spread = 0.001;
+const exchange: Exchange = new Exchange(instruments, spread);
 
 // Simulation
 const simulation = new Simulation(exchange, strategy);

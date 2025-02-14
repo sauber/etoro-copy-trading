@@ -30,7 +30,8 @@ const ranker: Rater = makeRanker(cache);
 // Load training data
 const instruments: Instruments = await loader.instrumentSamples(400);
 console.log("Instruments loaded:", instruments.length);
-const exchange: Exchange = new Exchange(instruments);
+const spread = 0.001;
+const exchange: Exchange = new Exchange(instruments, spread);
 
 // Load Parameters into model
 const config = repo.config;
