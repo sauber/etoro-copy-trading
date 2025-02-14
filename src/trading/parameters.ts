@@ -41,10 +41,10 @@ export type ParameterValues = [
 export function makeParameters(value: ParameterValues | [] = []): Parameters {
   return [
     new IntegerParameter("buy_window", 2, 100, value[0]),
-    new IntegerParameter("buy_threshold", 1, 50, value[1]),
+    new IntegerParameter("buy_threshold", 5, 50, value[1]),
     new IntegerParameter("sell_window", 2, 100, value[2]),
-    new IntegerParameter("sell_threshold", 60, 99, value[3]),
+    new IntegerParameter("sell_threshold", 50, 95, value[3]),
     new IntegerParameter("weekday", 1, 1, value[4]),
-    new Parameter("position_size", 0.01, 0.05, value[5]),
+    new Parameter("position_size", 0.01, 0.1, value[5]),
   ];
 }
