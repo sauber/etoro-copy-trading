@@ -12,11 +12,11 @@ import {
 } from "@sauber/backtest";
 import { RankingStrategy } from "../ranking/ranking-strategy.ts";
 import { assets } from "../assets/testdata.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 
-const ranking: Ranking = assets.ranking;
+const ranking: InvestorRanking = assets.ranking;
 await ranking.load();
 const investor: Investor = await assets.community.any();
 const instrument = new InvestorInstrument(investor);

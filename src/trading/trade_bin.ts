@@ -3,7 +3,7 @@ import { DataFrame } from "@sauber/dataframe";
 import { DateFormat } from "📚/time/mod.ts";
 import { Assets } from "📚/assets/assets.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Classifier } from "📚/trading/classifier.ts";
 import { Timing } from "📚/timing/mod.ts";
 import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
@@ -15,7 +15,7 @@ const repo = Assets.disk(path);
 let loader: Loader | null = new Loader(repo);
 
 // Models
-const ranking: Ranking = await loader.rankingModel();
+const ranking: InvestorRanking = await loader.rankingModel();
 const ranker: Rater = makeRanker(ranking);
 const timing: Timing = await loader.timingModel();
 const timer: Rater = makeTimer(timing);

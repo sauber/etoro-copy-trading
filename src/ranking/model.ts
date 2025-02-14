@@ -1,6 +1,6 @@
 import { Network, Train } from "@sauber/neurons";
 import type { NetworkData } from "@sauber/neurons";
-import type { Input, Inputs, Output, Outputs } from "./types.ts";
+import type { Input, Inputs, Output, Outputs } from "📚/ranking/types.ts";
 
 type TrainResults = {
   iterations: number;

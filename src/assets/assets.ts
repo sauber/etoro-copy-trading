@@ -6,7 +6,7 @@ import {
 } from "📚/storage/mod.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Config } from "📚/config/mod.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking, Ranking } from "📚/ranking/mod.ts";
 import { Timing } from "📚/timing/mod.ts";
 import { default_parameters, type ParameterData } from "📚/trading/mod.ts";
 
@@ -18,7 +18,7 @@ export class Assets {
   constructor(private readonly repo: Backend) {
     this.config = new Config(repo);
     this.community = new Community(repo);
-    this.ranking = new Ranking(repo);
+    this.ranking = new InvestorRanking(repo);
   }
 
   /** Create backend using disk repository */
