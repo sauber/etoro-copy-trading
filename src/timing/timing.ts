@@ -14,15 +14,15 @@ export class Timing {
     private readonly sell_window: number,
     private readonly sell_threshold: number,
   ) {
-    assert(buy_window > 1, "buy_window out of range");
+    assert(buy_window > 1, `buy_window out of range (1,): ${buy_window}`);
     assert(
       buy_threshold > 0 && buy_threshold <= 50,
-      "buy_threshold out of range",
+      `buy_threshold out of range (1,50]: ${buy_window}`,
     );
-    assert(sell_window > 1, "sell_window out of range");
+    assert(sell_window > 1, `sell_window out of range (1,): ${buy_window}`);
     assert(
-      sell_threshold > 50 && sell_threshold < 100,
-      "sell_threshold out of range",
+      sell_threshold >= 50 && sell_threshold < 100,
+      `sell_threshold out of range [50,100): ${buy_window}`,
     );
   }
 

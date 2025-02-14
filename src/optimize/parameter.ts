@@ -67,7 +67,10 @@ export class Parameter {
 
   /** Public value of parameter */
   public get value(): number {
-    const rounded = this.precision * Math.round(this._value / this.precision);
+    const rounded = parseFloat(
+      (this.precision * Math.round(this._value / this.precision))
+        .toPrecision(3),
+    );
     return rounded;
   }
 
