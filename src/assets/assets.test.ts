@@ -28,7 +28,7 @@ Deno.test("Community", () => {
 
 Deno.test("Ranking", () => {
   const assets = Assets.heap();
-  assertInstanceOf((assets.ranking), Ranking);
+  assertInstanceOf((assets.ranking), InvestorRanking);
 });
 
 Deno.test("Timing", async () => {

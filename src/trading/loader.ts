@@ -17,6 +17,7 @@ import { Assets } from "📚/assets/mod.ts";
 import {
   DateFormat,
   dateFromWeekday,
+  dateToBar,
   diffDate,
   nextDate,
   today,
@@ -24,23 +25,21 @@ import {
 import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "📚/math/statistics.ts";
-import { InvestorRanking, RankingStrategy } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
 import {
   CascadeStrategy,
   FutureStrategy,
   RoundingStrategy,
-  SizingStrategy,
 } from "📚/strategy/mod.ts";
-import {
-  DelayStrategy,
-  RSIStrategy,
-  Timing,
-  WeekdayStrategy,
-} from "📚/timing/mod.ts";
+import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
-import { default_parameters, type ParameterData } from "📚/trading/parameters.ts";
+import {
+  default_parameters,
+  type ParameterData,
+} from "📚/trading/parameters.ts";
 import { Policy } from "📚/trading/policy.ts";
 import { makeRanker, makeTimer } from "📚/trading/raters.ts";
+import { Semaphore } from "semaphore";
 
 const NOW: DateFormat = today();
 
@@ -69,8 +68,13 @@ type Journal = Diary<Mirrors>;
 export class Loader {
   constructor(private readonly assets: Assets) {}
 
+  private readonly semaphores = new Map<string, Semaphore>();
+
   /** Load data from repo and cache */
   private readonly cached: Record<string, CacheValue> = {};
+  private cache_access: number = 0;
+  private cache_loaded: Record<string, number> = {};
+  private cache_hit: number = 0;
   private async cache<T>(
     key: string,
     loader: () => Promise<CacheValue>,
@@ -78,28 +82,43 @@ export class Loader {
     if (!(key in this.cache)) {
       const value: CacheValue = await loader();
       this.cached[key] = value;
-      return value as T;
-    }
+      this.cache_loaded[key] ??= 0;
+      this.cache_loaded[key]++;
+      // if ( this.cache_loaded[key] > 1 ) console.log("Cache reload", this.cache_loaded[key], key);
+    } else this.cache_hit++;
+    this.cache_access++;
+    // console.log(`Cache create/access: ${this.cache_loaded[key]}/${this.cache_access}`, key);
+
     return this.cached[key] as T;
+    // });
   }
 
   /** Trading strategy parameters */
-  public settings(): Promise<ParameterData> {
-    return this.cache<ParameterData>(
-      "settings",
-      async () => (
+  private readonly settings_lock = new Semaphore(1);
+  private _settings: ParameterData | null = null;
+  public async settings(): Promise<ParameterData> {
+    if (this._settings !== null) return this._settings;
+    return await this.settings_lock.use(async () => {
+      if (this._settings !== null) return this._settings;
+      const settings: ParameterData =
         (await this.assets.config.get("trading")) as ParameterData ||
-        default_parameters
-      ),
-    );
+        default_parameters;
+      this._settings = settings;
+      return settings;
+    });
   }
 
   /** ID and value of account */
-  private account(): Promise<Mirror> {
-    return this.cache<Mirror>(
-      "account",
-      async () => (await this.assets.config.get("account")) as Mirror,
-    );
+  private readonly account_lock = new Semaphore(1);
+  private _account: Mirror | null = null;
+  private async account(): Promise<Mirror> {
+    if (this._account !== null) return this._account;
+    return await this.account_lock.use(async () => {
+      if (this._account !== null) return this._account;
+      const account: Mirror = await this.assets.config.get("account") as Mirror;
+      this._account = account;
+      return account;
+    });
   }
 
   /** Username of account */
@@ -131,32 +150,63 @@ export class Loader {
   }
 
   /** Which date of trading weekday is most recent to last date in repo */
-  public tradingDate(): Promise<DateFormat> {
-    return this.cache<DateFormat>(
-      "tradingDate",
-      async () => {
-        const repoEnd: DateFormat | null = await this.end();
-        const weekday: number = (await this.settings()).weekday;
-        return repoEnd ? dateFromWeekday(repoEnd, weekday) : NOW;
-      },
-    );
+  private readonly tradingDate_lock = new Semaphore(1);
+  private _tradingDate: DateFormat | null = null;
+  public async tradingDate(): Promise<DateFormat> {
+    if (this._tradingDate !== null) return this._tradingDate;
+    return await this.tradingDate_lock.use(async () => {
+      if (this._tradingDate !== null) return this._tradingDate;
+      console.log("Loading TradingDate");
+      const repoEnd: DateFormat | null = await this.end();
+      const weekday: number = (await this.settings()).weekday;
+      const tradingDate: DateFormat = repoEnd
+        ? dateFromWeekday(repoEnd, weekday)
+        : NOW;
+      this._tradingDate = tradingDate;
+      return tradingDate;
+    });
   }
 
   /** tradingDate as Bar */
-  public tradingBar(): Promise<Bar> {
-    return this.cache<Bar>(
-      "tradingBar",
-      async () => {
-        const date: DateFormat = await this.tradingDate();
-        const bar: Bar = diffDate(date, NOW);
-        return bar;
-      },
-    );
+  public async tradingBar(): Promise<Bar> {
+    return dateToBar(await this.tradingDate());
+  }
+
+  /** Load list of names */
+  private readonly names_lock = new Semaphore(1);
+  private _names: Set<string> | null = null;
+  private async names(): Promise<Set<string>> {
+    if (this._names !== null) return this._names;
+    return await this.names_lock.use(async () => {
+      if (this._names !== null) return this._names;
+      const names: Set<string> = await this.assets.community.allNames();
+      this._names = names;
+      return names;
+    });
+  }
+
+  /** A semaphore for each investor */
+  private readonly investorSemaphores = new Map<string, Semaphore>();
+  private investor_semaphore(username: string): Semaphore {
+    const lock = this.investorSemaphores.get(username);
+    if (lock) return lock;
+    const created = new Semaphore(1);
+    this.investorSemaphores.set(username, created);
+    return created;
   }
 
   /** Data for an investor */
-  private investor(username: string): Promise<Investor> {
-    return this.assets.community.investor(username);
+  private readonly _investors = new Map<string, Investor>();
+  private async investor(username: string): Promise<Investor> {
+    const prev = this._investors.get(username);
+    if (prev) return prev;
+
+    const lock = this.investor_semaphore(username);
+    return await lock.use(async () => {
+      const investor: Investor = await this.assets.community.investor(username);
+      this._investors.set(username, investor);
+      return investor;
+    });
   }
 
   /** Data for an investor or null if missing*/
@@ -164,7 +214,7 @@ export class Loader {
     return this.cache<Investor | null>(
       "mirror_" + username,
       async () => {
-        const names: Set<string> = await this.assets.community.allNames();
+        const names: Set<string> = await this.names();
         return names.has(username) ? await this.investor(username) : null;
       },
     );
@@ -173,7 +223,7 @@ export class Loader {
   /** Investor data for account */
   private async accountInvestor(): Promise<Investor> {
     const username: string = await this.username();
-    const investor: Investor = await this.assets.community.investor(username);
+    const investor: Investor = await this.investor(username);
     return investor;
   }
 
@@ -185,19 +235,28 @@ export class Loader {
   }
 
   /** List of mirrors most recent to trading date */
-  private mirrors(): Promise<Mirrors> {
-    return this.cache<Mirrors>(
-      "mirrors",
-      async () => {
-        const trading: DateFormat = await this.tradingDate();
-        const journal: Journal = await this.mirrorJournal();
-        const dates: Array<DateFormat> = journal.dates;
-        const start: DateFormat = dates[0];
-        const recent: DateFormat = dates.findLast((d) => d <= trading) || start;
-        const mirrors: Mirrors = journal.before(recent);
-        return mirrors;
-      },
-    );
+  private readonly mirrors_lock = new Semaphore(1);
+  private _mirrors: Mirrors | null = null;
+  private async mirrors(): Promise<Mirrors> {
+    // Mirrors already generated
+    if (this._mirrors !== null) return this._mirrors;
+
+    // Acquire lock
+    return await this.mirrors_lock.use(async () => {
+      // Confirm if resolved before lock acquired
+      if (this._mirrors !== null) return this._mirrors;
+
+      // Resolve mirrors
+      const trading: DateFormat = await this.tradingDate();
+      const journal: Journal = await this.mirrorJournal();
+      const dates: Array<DateFormat> = journal.dates;
+      const start: DateFormat = dates[0];
+      const recent: DateFormat = dates.findLast((d) => d <= trading) || start;
+      const mirrors: Mirrors = journal.before(recent);
+      console.log("Mirrors loaded from date", recent, mirrors.length);
+      this._mirrors = mirrors;
+      return mirrors;
+    });
   }
 
   /** Convert investor to instrument */
@@ -307,41 +366,60 @@ export class Loader {
   }
 
   /** All mirrors of account */
-  private positions(): Promise<Positions> {
-    return this.cache<Positions>(
-      "positions",
-      async () => {
-        const mirrors: Mirrors = await this.mirrors();
-        const scale: number = (await this.value()) / 100;
-        const positions: Positions = await Promise.all(
-          mirrors.map((m: Mirror) =>
-            this.position(m.UserName, m.Value * scale)
-          ),
-        );
-        return positions;
-      },
-    );
+  private readonly positions_lock = new Semaphore(1);
+  private _positions: Positions | null = null;
+  private async positions(): Promise<Positions> {
+    if (this._positions !== null) return this._positions;
+    return await this.positions_lock.use(async () => {
+      if (this._positions !== null) return this._positions;
+
+      const mirrors: Mirrors = await this.mirrors();
+      const scale: number = (await this.value()) / 100;
+      const positions: Positions = await Promise.all(
+        mirrors.map((m: Mirror) => this.position(m.UserName, m.Value * scale)),
+      );
+      this._positions = positions;
+      return positions;
+    });
+
+    // return this.cache<Positions>(
+    //   "positions",
+    //   async () => {
+    //     const mirrors: Mirrors = await this.mirrors();
+    //     const scale: number = (await this.value()) / 100;
+    //     const positions: Positions = await Promise.all(
+    //       mirrors.map((m: Mirror) =>
+    //         this.position(m.UserName, m.Value * scale)
+    //       ),
+    //     );
+    //     return positions;
+    //   },
+    // );
   }
 
   /** Amount available for investing */
-  private amount(): Promise<Amount> {
-    return this.cache<Amount>(
-      "amount",
-      async () => {
-        const bar: Bar = await this.tradingBar();
-        const value: Amount = await this.value();
-        const positions: Positions = await this.positions();
-        // Confirm all positions have available value data
-        // positions.forEach((p: Position)=>{
-        //  console.log("Position", p.instrument.symbol, p.amount, p.instrument.end);
-        // });
-        const invested: Amount = sum(
-          positions.map((p: Position) => p.value(bar + EXTEND)),
-        );
-        const amount: Amount = value - invested;
-        return amount;
-      },
-    );
+  private readonly amount_lock = new Semaphore(1);
+  private _amount: Amount | null = null;
+  private async amount(): Promise<Amount> {
+    if (this._amount !== null) return this._amount;
+    return await this.amount_lock.use(async () => {
+      if (this._amount !== null) return this._amount;
+
+      // return this.cache<Amount>(
+      //   "amount",
+      //   async () => {
+      const bar: Bar = await this.tradingBar();
+      const value: Amount = await this.value();
+      const positions: Positions = await this.positions();
+      const invested: Amount = sum(
+        positions.map((p: Position) => p.value(bar + EXTEND)),
+      );
+      const amount: Amount = value - invested;
+      this._amount = amount;
+      return amount;
+      //   },
+      // );
+    });
   }
 
   /** Investors available for purchase */
@@ -400,15 +478,6 @@ export class Loader {
 
   /** Timing Model */
   public timingModel(): Promise<Timing> {
-    // const settings: ParameterData = await this.settings();
-    // // TODO: Different window size for buying and selling
-    // const model = new Timing(
-    //   settings.window,
-    //   settings.buy,
-    //   settings.window,
-    //   settings.sell,
-    // );
-    // return model;
     return this.assets.timing();
   }
 
@@ -419,38 +488,6 @@ export class Loader {
     if (isNaN(size)) throw new Error("Position Size missing in settings");
     return size;
   }
-
-  /** Trading Strategy, a combination of strategies */
-  // TODO: Not used
-  // public async cascade_strategy(): Promise<Strategy> {
-  //   const model: Ranking = await this.rankingModel();
-  //   const settings: ParameterData = await this.settings();
-  //   return new CascadeStrategy([
-  //     new WeekdayStrategy(settings.weekday),
-  //     new RankingStrategy(model),
-  //     new DelayStrategy(
-  //       2,
-  //       new RSIStrategy(settings.window, settings.buy, settings.sell),
-  //     ),
-  //     new SizingStrategy(settings.size),
-  //   ]);
-  // }
-
-  /** Simulation Strategy, same as trading, but ensuring data available to hold positions open */
-  // public async simulation_strategy(): Promise<Strategy> {
-  //   const model: Ranking = await this.rankingModel();
-  //   const settings: ParameterData = await this.settings();
-  //   return new CascadeStrategy([
-  //     new WeekdayStrategy(settings.weekday),
-  //     new FutureStrategy(180),
-  //     new RankingStrategy(model),
-  //     new DelayStrategy(
-  //       2,
-  //       new RSIStrategy(settings.window, settings.buy, settings.sell),
-  //     ),
-  //     new SizingStrategy(settings.size),
-  //   ]);
-  // }
 
   /** Trading Policy */
   public async strategy(): Promise<Strategy> {
@@ -463,11 +500,9 @@ export class Loader {
     const policy = new Policy(ranker, timer, settings.position_size);
     const cascade = new CascadeStrategy([
       new WeekdayStrategy(settings.weekday),
-      // new DebugStrategy(),
       new FutureStrategy(180),
       policy,
       new RoundingStrategy(200),
-      // new DebugStrategy(),
     ]);
 
     return cascade;

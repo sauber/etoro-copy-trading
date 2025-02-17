@@ -8,6 +8,8 @@ import { Classifier } from "📚/trading/classifier.ts";
 import { Timing } from "📚/timing/mod.ts";
 import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
 
+const start: number = new Date().getTime();
+
 // Repo
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
@@ -29,10 +31,12 @@ const situation: StrategyContext = await loader.strategyContext();
 const tradingDate: DateFormat = await loader.tradingDate();
 const username: string = await loader.username();
 const positionSize: number = await loader.positionSize();
-console.log("Account:", username, "Trading Day:", tradingDate, "Cash:", situation.amount.toFixed(2));
 
 // Loading finished, free cache memory
 loader = null;
+const snap: number = new Date().getTime();
+console.log("Data loding time (ms)", snap - start);
+console.log("Account:", username, "Trading Day:", tradingDate, "Cash:", situation.amount.toFixed(2));
 
 const classifier = new Classifier(situation, ranker, timer, positionSize);
 const records = classifier.records;
