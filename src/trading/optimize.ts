@@ -1,10 +1,4 @@
-import {
-  Bar,
-  Exchange,
-  Instrument,
-  Simulation,
-  Strategy,
-} from "@sauber/backtest";
+import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters } from "📚/optimize/mod.ts";
 import { CascadeStrategy, RoundingStrategy } from "📚/strategy/mod.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
@@ -12,30 +6,11 @@ import { Status } from "📚/optimize/types.d.ts";
 import { FutureStrategy } from "📚/strategy/future-strategy.ts";
 import { Policy } from "📚/trading/policy.ts";
 
-// function makeParameters(value: Array<number> = []): Parameters {
-//   return [
-//     new IntegerParameter("window", 2, 100, value[0]),
-//     new IntegerParameter("buy", 10, 40, value[1]),
-//     new IntegerParameter("sell", 60, 90, value[2]),
-//     new IntegerParameter("weekday", 1, 1, value[3]),
-//     new Parameter("size", 0.01, 0.05, value[4]),
-//   ];
-// }
-
-// Values of window, buy, sell, weekday
-// type ParameterValues = [number, number, number, number, number];
 type Score = number;
 import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 import { Timing } from "📚/timing/timing.ts";
-// export type TradingData = {
-//   window: number;
-//   buy: number;
-//   sell: number;
-//   weekday: number;
-//   size: number;
-// };
 
 type Samples = Array<{ input: Parameters; output: number }>;
 
@@ -118,12 +93,9 @@ export class Optimize {
   /** Calculate score of simulation */
   // TODO: Factor in some sort of stability measure
   private score(simulation: Simulation): number {
-    // console.log("Calculating Score of Simultion");
-    // console.log({simulation});
     const trades: number = simulation.account.trades.length;
-    if ( trades == 0) return 0;
+    if (trades == 0) return 0;
     const profit: number = simulation.account.profit;
-    // const invested: number = simulation.account.InvestedRatio;
     const win: number = simulation.account.WinRatio;
     const frag: number = simulation.account.fragility;
 
@@ -132,8 +104,6 @@ export class Optimize {
     const trades_cost: number = Math.tanh(
       trades / simulation.account.bars,
     );
-    // The more uninvested cash invested the worse
-    // const cash_cost = 1 - invested;
     // The more losses the worse
     const lose_cost = 1 - win;
 

@@ -136,8 +136,6 @@ export class IntegerParameter extends Parameter {
 
 /** Value is not changable */
 export class StaticParameter extends Parameter {
-  protected override readonly optimizer = new Object() as Adam;
-  
   constructor(name: string, value: number) {
     super(name, value, value, value);
   }

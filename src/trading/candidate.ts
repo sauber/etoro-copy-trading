@@ -31,7 +31,7 @@ type BasicCandidate = {
   Timing: Timing;
 };
 
-type IgnoreCandidate = BasicCandidate & {};
+type IgnoreCandidate = BasicCandidate;
 
 type NewCandidate = BasicCandidate & {
   Score: Score;

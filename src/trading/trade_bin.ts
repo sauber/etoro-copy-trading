@@ -22,8 +22,6 @@ const ranker: Rater = makeRanker(ranking);
 const timing: Timing = await loader.timingModel();
 const timer: Rater = makeTimer(timing);
 
-// const strategy: Strategy = new Policy(ranking);
-
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();
 
