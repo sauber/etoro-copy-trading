@@ -31,7 +31,11 @@ export class Parameter {
   /** Amount value has changed */
   public changed: number = 0;
 
-  protected readonly optimizer = new Adam();
+  /** Underlying optimer */
+  private readonly optimizer = new Adam();
+
+  /** Precision of value */
+  public precision: number = 0.001;
 
   // Current float value of parameter
   protected _value: number;
@@ -63,7 +67,11 @@ export class Parameter {
 
   /** Public value of parameter */
   public get value(): number {
-    return this._value;
+    const rounded = parseFloat(
+      (this.precision * Math.round(this._value / this.precision))
+        .toPrecision(3),
+    );
+    return rounded;
   }
 
   /** Set value  */

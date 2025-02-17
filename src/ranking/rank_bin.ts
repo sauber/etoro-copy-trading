@@ -5,7 +5,7 @@ import { Community, Investors } from "📚/repository/mod.ts";
 import { DateFormat } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Assets } from "📚/assets/mod.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
 
 // Repo
 if (!Deno.args[0]) throw new Error("Path missing");
@@ -14,7 +14,7 @@ if (!Deno.statSync(path)) throw new Error(`${path} does not exist.`);
 const assets: Assets = Assets.disk(path);
 
 // Load Model
-const ranking: Ranking = assets.ranking;
+const ranking: InvestorRanking = assets.ranking;
 if (!(await ranking.load())) ranking.generate();
 
 // Load list of investors

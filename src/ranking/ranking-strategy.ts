@@ -3,13 +3,13 @@ import {
   PurchaseOrders,
   StrategyContext,
 } from "@sauber/backtest";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { PassThroughStrategy } from "📚/strategy/mod.ts";
 
 /** Lookup ranking of each investor */
 export class RankingStrategy extends PassThroughStrategy {
-  constructor(private readonly model: Ranking) {
+  constructor(private readonly model: InvestorRanking) {
     super();
   }
 

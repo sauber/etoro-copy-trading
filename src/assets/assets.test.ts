@@ -3,7 +3,8 @@ import { Config } from "📚/config/config.ts";
 import { Community } from "📚/repository/mod.ts";
 import { Assets } from "./assets.ts";
 import { path } from "./testdata.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
+import { Timing } from "📚/timing/mod.ts";
 
 Deno.test("Heap Backend", () => {
   const assets = Assets.heap();
@@ -27,5 +28,11 @@ Deno.test("Community", () => {
 
 Deno.test("Ranking", () => {
   const assets = Assets.heap();
-  assertInstanceOf((assets.ranking), Ranking);
+  assertInstanceOf((assets.ranking), InvestorRanking);
+});
+
+Deno.test("Timing", async () => {
+  const assets = Assets.heap();
+  const timing = await assets.timing();
+  assertInstanceOf(timing, Timing);
 });

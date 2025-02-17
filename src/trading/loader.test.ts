@@ -16,8 +16,9 @@ import { DateFormat, diffDate, today } from "📚/time/mod.ts";
 import { Mirror } from "📚/repository/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
-import { Parameters } from "📚/trading/types.ts";
-import { Ranking } from "📚/ranking/mod.ts";
+import { ParameterData } from "📚/trading/parameters.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
+import { Timing } from "📚/timing/mod.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Loader(assets), Loader);
@@ -61,13 +62,19 @@ Deno.test("Trading Context", async () => {
 
 Deno.test("Settings", async () => {
   const loader = new Loader(assets);
-  const settings: Parameters = await loader.settings();
+  const settings: ParameterData = await loader.settings();
   assert("weekday" in settings);
 });
 
 Deno.test("Ranking Model", async () => {
   const loader = new Loader(assets);
-  const model: Ranking = await loader.rankingModel();
+  const model: InvestorRanking = await loader.rankingModel();
+  assert(model);
+});
+
+Deno.test("Timing Model", async () => {
+  const loader = new Loader(assets);
+  const model: Timing = await loader.timingModel();
   assert(model);
 });
 

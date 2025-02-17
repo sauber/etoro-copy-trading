@@ -21,6 +21,7 @@ Deno.test("List of Strategies", () => {
     amount: 0,
     purchaseorders: [],
     closeorders: [],
+    positions: []
   };
   assertEquals(cascade.open(context), []);
   assertEquals(cascade.close(context), []);

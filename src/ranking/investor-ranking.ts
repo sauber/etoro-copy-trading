@@ -9,15 +9,16 @@ import { Community } from "📚/repository/mod.ts";
 import { Train } from "📚/ranking/train.ts";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { Bar } from "@sauber/backtest";
+import { Ranking } from "📚/ranking/mod.ts";
 
-export class Ranking {
+export class InvestorRanking implements Ranking {
   public static readonly assetName = "ranking.network";
   private readonly asset: Asset<NetworkData>;
   public model?: Model;
 
   // TODO: model should be private
   constructor(private readonly repo: Backend) {
-    this.asset = new Asset<NetworkData>(Ranking.assetName, this.repo);
+    this.asset = new Asset<NetworkData>(InvestorRanking.assetName, this.repo);
   }
 
   /** Load from repository or generate Ranking model if missing */
