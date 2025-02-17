@@ -4,6 +4,7 @@ import {
   Maximize,
   Parameter,
   Parameters,
+  StaticParameter,
 } from "📚/optimize/mod.ts";
 import { CascadeStrategy, SizingStrategy } from "📚/strategy/mod.ts";
 import { RSIStrategy } from "📚/timing/rsi-strategy.ts";
@@ -17,7 +18,7 @@ function makeParameters(value: Array<number> = []): Parameters {
     new IntegerParameter("window", 2, 100, value[0]),
     new IntegerParameter("buy", 10, 40, value[1]),
     new IntegerParameter("sell", 60, 90, value[2]),
-    new IntegerParameter("weekday", 1, 1, value[3]),
+    new StaticParameter("weekday", value[3]),
     new Parameter("size", 0.01, 0.05, value[4]),
   ];
 }
