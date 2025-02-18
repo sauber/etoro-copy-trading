@@ -45,6 +45,6 @@ export function makeParameters(value: ParameterValues | [] = []): Parameters {
     new IntegerParameter("sell_window", 2, 100, value[2]),
     new IntegerParameter("sell_threshold", 50, 95, value[3]),
     new IntegerParameter("weekday", 1, 1, value[4]),
-    new Parameter("position_size", 0.01, 0.1, value[5]),
+    new Parameter("position_size", 0.01, 0.06, value[5]),
   ];
 }
