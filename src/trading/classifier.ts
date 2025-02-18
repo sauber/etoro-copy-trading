@@ -81,9 +81,11 @@ export class Classifier {
     return candidates.map((candidate: Candidate) => {
       const pos = candidate.purchaseorders;
       const po: PurchaseOrder = pos[0];
+      // return po;
       // Change amount to gap
-      const gap: number = candidate.gap;
-      const changed: PurchaseOrder = Object.assign({}, po, { amount: gap });
+      // const gap: number = candidate.gap;
+      const amount: Amount = candidate.BuyAmount;
+      const changed: PurchaseOrder = Object.assign({}, po, { amount });
       return changed;
     });
   }
