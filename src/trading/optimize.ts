@@ -121,7 +121,7 @@ export class Optimize {
     // console.log("Calculating Score of Simultion");
     // console.log({simulation});
     const trades: number = simulation.account.trades.length;
-    if ( trades == 0) return 0;
+    if (trades == 0) return 0;
     const profit: number = simulation.account.profit;
     // const invested: number = simulation.account.InvestedRatio;
     const win: number = simulation.account.WinRatio;
@@ -145,7 +145,21 @@ export class Optimize {
     const costs = scale * (trades_cost + lose_cost + frag + expire) / 4;
     // Subtract cost from profit;
     const score = profit - costs;
-    // console.log({trades, profit, win, frag, trades_cost, lose_cost, expire, scale, costs, score});
+    if (!isFinite(score)) {
+      console.log({
+        trades,
+        profit,
+        win,
+        frag,
+        trades_cost,
+        lose_cost,
+        expire,
+        scale,
+        costs,
+        score,
+      });
+      throw new Error("Score is invalid");
+    }
 
     return score;
   }
