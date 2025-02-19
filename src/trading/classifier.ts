@@ -81,9 +81,6 @@ export class Classifier {
     return candidates.map((candidate: Candidate) => {
       const pos = candidate.purchaseorders;
       const po: PurchaseOrder = pos[0];
-      // return po;
-      // Change amount to gap
-      // const gap: number = candidate.gap;
       const amount: Amount = candidate.BuyAmount;
       const changed: PurchaseOrder = Object.assign({}, po, { amount });
       return changed;
@@ -96,6 +93,6 @@ export class Classifier {
       .filter((c: Candidate) => c.isSell)
       .map((c: Candidate) => c.positions)
       .flat()
-      .map((position: Position) => ({ position, confidence: 1 }));
+      .map((position: Position) => ({ position, confidence: 1, reason: "Close" }));
   }
 }

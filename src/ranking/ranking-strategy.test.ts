@@ -1,4 +1,4 @@
-import { assertEquals, assertGreater, assertInstanceOf } from "@std/assert";
+import { assertGreater, assertInstanceOf } from "@std/assert";
 import {
   Amount,
   Bar,
@@ -33,7 +33,7 @@ const position: Position = new Position(
   0,
 );
 const purchaseorder: PurchaseOrder = { instrument, amount };
-const closeorder: CloseOrder = { position, confidence: 1 };
+const closeorder: CloseOrder = { position, confidence: 1, reason: "Close" };
 
 Deno.test("Instance", () => {
   assertInstanceOf(new RankingStrategy(ranking), RankingStrategy);

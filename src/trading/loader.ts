@@ -445,7 +445,7 @@ export class Loader {
       async () => {
         const positions: Positions = await this.positions();
         const closeOrders: CloseOrders = positions.map(
-          (position: Position) => ({ position, confidence: 1 }),
+          (position: Position) => ({ position, confidence: 1, reason: "Close"}),
         );
         return closeOrders;
       },

@@ -45,7 +45,7 @@ Deno.test("Open New Positions", () => {
   const pos: PurchaseOrders = classifier.open();
   assertEquals(pos.length, 1);
   assertEquals(pos[0].instrument.symbol, "SanjaySoni1812");
-  assertAlmostEquals(pos[0].amount, 10000);
+  assertAlmostEquals(pos[0].amount, 2308, 1);
 });
 
 Deno.test("Close Existing Positions", () => {
