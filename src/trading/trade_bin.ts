@@ -8,7 +8,7 @@ import { Classifier } from "📚/trading/classifier.ts";
 import { Timing } from "📚/timing/mod.ts";
 import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
 
-const start: number = new Date().getTime();
+const start: number = performance.now();
 
 // Repo
 const path: string = Deno.args[0];
@@ -32,7 +32,7 @@ const positionSize: number = await loader.positionSize();
 
 // Loading finished, free cache memory
 loader = null;
-const snap: number = new Date().getTime();
+const snap: number = performance.now();
 console.log("Data loding time (ms)", snap - start);
 console.log("Account:", username, "Trading Day:", tradingDate, "Cash:", situation.amount.toFixed(2));
 
