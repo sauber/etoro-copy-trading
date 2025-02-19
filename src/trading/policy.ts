@@ -25,7 +25,7 @@ export class Policy implements Strategy {
       return this._classifier;
     }
 
-    // Generate new Classifier at bar
+    // Generate new Classifier at current bar
     const classifier = new Classifier(
       context,
       this.ranker,

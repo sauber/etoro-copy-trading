@@ -6,3 +6,4 @@ export * from "📚/strategy/future-strategy.ts";
 export * from "📚/strategy/debug-strategy.ts";
 export * from "📚/strategy/rounding-strategy.ts";
 export * from "📚/strategy/union-strategy.ts";
+export * from "📚/strategy/stoploss-strategy.ts";

@@ -27,6 +27,7 @@ const exchange: Exchange = new Exchange(instruments, spread);
 const simulation = new Simulation(exchange, strategy);
 console.log("Simulation starts");
 simulation.run();
+console.log("Simulation ends");
 console.log(simulation.account.toString);
 console.log(simulation.account.plot());
 console.log(simulation.account.portfolio.toString(exchange.end));
