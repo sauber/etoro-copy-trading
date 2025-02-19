@@ -2,7 +2,6 @@
   "lock": false,
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check **/*.ts",
-    "community": "deno run --allow-read=testdata,../etoro-data/data src/repository/community_bin.ts ../etoro-data/data",
     "optimize": "deno run --allow-read=../etoro-data/data src/trading/optimize_bin.ts ../etoro-data/data",
     "profile": "deno run --allow-read=testdata,../etoro-data/data --v8-flags=--prof src/timing/optimize_bin.ts testdata",
     "simulation": "deno run --allow-read=../etoro-data/data src/trading/simulation_bin.ts ../etoro-data/data",
