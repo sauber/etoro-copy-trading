@@ -113,12 +113,12 @@ export class Optimize {
     // The more losses the worse
     const lose_cost = 1 - win;
 
-    // Favor more closes than expirations
-    const expire = simulation.account.expireRatio;
+    // Favor normal closes
+    const abrupt = 1-simulation.account.closeRatio;
 
     // Scale each cost to profit
     const scale: number = Math.abs(profit);
-    const costs = scale * (trades_cost + lose_cost + frag + expire) / 4;
+    const costs = scale * (trades_cost + lose_cost + frag + abrupt) / 4;
     // Subtract cost from profit;
     const score = profit - costs;
     // console.log({trades, profit, win, frag, trades_cost, lose_cost, expire, scale, costs, score});
