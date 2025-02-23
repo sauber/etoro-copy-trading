@@ -1,10 +1,8 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
-import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters } from "📚/optimize/mod.ts";
 import {
   CascadeStrategy,
   RoundingStrategy,
-  StopLossStrategy,
   UnionStrategy,
 } from "📚/strategy/mod.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
@@ -12,11 +10,11 @@ import { Status } from "📚/optimize/types.d.ts";
 import { FutureStrategy } from "📚/strategy/future-strategy.ts";
 import { Policy } from "📚/trading/policy.ts";
 
-type Score = number;
 import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 import { Timing } from "📚/timing/timing.ts";
+import { StopLossStrategy } from "📚/strategy/stoploss-strategy.ts";
 
 type Samples = Array<{ input: Parameters; output: number }>;
 type Score = number;
@@ -111,7 +109,6 @@ export class Optimize {
         frag,
         trades_cost,
         lose_cost,
-        expire,
         scale,
         costs,
         score,
