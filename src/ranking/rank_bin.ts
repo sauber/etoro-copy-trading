@@ -2,7 +2,7 @@
 
 import { DataFrame } from "@sauber/dataframe";
 import { Community, Investors } from "📚/repository/mod.ts";
-import { DateFormat } from "📚/time/mod.ts";
+import { DateFormat, dateToBar } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Assets } from "📚/assets/mod.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
@@ -26,7 +26,9 @@ if (!end) throw new Error("No end date in community");
 console.log(`${end} investor count:`, investors.length);
 
 // Predict SharpeRatio for each Investor
-const sr: number[] = investors.map((i: Investor) => ranking.predict(i, end));
+const sr: number[] = investors.map((i: Investor) =>
+  ranking.predict(i, dateToBar(end))
+);
 
 const df = DataFrame.fromRecords(
   investors.map((investor: Investor, index: number) => ({
