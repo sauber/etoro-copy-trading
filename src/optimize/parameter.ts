@@ -134,4 +134,39 @@ export class IntegerParameter extends Parameter {
   }
 }
 
+/** Value is not changable */
+export class StaticParameter extends Parameter {
+  constructor(name: string, value: number) {
+    super(name, value, value, value);
+  }
+
+  public override get value(): number {
+    return this._value;
+  }
+
+  public override get random(): number {
+    return this._value;
+  }
+
+  public override suggest(): number {
+    return this._value;
+  }
+
+  public override learn(_x: number, _y: number): void {
+    // Do nothing
+  }
+
+  public override get gradient(): number {
+    return 0;
+  }
+
+  public override update(): void {
+    // Do nothing
+  }
+
+  public override print(): string {
+    return `${this.name}: v=${this._value} g=0`;
+  }
+}
+
 export type Parameters = Array<Parameter>;

@@ -19,5 +19,5 @@ profile.txt
 # tmp files from tests
 tmp/
 
-# Workspaces
+# VSCode spaces
 *.code-workspace

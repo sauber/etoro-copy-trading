@@ -30,6 +30,8 @@ import {
   CascadeStrategy,
   FutureStrategy,
   RoundingStrategy,
+  StopLossStrategy,
+  UnionStrategy,
 } from "📚/strategy/mod.ts";
 import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
@@ -445,7 +447,7 @@ export class Loader {
       async () => {
         const positions: Positions = await this.positions();
         const closeOrders: CloseOrders = positions.map(
-          (position: Position) => ({ position, confidence: 1 }),
+          (position: Position) => ({ position, confidence: 1, reason: "Close"}),
         );
         return closeOrders;
       },
@@ -498,13 +500,15 @@ export class Loader {
     const timer = makeTimer(timing);
 
     const policy = new Policy(ranker, timer, settings.position_size);
+    const stoploss = new StopLossStrategy(settings.stoploss);
     const cascade = new CascadeStrategy([
       new WeekdayStrategy(settings.weekday),
       new FutureStrategy(180),
       policy,
       new RoundingStrategy(200),
     ]);
+    const union  = new UnionStrategy([stoploss, cascade]);
 
-    return cascade;
+    return union;
   }
 }

@@ -1,8 +1,6 @@
 import {
   Amount,
-  Bar,
   CloseOrders,
-  Instrument,
   Position,
   PurchaseOrder,
   PurchaseOrders,
@@ -11,9 +9,6 @@ import {
 import { assert } from "@std/assert";
 import { Candidate, CandidateExport } from "📚/trading/candidate.ts";
 import { Rater } from "📚/trading/raters.ts";
-
-/** Rater function type to assess ranking or timing of instruments */
-// export type Rater = (instrument: Instrument, bar: Bar) => number;
 
 type Rank = number;
 type Timing = number;
@@ -36,7 +31,7 @@ export class Classifier {
     const target: Amount = context.value * positionSize;
     const bar = context.bar;
 
-    // Organizer all purchaseorders by instrument
+    // Group all purchaseorders by instrument
     context.purchaseorders.forEach((po) => {
       const instrument = po.instrument;
       const username: string = instrument.symbol;
@@ -50,9 +45,6 @@ export class Classifier {
       candidate.addPurchaseOrder(po);
       this.candidates.set(username, candidate);
     });
-
-    // TODO; Add all open positions to candidates
-    // context.positions.foreach(ps=>{});
 
     // Add all open positions to candidates
     context.positions.forEach((position) => {
@@ -86,13 +78,11 @@ export class Classifier {
   /** The list of positions to open */
   public open(): PurchaseOrders {
     const candidates = this.all.filter((c: Candidate) => c.isBuy);
-    // console.log("Count of Candidates with Purchase Orders:", candidates.length);
     return candidates.map((candidate: Candidate) => {
       const pos = candidate.purchaseorders;
       const po: PurchaseOrder = pos[0];
-      // Change amount to gap
-      const gap: number = candidate.gap;
-      const changed: PurchaseOrder = Object.assign({}, po, { amount: gap });
+      const amount: Amount = candidate.BuyAmount;
+      const changed: PurchaseOrder = Object.assign({}, po, { amount });
       return changed;
     });
   }
@@ -103,6 +93,6 @@ export class Classifier {
       .filter((c: Candidate) => c.isSell)
       .map((c: Candidate) => c.positions)
       .flat()
-      .map((position: Position) => ({ position, confidence: 1 }));
+      .map((position: Position) => ({ position, confidence: 1, reason: "Close" }));
   }
 }

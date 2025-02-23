@@ -31,10 +31,11 @@ type BasicCandidate = {
   Timing: Timing;
 };
 
-type IgnoreCandidate = BasicCandidate & {};
+type IgnoreCandidate = BasicCandidate;
 
 type NewCandidate = BasicCandidate & {
   Score: Score;
+  Target: Amount;
   Buy: Amount;
   Action: "Open";
 };
@@ -52,6 +53,7 @@ type KeepCandidate = HasCandidate & {
 
 type IncreaseCandidate = HasCandidate & {
   Score: Score;
+  Target: Amount;
   Buy: Amount;
   Action: "Increase";
 };
@@ -82,7 +84,7 @@ export class Candidate {
     private readonly bar: Bar,
     private readonly rank: Rank,
     private readonly timing: Timing,
-    private readonly target: Amount,
+    private readonly maxTarget: Amount,
   ) {}
 
   /** Add a CloseOrder to list */
@@ -131,6 +133,10 @@ export class Candidate {
     );
   }
 
+  private get target(): Amount {
+    return this.maxTarget * this.rank;
+  }
+
   /** Amount of under-investent. Negative if over-invested. */
   public get gap(): number {
     return this.target - this.value;
@@ -152,6 +158,11 @@ export class Candidate {
 
   public get score(): number {
     return Math.max(this.rank, 0) * Math.max(this.timing, 0);
+  }
+
+  /** When open or increase, by which amount */
+  public get BuyAmount(): Amount {
+    return Math.min(this.target * this.timing, this.target - this.value);
   }
 
   public export(): CandidateExport {
@@ -187,7 +198,7 @@ export class Candidate {
         } = {
           Score: this.score,
           Target: this.target,
-          Buy: Math.min(this.target * this.score, this.target - this.value),
+          Buy: this.BuyAmount,
           Action: "Increase",
         };
         const increase: IncreaseCandidate = Object.assign({}, open, amount);
@@ -200,9 +211,10 @@ export class Candidate {
       }
     } // Open new Candidate
     else if (this.rank > 0 && this.timing > 0) {
-      const amount: { Score: number; Buy: Amount; Action: "Open" } = {
+      const amount: { Score: number; Target:Amount, Buy: Amount; Action: "Open" } = {
         Score: this.score,
-        Buy: this.target * this.score,
+        Target: this.target,
+        Buy: this.BuyAmount,
         Action: "Open",
       };
       const open: NewCandidate = Object.assign({}, candidate, amount);
