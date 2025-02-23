@@ -4,7 +4,7 @@ import type { DateFormat } from "📚/time/mod.ts";
 import { diffDate } from "📚/time/mod.ts";
 import { Chart } from "📚/chart/mod.ts";
 import { MACD, MACDParameters } from "./macd.ts";
-import type { Parameter } from "./cross-path.ts";
+import type { Parameter } from "📚/indicator/cross-path.ts";
 import { sum } from "📚/math/statistics.ts";
 
 type Position = {
