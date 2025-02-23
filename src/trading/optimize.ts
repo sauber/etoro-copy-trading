@@ -1,4 +1,5 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
+import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters } from "📚/optimize/mod.ts";
 import {
   CascadeStrategy,
@@ -18,6 +19,7 @@ import { ParameterData } from "📚/trading/mod.ts";
 import { Timing } from "📚/timing/timing.ts";
 
 type Samples = Array<{ input: Parameters; output: number }>;
+type Score = number;
 
 /** Generate and train parameters for timing model */
 export class Optimize {
@@ -56,7 +58,6 @@ export class Optimize {
   /** Create an optimer with random start values, run simulation and return simulation score */
   private static sample(exchange: Exchange, ranker: Rater): [Score, Optimize] {
     const input: Parameters = makeParameters();
-    // console.log({input});
     const optimizer = new Optimize(input, ranker);
     const score: Score = optimizer.simulation(exchange, input);
     return [score, optimizer];
@@ -73,33 +74,14 @@ export class Optimize {
       const result: [Score, Optimize] = Optimize.sample(exchange, ranker);
       if (result[0] > best[0]) best = result;
     }
-    // console.log(best);
     return best[1];
-  }
-
-  /** Get results for a number of inputs */
-  private samples(exchange: Exchange, count: number): Samples {
-    const result: Samples = Array(count);
-    for (let i = 0; i < count; i++) {
-      const input: Parameters = makeParameters();
-      const output: number = this.simulation(exchange, input);
-      result[i] = { input, output };
-    }
-    return result;
-  }
-
-  /** Dump parameters and score */
-  private print(exchange: Exchange): string {
-    const v = (n: number): string => n.toFixed(4);
-    const score = this.simulation(exchange, this.parameters);
-    return `Score: ${v(score)} ` +
-      this.parameters.map((p) => p.print()).join(", ");
   }
 
   /** Calculate score of simulation */
   // TODO: Factor in some sort of stability measure
   private score(simulation: Simulation): number {
     const trades: number = simulation.account.trades.length;
+    if (trades == 0) return 0;
     if (trades == 0) return 0;
     const profit: number = simulation.account.profit;
     const win: number = simulation.account.WinRatio;
@@ -121,7 +103,21 @@ export class Optimize {
     const costs = scale * (trades_cost + lose_cost + frag + abrupt) / 4;
     // Subtract cost from profit;
     const score = profit - costs;
-    // console.log({trades, profit, win, frag, trades_cost, lose_cost, expire, scale, costs, score});
+    if (!isFinite(score)) {
+      console.log({
+        trades,
+        profit,
+        win,
+        frag,
+        trades_cost,
+        lose_cost,
+        expire,
+        scale,
+        costs,
+        score,
+      });
+      throw new Error("Score is invalid");
+    }
 
     return score;
   }
