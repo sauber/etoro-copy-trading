@@ -8,7 +8,7 @@ import { Classifier } from "📚/trading/classifier.ts";
 import { Timing } from "📚/timing/mod.ts";
 import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
 
-const start: number = performance.now();
+// const start: number = performance.now();
 
 // Repo
 const path: string = Deno.args[0];
@@ -29,12 +29,13 @@ const situation: StrategyContext = await loader.strategyContext();
 const tradingDate: DateFormat = await loader.tradingDate();
 const username: string = await loader.username();
 const positionSize: number = await loader.positionSize();
+const stoploss: number = (await loader.settings()).stoploss;
 
 // Loading finished, free cache memory
 loader = null;
-const snap: number = performance.now();
-console.log("Data loding time (ms)", snap - start);
-console.log("Account:", username, "Trading Day:", tradingDate, "Cash:", situation.amount.toFixed(2));
+// const snap: number = performance.now();
+// console.log("Data loding time (ms)", snap - start);
+console.log("Account:", username, "Trading Day:", tradingDate, "StopLoss:", stoploss.toFixed(2), "Cash:", situation.amount.toFixed(2));
 
 const classifier = new Classifier(situation, ranker, timer, positionSize);
 const records = classifier.records;

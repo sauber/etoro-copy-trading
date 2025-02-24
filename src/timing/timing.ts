@@ -1,5 +1,5 @@
 import { Bar, Buffer, Chart, Instrument } from "@sauber/backtest";
-import { RSI, StochasticRSI } from "@debut/indicators";
+import { RSI } from "@debut/indicators";
 import { assert } from "@std/assert";
 
 type ChartCache = Map<string, Chart>;
@@ -30,12 +30,10 @@ export class Timing {
   private static create_chart(instrument: Instrument, window: number): Chart {
     const end: Bar = instrument.end;
     const source: Buffer = instrument.buffer;
-    // const indicator = new RSI(window);
-    const indicator = new StochasticRSI(window, 3, 3, window);
-    const series = source.map((v) => {
-      const value = indicator.nextValue(v);
-      return value ? value.stochRsi : NaN;
-    }).filter((v) => v !== undefined && !isNaN(v));
+    const indicator = new RSI(window);
+    const series = source.map((v) => indicator.nextValue(v)).filter((v) =>
+      v !== undefined && !isNaN(v)
+    );
     return new Chart(series, end);
   }
 

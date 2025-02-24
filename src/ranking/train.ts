@@ -151,6 +151,7 @@ export class Train {
     const inputs: DataFrame = data.exclude(["SharpeRatio"]);
     const outputs: DataFrame = data.include(["SharpeRatio"]);
     const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
+    console.log({labels});
 
     // Callback to model from dashboard
     const predict = (a: number, b: number): number => {
