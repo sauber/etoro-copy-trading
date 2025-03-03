@@ -39,7 +39,7 @@ const settings = await config.get(modelAssetName) as ParameterData;
 const loaded: boolean = settings !== null;
 const model = loaded
   ? Optimize.import(settings, ranker)
-  : Optimize.generate(exchange, 200, ranker);
+  : Optimize.generate(exchange, 1500, ranker);
 if (loaded) console.log("Loaded settings:", settings);
 else console.log("No settings found, starting from", model.export());
 
