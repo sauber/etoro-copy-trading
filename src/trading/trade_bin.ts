@@ -8,7 +8,7 @@ import { Classifier } from "📚/trading/classifier.ts";
 import { Timing } from "📚/timing/mod.ts";
 import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
 
-// const start: number = performance.now();
+const start: number = performance.now();
 
 // Repo
 const path: string = Deno.args[0];
