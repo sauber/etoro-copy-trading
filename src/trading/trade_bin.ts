@@ -33,9 +33,9 @@ const stoploss: number = (await loader.settings()).stoploss;
 
 // Loading finished, free cache memory
 loader = null;
-// const snap: number = performance.now();
-// console.log("Data loding time (ms)", snap - start);
-console.log("Account:", username, "Trading Day:", tradingDate, "StopLoss:", stoploss.toFixed(2), "Cash:", situation.amount.toFixed(2));
+const snap: number = performance.now();
+console.log("Data loding time (ms)", snap - start);
+console.log("Account:", username, "Trading Day:", tradingDate, "SL:", stoploss, "Cash:", situation.amount.toFixed(2));
 
 const classifier = new Classifier(situation, ranker, timer, positionSize);
 const records = classifier.records;

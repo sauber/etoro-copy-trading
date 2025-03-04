@@ -31,9 +31,14 @@ export class Timing {
     const end: Bar = instrument.end;
     const source: Buffer = instrument.buffer;
     const indicator = new RSI(window);
-    const series = source.map((v) => indicator.nextValue(v)).filter((v) =>
-      v !== undefined && !isNaN(v)
+    const series: Buffer = source.map((v) => indicator.nextValue(v)).filter(
+      (v) => v !== undefined && !isNaN(v)
     );
+    // const indicator = new StochasticRSI(window, 3, 3, window);
+    // const series = source.map((v) => {
+    //   const value = indicator.nextValue(v);
+    //   return value ? value.stochRsi : NaN;
+    // }).filter((v) => v !== undefined && !isNaN(v));
     return new Chart(series, end);
   }
 
