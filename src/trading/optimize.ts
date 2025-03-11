@@ -3,6 +3,7 @@ import { Maximize, Parameters } from "📚/optimize/mod.ts";
 import {
   CascadeStrategy,
   RoundingStrategy,
+  TrailingStrategy,
   UnionStrategy,
 } from "📚/strategy/mod.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
@@ -94,7 +95,7 @@ export class Optimize {
     const lose_cost = 1 - win;
 
     // Favor normal closes
-    const abrupt = 1-simulation.account.closeRatio;
+    const abrupt = 1 - simulation.account.closeRatio;
 
     // Scale each cost to profit
     const scale: number = Math.abs(profit);
@@ -133,14 +134,33 @@ export class Optimize {
     const timer: Rater = makeTimer(timingModel);
     const policy = new Policy(this.ranker, timer, settings.position_size);
 
-    const cascade: Strategy = new CascadeStrategy([
-      new WeekdayStrategy(settings.weekday),
-      new FutureStrategy(180),
-      policy,
-      new RoundingStrategy(200),
-    ]);
+    // const cascade: Strategy = new CascadeStrategy([
+    //   new WeekdayStrategy(settings.weekday),
+    //   new FutureStrategy(180),
+    //   policy,
+    //   new RoundingStrategy(200),
+    // ]);
+    // const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
+    // const trailing: Strategy = new TrailingStrategy(settings.stoploss);
+    // const strategy: Strategy = new UnionStrategy([cascade, stoploss]);
+
     const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
-    const strategy: Strategy = new UnionStrategy([cascade, stoploss]);
+    const trailing: Strategy = new TrailingStrategy(settings.stoploss);
+    const strategy: Strategy = new UnionStrategy([
+      stoploss,
+      new CascadeStrategy([
+        new WeekdayStrategy(settings.weekday),
+        new UnionStrategy([
+          trailing,
+          new CascadeStrategy([
+            new FutureStrategy(180),
+            policy,
+            new RoundingStrategy(200),
+          ]),
+        ]),
+      ]),
+    ]);
+
     return strategy;
   }
 

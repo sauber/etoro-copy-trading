@@ -31,6 +31,7 @@ import {
   FutureStrategy,
   RoundingStrategy,
   StopLossStrategy,
+  TrailingStrategy,
   UnionStrategy,
 } from "📚/strategy/mod.ts";
 import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
@@ -447,7 +448,11 @@ export class Loader {
       async () => {
         const positions: Positions = await this.positions();
         const closeOrders: CloseOrders = positions.map(
-          (position: Position) => ({ position, confidence: 1, reason: "Close"}),
+          (position: Position) => ({
+            position,
+            confidence: 1,
+            reason: "Close",
+          }),
         );
         return closeOrders;
       },
@@ -499,16 +504,25 @@ export class Loader {
     const ranker = makeRanker(ranking);
     const timer = makeTimer(timing);
 
-    const policy = new Policy(ranker, timer, settings.position_size);
-    const stoploss = new StopLossStrategy(settings.stoploss);
-    const cascade = new CascadeStrategy([
-      new WeekdayStrategy(settings.weekday),
-      new FutureStrategy(180),
-      policy,
-      new RoundingStrategy(200),
+    const policy: Strategy = new Policy(ranker, timer, settings.position_size);
+    const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
+    const trailing: Strategy = new TrailingStrategy(settings.stoploss);
+    const strategy: Strategy = new UnionStrategy([
+      stoploss,
+      new CascadeStrategy([
+        new WeekdayStrategy(settings.weekday),
+        new UnionStrategy([
+          trailing,
+          new CascadeStrategy([
+            new FutureStrategy(180),
+            policy,
+            new RoundingStrategy(200),
+          ]),
+        ]),
+      ]),
     ]);
-    const union  = new UnionStrategy([stoploss, cascade]);
+    // const union: Strategy = new UnionStrategy([stoploss, cascade]);
 
-    return union;
+    return strategy;
   }
 }
