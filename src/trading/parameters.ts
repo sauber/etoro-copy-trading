@@ -7,6 +7,7 @@ type SellWindow = number;
 type SellThreshold = number;
 type PositionSize = number;
 type StopLoss = number;
+type Limit = number;
 
 /** Parameters to strategies */
 export type ParameterData = {
@@ -17,6 +18,7 @@ export type ParameterData = {
   sell_threshold: SellThreshold;
   position_size: PositionSize;
   stoploss: StopLoss;
+  limit: Limit;
 };
 
 /** Default parameter values */
@@ -28,6 +30,7 @@ export const default_parameters: ParameterData = {
   sell_threshold: 70,
   position_size: 0.1,
   stoploss: 0.85,
+  limit: 1
 };
 
 /** Only the values in sequence */
@@ -38,7 +41,8 @@ export type ParameterValues = [
   SellWindow,
   SellThreshold,
   PositionSize,
-  StopLoss
+  StopLoss,
+  Limit
 ];
 
 /** Generate list of parameters optionally with initial values */
@@ -51,5 +55,6 @@ export function makeParameters(value: ParameterValues | [] = []): Parameters {
     new IntegerParameter("weekday", 1, 1, value[4]),
     new Parameter("position_size", 0.01, 0.05, value[5]),
     new Parameter("stoploss", 0.85, 0.95, value[6]),
+    new IntegerParameter("limit", 1, 10, value[7])
   ];
 }

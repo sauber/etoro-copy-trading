@@ -2,6 +2,7 @@ import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters } from "📚/optimize/mod.ts";
 import {
   CascadeStrategy,
+  LimitStrategy,
   RoundingStrategy,
   TrailingStrategy,
   UnionStrategy,
@@ -134,17 +135,6 @@ export class Optimize {
     const timer: Rater = makeTimer(timingModel);
     const policy = new Policy(this.ranker, timer, settings.position_size);
 
-    // const cascade: Strategy = new CascadeStrategy([
-    //   new WeekdayStrategy(settings.weekday),
-    //   new FutureStrategy(180),
-    //   policy,
-    //   new RoundingStrategy(200),
-    // ]);
-    // const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
-    // const trailing: Strategy = new TrailingStrategy(settings.stoploss);
-    // const strategy: Strategy = new UnionStrategy([cascade, stoploss]);
-
-    // const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
     const trailing: Strategy = new TrailingStrategy(settings.stoploss);
     const strategy: Strategy = new CascadeStrategy([
       new WeekdayStrategy(settings.weekday),
@@ -153,6 +143,7 @@ export class Optimize {
         new CascadeStrategy([
           new FutureStrategy(180),
           policy,
+          new LimitStrategy(settings.limit),
           new RoundingStrategy(200),
         ]),
       ]),

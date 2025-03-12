@@ -43,6 +43,7 @@ import {
 import { Policy } from "📚/trading/policy.ts";
 import { makeRanker, makeTimer } from "📚/trading/raters.ts";
 import { Semaphore } from "semaphore";
+import { LimitStrategy } from "📚/strategy/limit-strategy.ts";
 
 const NOW: DateFormat = today();
 
@@ -516,6 +517,7 @@ export class Loader {
           new CascadeStrategy([
             new FutureStrategy(180),
             policy,
+            new LimitStrategy(settings.limit),
             new RoundingStrategy(200),
           ]),
         ]),
