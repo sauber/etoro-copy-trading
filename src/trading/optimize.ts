@@ -144,19 +144,16 @@ export class Optimize {
     // const trailing: Strategy = new TrailingStrategy(settings.stoploss);
     // const strategy: Strategy = new UnionStrategy([cascade, stoploss]);
 
-    const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
+    // const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
     const trailing: Strategy = new TrailingStrategy(settings.stoploss);
-    const strategy: Strategy = new UnionStrategy([
-      stoploss,
-      new CascadeStrategy([
-        new WeekdayStrategy(settings.weekday),
-        new UnionStrategy([
-          trailing,
-          new CascadeStrategy([
-            new FutureStrategy(180),
-            policy,
-            new RoundingStrategy(200),
-          ]),
+    const strategy: Strategy = new CascadeStrategy([
+      new WeekdayStrategy(settings.weekday),
+      new UnionStrategy([
+        trailing,
+        new CascadeStrategy([
+          new FutureStrategy(180),
+          policy,
+          new RoundingStrategy(200),
         ]),
       ]),
     ]);

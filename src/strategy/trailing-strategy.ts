@@ -1,4 +1,5 @@
 import {
+  Amount,
   Bar,
   CloseOrders,
   PurchaseOrders,
@@ -19,14 +20,15 @@ export class TrailingStrategy extends PassThroughStrategy {
 
   /** List of positions where value is below threshold */
   public override close(context: StrategyContext): CloseOrders {
-    // console.log("StopLoss close bar", context.bar);
     return context.closeorders
       .filter((co) => {
-        const above: number = co.position.value(context.bar) / this.threshold;
+        const current: Amount = co.position.value(context.bar);
+        const above: Amount = current / this.threshold;
         const start: Bar = co.position.start;
-        for (let i = context.bar; i > start; i--) {
+        for (let i = context.bar; i < start; i++) {
           if (co.position.value(i) > above) return true;
         }
+
         return false;
       })
       .map((co) => ({ ...co, reason: "Loss" }));
