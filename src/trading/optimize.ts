@@ -176,7 +176,7 @@ export class Optimize {
   public optimize(
     exchange: Exchange,
     epochs: number = 500,
-    epsilon: number = 0.001,
+    epsilon: number = 0.01,
     status: Status = () => undefined,
   ): number {
     // Callback from optimize to model
@@ -193,7 +193,7 @@ export class Optimize {
       status,
       every: 10,
       epsilon,
-      batchSize: 20,
+      batchSize: 32,
     });
 
     const iterations = minimizer.run();
