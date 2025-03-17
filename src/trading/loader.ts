@@ -523,7 +523,6 @@ export class Loader {
         ]),
       ]),
     ]);
-    // const union: Strategy = new UnionStrategy([stoploss, cascade]);
 
     return strategy;
   }
