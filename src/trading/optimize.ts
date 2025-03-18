@@ -38,6 +38,7 @@ export class Optimize {
       data.sell_threshold,
       data.position_size,
       data.stoploss,
+      data.limit
     ];
     const parameters: Parameters = makeParameters(values);
     return new Optimize(parameters, ranker);
