@@ -30,12 +30,13 @@ const tradingDate: DateFormat = await loader.tradingDate();
 const username: string = await loader.username();
 const positionSize: number = await loader.positionSize();
 const stoploss: number = (await loader.settings()).stoploss;
+const limit: number = (await loader.settings()).limit;
 
 // Loading finished, free cache memory
 loader = null;
 const snap: number = performance.now();
-console.log("Data loding time (ms)", snap - start);
-console.log("Account:", username, "Trading Day:", tradingDate, "SL:", stoploss, "Cash:", situation.amount.toFixed(2));
+console.log("Data loading time (ms)", snap - start);
+console.log("Account:", username, "Trading Day:", tradingDate, "SL:", stoploss, "Limit:", limit, "Cash:", situation.amount.toFixed(2));
 
 const classifier = new Classifier(situation, ranker, timer, positionSize);
 const records = classifier.records;
