@@ -1,1 +1,1 @@
-export { Chart } from "./chart.ts";
+export { Chart } from "./chart2.ts";
