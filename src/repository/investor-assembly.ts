@@ -1,6 +1,6 @@
 import { type DateFormat, diffDate } from "📚/time/mod.ts";
 import { Backend, JournaledAsset } from "📚/storage/mod.ts";
-import { Chart as CompiledChart } from "📚/chart/mod.ts";
+import { Trimmer } from "📚/repository/trimmer.ts";
 import { Bar, Chart as BackTestChart } from "@sauber/backtest";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
@@ -129,7 +129,7 @@ export class InvestorAssembly {
     let end: DateFormat = dates[dates.length - 1];
     const lastData: ChartData = await this.chartAsset.retrieve(end);
     const lastChart = new Chart(lastData);
-    const compiled = new CompiledChart(lastChart.values, end).trim;
+    const compiled = new Trimmer(lastChart.values, end).trim;
     const values: number[] = compiled.values;
     let start: DateFormat = compiled.start;
     end = compiled.end;
@@ -143,8 +143,8 @@ export class InvestorAssembly {
 
       // Load older chart
       const loaded: Chart = new Chart(await this.chartAsset.retrieve(date));
-      const sooner: CompiledChart =
-        new CompiledChart(loaded.values, loaded.end).trim;
+      const sooner: Trimmer =
+        new Trimmer(loaded.values, loaded.end).trim;
 
       // Confirm even after trimming, there is still overlap
       if (sooner.end < start) {
