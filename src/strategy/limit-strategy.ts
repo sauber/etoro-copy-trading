@@ -1,9 +1,11 @@
 import { CloseOrders, PurchaseOrders, StrategyContext } from "@sauber/backtest";
+import { assert } from "@std/assert/assert";
 import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
 
 /** Limit count of orders */
 export class LimitStrategy extends PassThroughStrategy {
   constructor(private readonly count: number) {
+    assert(count > 0, "Count must be positive");
     super();
   }
 
