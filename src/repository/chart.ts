@@ -48,10 +48,10 @@ export class Chart {
     const todayDate: DateFormat = today();
     const expectedDate: DateFormat = nextDate(todayDate, -maxAge);
     const active = (12 - 1) * 7 - 1; // 12-1 weeks
-    if (this.count < active) {
-      console.error(`Error: Too few dates in chart: ${this.count}`);
-      return false;
-    }
+    // if (this.count < active) {
+    //   console.error(`Error: Too few dates in chart: ${this.count}`);
+    //   return false;
+    // }
     if (this.end > todayDate) {
       console.error(`Error: Last date ${this.end} is in the future`);
       return false;
