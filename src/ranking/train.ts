@@ -48,8 +48,8 @@ function createDashboard(
   const height = HEIGHT;
   type Point = [number, number];
 
-  // Pick max 200 samples for overlay
-  const samples: DataFrame = data.shuffle.slice(0, overlay_count);
+  // Pick samples for overlay
+  const samples: DataFrame = data.shuffle.slice(0, overlay_count).outlier(2);
   const overlay: Array<Point> = samples.records.map((r) =>
     [r[xlabel], r[ylabel]] as Point
   );
