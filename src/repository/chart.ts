@@ -21,7 +21,12 @@ function date(timestamp: string): DateFormat {
 
 /** Scraped chart data from eToro */
 export class Chart {
-  constructor(private readonly raw: ChartData) {}
+  // Max delay in number of days in chart
+  public readonly maxAge: number = 2;
+
+  constructor(private readonly raw: ChartData, data?: Partial<Chart>) {
+    Object.assign(this, data);
+  }
 
   private get list(): ChartEntry[] {
     return this.raw.simulation.oneYearAgo?.chart || [];
@@ -44,10 +49,10 @@ export class Chart {
   }
 
   public validate(): boolean {
-    const maxAge = 3;
+    // const maxAge = 3;
     const todayDate: DateFormat = today();
-    const expectedDate: DateFormat = nextDate(todayDate, -maxAge);
-    const active = (12 - 1) * 7 - 1; // 12-1 weeks
+    const expectedDate: DateFormat = nextDate(todayDate, -this.maxAge);
+    // const active = (12 - 1) * 7 - 1; // 12-1 weeks
     // if (this.count < active) {
     //   console.error(`Error: Too few dates in chart: ${this.count}`);
     //   return false;

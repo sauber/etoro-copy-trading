@@ -1,4 +1,4 @@
-import { JournaledAsset, Backend } from "📚/storage/mod.ts";
+import { Backend, JournaledAsset } from "📚/storage/mod.ts";
 
 import { Discover } from "./discover.ts";
 import type { DiscoverData } from "./discover.ts";
@@ -55,12 +55,15 @@ export class Refresh {
   // How many external fetches are performed
   private fetchCount = 0;
 
+  // Max delay in charts
+  private readonly maxDelay: number = 2;
+
   constructor(
     private readonly repo: Backend,
     private readonly fetcher: FetchBackend,
     private readonly investor: InvestorId,
     private readonly filter: DiscoverFilter, // TODO: Expire // TODO: Discover Range
-    private readonly blacklist: Blacklist
+    private readonly blacklist: Blacklist,
   ) {}
 
   /** Load  asset from web if missing or expired */
@@ -132,8 +135,9 @@ export class Refresh {
 
   /** Load chart for an investor */
   private chart(investor: InvestorId): Promise<boolean> {
+    const maxAge: number = this.maxDelay;
     const validate = function (loaded: ChartData) {
-      const chart: Chart = new Chart(loaded);
+      const chart: Chart = new Chart(loaded, { maxAge });
       if (!chart.validate()) {
         return false;
       }
@@ -209,7 +213,9 @@ export class Refresh {
       ...(await this.mirrors()),
       ...(await this.discover()),
     ];
-    const whitelist = investors.filter(id=>!(id.UserName in this.blacklist));
+    const whitelist = investors.filter((id) =>
+      !(id.UserName in this.blacklist)
+    );
     const subset: InvestorId[] = max ? whitelist.slice(0, max) : whitelist;
     const uniq: InvestorId[] = subset.filter(onlyUnique);
 
