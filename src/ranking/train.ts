@@ -27,6 +27,7 @@ function correlations(inputs: DataFrame, outputs: DataFrame): [string, string] {
     .amend("abs", (r) => Math.abs(r.SharpeRatio as number))
     .sort("abs")
     .reverse;
+  correlations.slice(0, 10).digits(4).print("Correlations");
   const names = correlations.values<string>("Name").slice(0, 2) as [
     string,
     string,
