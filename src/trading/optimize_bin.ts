@@ -28,7 +28,7 @@ const cache: Ranking = new RankingCache(ranking);
 const ranker: Rater = makeRanker(cache);
 
 // Load training data
-const instruments: Instruments = await loader.instrumentSamples(400);
+const instruments: Instruments = await loader.instrumentSamples(800);
 console.log("Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
