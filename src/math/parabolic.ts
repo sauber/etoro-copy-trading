@@ -3,7 +3,7 @@
 export type Point = [x: number, y: number];
 type Coefficients = [a: number, b: number, c: number];
 
-interface ParabolicResult {
+export interface ParabolicResult {
   coefficients: Coefficients;
   peak: Point;
   predict: (x: number) => number;
