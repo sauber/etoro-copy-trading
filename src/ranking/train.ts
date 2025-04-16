@@ -3,22 +3,12 @@ import { Dashboard, type Predict } from "@sauber/ml-cli-dashboard";
 import { avg } from "@sauber/statistics";
 import { Model } from "📚/ranking/model.ts";
 import { Investors } from "📚/repository/mod.ts";
-import { Samples, TrainingData } from "📚/ranking/trainingdata.ts";
+import { TrainingData } from "📚/ranking/trainingdata.ts";
 import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
 
 // Dashboard size
 const WIDTH = 78;
 const HEIGHT = 12;
-
-// Recursively trim training data until no outliers remain
-function outlierFilter(data: DataFrame, factor: number = 10): DataFrame {
-  const prev: number = data.length;
-  data = data.outlier(factor);
-  if (data.length != prev) {
-    console.log(`Data length trimmed ${prev} to ${data.length}`);
-  }
-  return (data.length == prev) ? data : outlierFilter(data, factor);
-}
 
 // Identify top two input columns correlated to output
 function correlations(inputs: DataFrame, outputs: DataFrame): [string, string] {
@@ -69,19 +59,19 @@ function createDashboard(
 }
 
 // Validation of random inputs
-function validation(model: Model, data: DataFrame, count: number = 5): void {
-  console.log("Validation");
-  const samples = data.shuffle.slice(0, count);
-  const inputs: Inputs = samples.exclude(["Score"]).records as Inputs;
-  const outputs: Outputs = samples.values("Score") as Outputs;
-  // Compare training output with predicted output
-  inputs.forEach((input: Input, sample: number) => {
-    console.log("sample");
-    console.log("  xs:", input);
-    console.log("  ys:", outputs[sample]);
-    console.log("  yp:", model.predict(input));
-  });
-}
+// function validation(model: Model, data: DataFrame, count: number = 5): void {
+//   console.log("Validation");
+//   const samples = data.shuffle.slice(0, count);
+//   const inputs: Inputs = samples.exclude(["Score"]).records as Inputs;
+//   const outputs: Outputs = samples.values("Score") as Outputs;
+//   // Compare training output with predicted output
+//   inputs.forEach((input: Input, sample: number) => {
+//     console.log("sample");
+//     console.log("  xs:", input);
+//     console.log("  ys:", outputs[sample]);
+//     console.log("  yp:", model.predict(input));
+//   });
+// }
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -111,23 +101,8 @@ export class Train {
   }
 
   private _data?: DataFrame;
-  private trainingdata(): DataFrame {
-    if (!this._data) {
-      const td = new TrainingData(this.bar_count);
-      const samples: Samples = [];
-
-      for (const investor of this.investors) {
-        const features: Samples = td.features(investor);
-        // console.log("Investor", investor.UserName, features);
-        samples.push(...features);
-      }
-      const records = samples.map((s) => Object.assign(s.input, {Score: s.output}));
-      // console.log("Records", {records});
-      const df = DataFrame.fromRecords(records);
-      const trimmed = outlierFilter(df);
-      // console.log("Training sample loaded:", trimmed.length);
-      this._data = trimmed;
-    }
+  public trainingdata(): DataFrame {
+    if ( !this._data ) this._data = new TrainingData(this.bar_count).generate(this.investors);
     return this._data;
   }
 
