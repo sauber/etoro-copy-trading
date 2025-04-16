@@ -18,9 +18,8 @@ export class Model {
     const hidden: number = Math.round(inputs * 1.5);
     const network = new Network(inputs)
       .normalize
-      .dense(hidden)
-      .lrelu.dense(hidden)
-      .lrelu
+      .dense(hidden).lrelu
+      .dense(hidden).lrelu
       .dense(1);
     return new Model(network);
   }
