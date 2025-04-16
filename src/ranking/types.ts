@@ -62,12 +62,10 @@ export type Input = {
 export type Inputs = Array<Input>;
 
 /** Output column names */
-export const output_labels = ["SharpeRatio"] as const;
+export const output_labels = ["Score"] as const;
 
-/** One output parameter; SharpeRatio */
-export type Output = {
-  SharpeRatio: number;
-};
+/** One output parameter */
+export type Output = number; 
 
 /** List of outputs */
 export type Outputs = Array<Output>;

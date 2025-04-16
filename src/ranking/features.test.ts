@@ -36,6 +36,6 @@ Deno.test("Output", () => {
   const rank = new Features(investor);
   const date: DateFormat = investor.stats.start;
   const bar: Bar = dateToBar(date);
-  const features: Output = rank.output(bar);
-  assertAlmostEquals(features.SharpeRatio, 2.19, 0.01);
+  const output: Output = rank.output(bar);
+  assertAlmostEquals(output, 2.19, 0.01);
 });

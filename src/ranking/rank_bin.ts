@@ -25,23 +25,23 @@ const end: DateFormat | null = await community.end();
 if (!end) throw new Error("No end date in community");
 console.log(`${end} investor count:`, investors.length);
 
-// Predict SharpeRatio for each Investor
-const sr: number[] = investors.map((i: Investor) =>
+// Predict Score for each Investor
+const score: number[] = investors.map((i: Investor) =>
   ranking.predict(i, dateToBar(end))
 );
 
 const df = DataFrame.fromRecords(
   investors.map((investor: Investor, index: number) => ({
     Investor: investor.UserName,
-    SharpeRatio: sr[index],
+    Score: score[index],
   })),
-).sort("SharpeRatio");
+).sort("Score");
 
-const desired = df.select((r) => r.SharpeRatio as number > 0).reverse;
+const desired = df.select((r) => r.Score as number > 0).reverse;
 desired.slice(0, 5).digits(3).print(
   `Most Desired Investors of ${desired.length}`,
 );
-const undesired = df.select((r) => r.SharpeRatio as number < 0);
+const undesired = df.select((r) => r.Score as number < 0);
 undesired.slice(0, 5).digits(3).print(
   `Most undesired Investors of ${undesired.length}`,
 );

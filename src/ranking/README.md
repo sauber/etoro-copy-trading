@@ -1,1 +1,1 @@
-Train a neural network on future SharpeRatio based on investors numerical stats.
+Train a neural network on future chart score based on investors numerical stats.

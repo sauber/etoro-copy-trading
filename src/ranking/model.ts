@@ -45,7 +45,7 @@ export class Model {
     callback?: Dashboard,
   ): TrainResults {
     const xs = inputs.map((record) => Object.values(record));
-    const ys = outputs.map((record) => Object.values(record));
+    const ys = outputs.map((record) => [record]);
 
     this.network.adapt(xs);
     const train = new Train(this.network, xs, ys);
@@ -59,6 +59,6 @@ export class Model {
   public predict(input: Input): Output {
     const x: number[] = Object.values(input);
     const result = this.network.predict(x);
-    return { SharpeRatio: result[0] } as Output;
+    return result[0] as Output;
   }
 }

@@ -24,7 +24,7 @@ function outlierFilter(data: DataFrame, factor: number = 10): DataFrame {
 function correlations(inputs: DataFrame, outputs: DataFrame): [string, string] {
   const correlations: DataFrame = inputs
     .correlationMatrix(outputs)
-    .amend("abs", (r) => Math.abs(r.SharpeRatio as number))
+    .amend("abs", (r) => Math.abs(r.Score as number))
     .sort("abs")
     .reverse;
   correlations.slice(0, 10).digits(4).print("Correlations");
@@ -54,7 +54,7 @@ function createDashboard(
   const overlay: Array<Point> = samples.records.map((r) =>
     [r[xlabel], r[ylabel]] as Point
   );
-  const out: number[] = samples.records.map((r) => r.SharpeRatio as number);
+  const out: number[] = samples.records.map((r) => r.Score as number);
 
   return new Dashboard(
     width,
@@ -72,8 +72,8 @@ function createDashboard(
 function validation(model: Model, data: DataFrame, count: number = 5): void {
   console.log("Validation");
   const samples = data.shuffle.slice(0, count);
-  const inputs: Inputs = samples.exclude(["SharpeRatio"]).records as Inputs;
-  const outputs: Outputs = samples.include(["SharpeRatio"]).records as Outputs;
+  const inputs: Inputs = samples.exclude(["Score"]).records as Inputs;
+  const outputs: Outputs = samples.values("Score") as Outputs;
   // Compare training output with predicted output
   inputs.forEach((input: Input, sample: number) => {
     console.log("sample");
@@ -121,7 +121,7 @@ export class Train {
         // console.log("Investor", investor.UserName, features);
         samples.push(...features);
       }
-      const records = samples.map((s) => Object.assign(s.input, s.output));
+      const records = samples.map((s) => Object.assign(s.input, {Score: s.output}));
       // console.log("Records", {records});
       const df = DataFrame.fromRecords(records);
       const trimmed = outlierFilter(df);
@@ -133,7 +133,7 @@ export class Train {
 
   /** Mean value for each input column */
   private means(): Input {
-    const inputs: DataFrame = this.trainingdata().exclude(["SharpeRatio"]);
+    const inputs: DataFrame = this.trainingdata().exclude(["Score"]);
 
     // Mean values
     const colNames = inputs.names as Array<keyof Input>;
@@ -149,8 +149,8 @@ export class Train {
   public get dashboard(): Dashboard {
     const data: DataFrame = this.trainingdata();
     const means: Input = this.means();
-    const inputs: DataFrame = data.exclude(["SharpeRatio"]);
-    const outputs: DataFrame = data.include(["SharpeRatio"]);
+    const inputs: DataFrame = data.exclude(["Score"]);
+    const outputs: DataFrame = data.include(["Score"]);
     const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
     console.log({labels});
 
@@ -158,7 +158,7 @@ export class Train {
     const predict = (a: number, b: number): number => {
       means[labels[0]] = a;
       means[labels[1]] = b;
-      return this.model.predict(means).SharpeRatio;
+      return this.model.predict(means);
     };
 
     const dashboard = createDashboard(
@@ -174,8 +174,8 @@ export class Train {
   /** Run training */
   public run(dashboard?: Dashboard): number {
     const data: DataFrame = this.trainingdata();
-    const inputs: DataFrame = data.exclude(["SharpeRatio"]);
-    const outputs: DataFrame = data.include(["SharpeRatio"]);
+    const inputs: Inputs = data.exclude(["Score"]).records as Inputs;
+    const outputs: Outputs = data.values("Score");
 
     // Callback to dashboard from training
     const status = dashboard
@@ -188,8 +188,8 @@ export class Train {
     // console.log("Training...");
     const iterations = this.epochs;
     const results = this.model.train(
-      inputs.records as Inputs,
-      outputs.records as Outputs,
+      inputs,
+      outputs,
       iterations,
       this.learning_rate,
       this.batch_size,
@@ -197,8 +197,6 @@ export class Train {
     );
 
     if (dashboard) console.log(dashboard.finish());
-    // console.log(results);
-    // validation(this.model, data, 5);
     return results.iterations;
   }
 }

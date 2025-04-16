@@ -39,7 +39,7 @@ export class InvestorRanking implements Ranking {
     if (this.model) await this.asset.store(this.model.export());
   }
 
-  /** Predicted future SharpeRatio for an investor */
+  /** Predicted future Score for an investor */
   public predict(
     investor: Investor,
     bar: Bar,
@@ -49,7 +49,7 @@ export class InvestorRanking implements Ranking {
     }
     const input: Input = new Features(investor).input(bar);
     const prediction: Output = this.model.predict(input);
-    return prediction.SharpeRatio;
+    return prediction;
   }
 
   public async train(): Promise<void> {

@@ -18,6 +18,6 @@ Deno.test("Generate data", () => {
   assertGreaterOrEqual(fs.length, 0);
   for (const f of fs) {
     assertEquals(Object.keys(f), ["input", "output"]);
-    assertNotEquals(f.output.SharpeRatio, 0);
+    assertNotEquals(f.output, 0);
   }
 });

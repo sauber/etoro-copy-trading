@@ -19,7 +19,7 @@ function input(): Input {
 
 /** Generate a random set of output */
 function output(): Output {
-  return { SharpeRatio: Math.random() };
+  return Math.random();
 }
 
 /** Number of input features */
@@ -52,5 +52,5 @@ Deno.test("Predict", () => {
   const m = Model.generate(features);
   const inp: Input = input();
   const out: Output = m.predict(inp);
-  assertNotEquals(out.SharpeRatio, 0);
+  assertNotEquals(out, 0);
 });
