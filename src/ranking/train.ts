@@ -78,7 +78,7 @@ function createDashboard(
 /** Train Ranking model with Training data */
 export class Train {
   /** Minimum number of future bars after stats */
-  public readonly bar_count: number = 30;
+  public readonly bar_count: number = 180;
 
   /** Maximum number fo training iterations */
   public readonly epochs: number = 2000;
@@ -87,7 +87,7 @@ export class Train {
   public readonly learning_rate: number = 0.001;
 
   /** Number of samples for stochastic gradient descent */
-  public readonly batch_size: number = 64;
+  public readonly batch_size: number = 200;
 
   /** Number of samples to overlay in dashboard */
   public readonly overlay_size: number = 200;

@@ -18,8 +18,14 @@ export class Model {
     const hidden: number = Math.round(inputs * 1.5);
     const network = new Network(inputs)
       .normalize
-      .dense(hidden).lrelu
-      .dense(hidden).lrelu
+      .simple.lrelu
+      // .simple.lrelu
+      // .simple.lrelu
+      // .dense(hidden).lrelu
+      // .dense(hidden).lrelu
+      // .dense(4).lrelu
+      // .dense(4).lrelu
+      // .dense(3).lrelu
       .dense(1);
     return new Model(network);
   }
@@ -41,7 +47,7 @@ export class Model {
     outputs: Outputs,
     max_iterations: number = 20000,
     learning_rate: number = 0.001,
-    batch_size: number = 64,
+    batch_size: number = 32,
     callback?: Dashboard,
   ): TrainResults {
     const xs = inputs.map((record) => Object.values(record));
@@ -50,7 +56,9 @@ export class Model {
     this.network.adapt(xs);
     const train = new Train(this.network, xs, ys);
     if (callback) train.callback = callback;
+    console.log("batch_size", batch_size);
     train.batchSize = batch_size;
+    train.callbackFrequency = 10;
     const iterations: number = train.run(max_iterations, learning_rate);
     return { iterations, loss: train.loss };
   }

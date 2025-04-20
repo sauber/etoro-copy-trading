@@ -183,7 +183,7 @@ export class Optimize {
       agent: reward as (inputs: Array<number>) => number,
       epochs,
       status,
-      every: 10,
+      every: 1,
       epsilon,
       batchSize: 32,
     });
