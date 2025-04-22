@@ -19,13 +19,7 @@ export class Model {
     const network = new Network(inputs)
       .normalize
       .simple.lrelu
-      // .simple.lrelu
-      // .simple.lrelu
-      // .dense(hidden).lrelu
-      // .dense(hidden).lrelu
-      // .dense(4).lrelu
-      // .dense(4).lrelu
-      // .dense(3).lrelu
+      .dense(3).lrelu
       .dense(1);
     return new Model(network);
   }
