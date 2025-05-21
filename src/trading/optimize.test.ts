@@ -4,10 +4,9 @@ import {
   assertInstanceOf,
   assertLessOrEqual,
 } from "@std/assert";
-import { Dashboard, Parameters } from "📚/optimize/mod.ts";
+import { Dashboard, Parameters, Output } from "@sauber/optimize";
 import { Bar, Exchange, Instrument, TestInstrument } from "@sauber/backtest";
 import { Optimize } from "📚/trading/optimize.ts";
-import { Output } from "📚/optimize/types.d.ts";
 import { Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 

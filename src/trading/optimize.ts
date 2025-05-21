@@ -1,5 +1,5 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
-import { Maximize, Parameters } from "📚/optimize/mod.ts";
+import { Maximize, Parameters, Status } from "@sauber/optimize";
 import {
   CascadeStrategy,
   LimitStrategy,
@@ -8,7 +8,6 @@ import {
   UnionStrategy,
 } from "📚/strategy/mod.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
-import { Status } from "📚/optimize/types.d.ts";
 import { FutureStrategy } from "📚/strategy/future-strategy.ts";
 import { Policy } from "📚/trading/policy.ts";
 

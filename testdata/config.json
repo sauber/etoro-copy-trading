@@ -8,6 +8,7 @@
   "trading": {
     "buy_window": 2,
     "buy_threshold": 50,
+    "limit": 3,
     "sell_window": 2,
     "sell_threshold": 80,
     "weekday": 1,

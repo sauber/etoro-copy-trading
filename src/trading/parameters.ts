@@ -1,4 +1,4 @@
-import { IntegerParameter, Parameter, Parameters } from "📚/optimize/mod.ts";
+import { IntegerParameter, Parameter, Parameters } from "@sauber/optimize";
 
 type Weekday = number;
 type BuyWindow = number;

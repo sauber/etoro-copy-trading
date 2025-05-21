@@ -78,6 +78,7 @@ function createDashboard(
 /** Train Ranking model with Training data */
 export class Train {
   /** Minimum number of future bars after stats */
+  // 15 for testdata, 180 for real data
   public readonly bar_count: number = 180;
 
   /** Maximum number fo training iterations */
