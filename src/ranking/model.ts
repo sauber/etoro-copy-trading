@@ -16,9 +16,11 @@ export class Model {
 
   /** Generate new model with random parameters */
   public static generate(inputs: number) {
-    const hidden: number = Math.round(inputs * 1.5);
     const network = new Network(inputs)
       .normalize
+      .simple.lrelu
+      .simple.lrelu
+      .simple.lrelu
       .simple.lrelu
       .dense(3).lrelu
       .dense(1);
