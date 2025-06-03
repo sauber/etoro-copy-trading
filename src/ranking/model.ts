@@ -1,5 +1,6 @@
 import { Network, Train } from "@sauber/neurons";
 import type { NetworkData } from "@sauber/neurons";
+import { mse } from "@sauber/statistics";
 import type { Input, Inputs, Output, Outputs } from "📚/ranking/types.ts";
 
 type TrainResults = {
@@ -62,5 +63,16 @@ export class Model {
     const x: number[] = Object.values(input);
     const result = this.network.predict(x);
     return result[0] as Output;
+  }
+
+  /** Validate accuracy of model based on inputs and outputs. Higher number is higher error. */
+  public validate(
+    inputs: Inputs,
+    outputs: Outputs,
+  ): number {
+    const xs: number[][] = inputs.map((record) => Object.values(record));
+    const results: Outputs = xs.map((x) => this.network.predict(x)[0]);
+    const error: number = mse(outputs, results);
+    return error;
   }
 }

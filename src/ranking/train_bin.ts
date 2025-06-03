@@ -13,5 +13,8 @@ if (!(await ranking.load())) {
 } else {
   console.log("Model loaded.");
 }
-await ranking.train();
-await ranking.save();
+const improvement = await ranking.train();
+if (improvement > 0) {
+  await ranking.save();
+  console.log("Model saved with improvement:", improvement);
+}

@@ -103,7 +103,9 @@ export class Train {
 
   private _data?: DataFrame;
   public trainingdata(): DataFrame {
-    if ( !this._data ) this._data = new TrainingData(this.bar_count).generate(this.investors);
+    if (!this._data) {
+      this._data = new TrainingData(this.bar_count).generate(this.investors);
+    }
     return this._data;
   }
 
@@ -128,7 +130,7 @@ export class Train {
     const inputs: DataFrame = data.exclude(["Score"]);
     const outputs: DataFrame = data.include(["Score"]);
     const labels = correlations(inputs, outputs) as [keyof Input, keyof Input];
-    console.log({labels});
+    console.log({ labels });
 
     // Callback to model from dashboard
     const predict = (a: number, b: number): number => {
@@ -174,5 +176,14 @@ export class Train {
 
     if (dashboard) console.log(dashboard.finish());
     return results.iterations;
+  }
+
+  /** Confirm accuracy of model */
+  public validate(): number {
+    const data: DataFrame = this.trainingdata();
+    const inputs: Inputs = data.exclude(["Score"]).records as Inputs;
+    const outputs: Outputs = data.values("Score");
+    const error: number = this.model.validate(inputs, outputs);
+    return error;
   }
 }

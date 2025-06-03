@@ -52,12 +52,23 @@ export class InvestorRanking implements Ranking {
     return prediction;
   }
 
-  public async train(): Promise<void> {
+  public async train(): Promise<number> {
     if (!this.model) throw new Error("Error: Model not defined, cannot train.");
     const community: Community = new Community(this.repo);
     const investors = await community.all();
     const train = new Train(this.model, investors);
     const dashboard: Dashboard = train.dashboard;
+    const baseline: number = train.validate();
     train.run(dashboard);
+    const results = train.validate();
+    const improvement: number = baseline - results;
+    console.log(
+      "Model error improved from",
+      baseline,
+      "to",
+      results,
+      ((baseline - results) / baseline * 100).toPrecision(3) + "%",
+    );
+    return improvement;
   }
 }

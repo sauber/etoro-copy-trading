@@ -54,3 +54,11 @@ Deno.test("Predict", () => {
   const out: Output = m.predict(inp);
   assertNotEquals(out, 0);
 });
+
+Deno.test("Validate", () => {
+  const m = Model.generate(features);
+  const inputs: Inputs = [input(), input(), input(), input()];
+  const outputs: Outputs = [output(), output(), output(), output()];
+  const error: number = m.validate(inputs, outputs);
+  assertNotEquals(error, 0);
+});
