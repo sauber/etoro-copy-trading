@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "../etoro-data"
+			"path": "."
 		},
 		{
-			"path": "."
+			"path": "../etoro-data"
 		}
 	],
 	"settings": {}
