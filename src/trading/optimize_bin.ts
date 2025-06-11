@@ -1,6 +1,6 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
-import { Optimize } from "../trading/optimize.ts";
+import { Optimize } from "📚/trading/optimize.ts";
 import { Assets } from "📚/assets/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { makeRanker, Rater } from "📚/trading/raters.ts";
