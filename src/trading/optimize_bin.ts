@@ -8,7 +8,6 @@ import { InvestorRanking, Ranking } from "📚/ranking/mod.ts";
 import { ParameterData } from "📚/trading/parameters.ts";
 import { RankingCache } from "📚/ranking/ranking-cache.ts";
 
-
 ////////////////////////////////////////////////////////////////////////
 /// Main
 ////////////////////////////////////////////////////////////////////////
@@ -27,10 +26,21 @@ const cache: Ranking = new RankingCache(ranking);
 const ranker: Rater = makeRanker(cache);
 
 // Load training data
-const instruments: Instruments = await loader.instrumentSamples(800);
-console.log("Instruments loaded:", instruments.length);
+const instrument_count: number = 800;
+const instruments: Instruments = await loader.instrumentSamples(
+  instrument_count,
+);
+console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
+
+// Load Validation data
+const validation_count: number = 800;
+const validationInstruments: Instruments = await loader.instrumentSamples(
+  validation_count,
+);
+console.log("Validation Instruments loaded:", validationInstruments.length);
+const validation: Exchange = new Exchange(instruments, spread);
 
 // Load Parameters into model
 const config = repo.config;
@@ -53,9 +63,21 @@ const status: Status = (
   reward: number[],
 ) => console.log(dashboard.render(parameters, iterations, reward));
 
+// Confirm starting score
+const initialScore: number = model.predict(validation);
+console.log("Initial score:", initialScore);
+
 // Run optimizer and save results
 const epsilon = 0.01;
 const _iterations: number = model.optimize(exchange, epochs, epsilon, status);
-const exported: ParameterData = model.export();
-console.log("Saved settings: ", exported);
-await config.set(modelAssetName, exported);
+
+// Confirm final score
+const finalScore: number = model.predict(validation);
+console.log("Final score:", finalScore);
+
+// Save model only if score improved
+if (finalScore > initialScore) {
+  const exported: ParameterData = model.export();
+  console.log("Saved settings: ", exported);
+  await config.set(modelAssetName, exported);
+}

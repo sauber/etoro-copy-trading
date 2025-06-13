@@ -15,7 +15,6 @@ import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 import { Timing } from "📚/timing/timing.ts";
-import { StopLossStrategy } from "📚/strategy/stoploss-strategy.ts";
 
 type Samples = Array<{ input: Parameters; output: number }>;
 type Score = number;
@@ -37,7 +36,7 @@ export class Optimize {
       data.sell_threshold,
       data.position_size,
       data.stoploss,
-      data.limit
+      data.limit,
     ];
     const parameters: Parameters = makeParameters(values);
     return new Optimize(parameters, ranker);
@@ -171,10 +170,8 @@ export class Optimize {
     status: Status = () => undefined,
   ): number {
     // Callback from optimize to model
-    const reward = (input: ParameterValues): Score => {
-      const score: Score = this.simulation(exchange, makeParameters(input));
-      return score;
-    };
+    const reward = (input: ParameterValues): Score =>
+      this.simulation(exchange, makeParameters(input));
 
     // Configure minimizer
     const minimizer = new Maximize({
@@ -191,6 +188,7 @@ export class Optimize {
     return iterations;
   }
 
+  /** Predict score based on current parameters */
   public predict(exchange: Exchange): Score {
     return this.simulation(exchange, this.parameters);
   }
