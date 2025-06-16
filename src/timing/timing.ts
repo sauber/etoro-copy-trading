@@ -1,6 +1,7 @@
 import { Bar, Buffer, Chart, Instrument } from "@sauber/backtest";
 import { rsi_signal } from "📚/timing/rsi-signal.ts";
 import { demark_signal } from "📚/timing/demark-signal.ts";
+import { detrendExponential } from "./untrend.ts";
 
 /** Asset buying or sell opportunity from instrument */
 export class Timing {
@@ -16,15 +17,9 @@ export class Timing {
 
   /** Create signal chart with custom parameters */
   private create_chart(instrument: Instrument): Chart {
-    // const signal: Buffer = rsi_signal(
-    //   instrument.buffer,
-    //   this.buy_window,
-    //   this.buy_threshold,
-    //   this.sell_window,
-    //   this.sell_threshold,
-    // );
+    const flattened: Buffer = detrendExponential(instrument.buffer);
     const signal: Buffer = demark_signal(
-      instrument.buffer,
+      flattened,
       this.buy_window,
       this.buy_threshold,
       this.sell_threshold,
