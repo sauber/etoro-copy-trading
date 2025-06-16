@@ -1,5 +1,4 @@
 import { Bar, Buffer, Chart, Instrument } from "@sauber/backtest";
-import { rsi_signal } from "📚/timing/rsi-signal.ts";
 import { demark_signal } from "📚/timing/demark-signal.ts";
 import { detrendExponential } from "./untrend.ts";
 
@@ -17,6 +16,7 @@ export class Timing {
 
   /** Create signal chart with custom parameters */
   private create_chart(instrument: Instrument): Chart {
+    // XXX: This is too late to flatten, since simulation trades should use same flattened buffer
     const flattened: Buffer = detrendExponential(instrument.buffer);
     const signal: Buffer = demark_signal(
       flattened,

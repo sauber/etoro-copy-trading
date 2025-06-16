@@ -32,6 +32,7 @@ const instruments: Instruments = await loader.instrumentSamples(
 );
 console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
+// TODO: Convert instruments to untrended instruments
 const exchange: Exchange = new Exchange(instruments, spread);
 
 // Load Validation data
@@ -40,6 +41,7 @@ const validationInstruments: Instruments = await loader.instrumentSamples(
   validation_count,
 );
 console.log("Validation Instruments loaded:", validationInstruments.length);
+// TODO: Convert instruments to untrended instruments
 const validation: Exchange = new Exchange(instruments, spread);
 
 // Load Parameters into model
