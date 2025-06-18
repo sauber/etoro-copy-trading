@@ -35,7 +35,10 @@ Deno.test("UserName", () => {
 Deno.test("Caching", async () => {
   const assembly = new InvestorAssembly(username, repo);
   const _investor: Investor = await assembly.investor();
-  const asset = new JournaledAsset<InvestorExport>(username + ".compiled", repo);
+  const asset = new JournaledAsset<InvestorExport>(
+    username + ".compiled",
+    repo,
+  );
   assert(await asset.exists());
 });
 
@@ -87,4 +90,15 @@ Deno.test("Mirrors", async () => {
   for (const id in mirror) {
     assertNotEquals(id, "");
   }
+});
+
+Deno.test("Test Investor", async () => {
+  const assembly = new InvestorAssembly(username, repo);
+  const investor: Investor = await assembly.testInvestor();
+  assertInstanceOf(investor, Investor);
+  const chart: Chart = investor.chart;
+  const series: Buffer = chart.values;
+  assertEquals(series.length, 449);
+  assertAlmostEquals(series[0], 3190.99);
+  assertAlmostEquals(series[series.length - 1], 9943.52);
 });

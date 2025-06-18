@@ -1,4 +1,5 @@
 import { Buffer } from "@sauber/backtest";
+import { avg } from "@sauber/statistics";
 
 /**
  * Removes exponential trend from a buffer of values.
@@ -21,13 +22,13 @@ export function detrendExponential(input: Buffer): Buffer {
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
   const intercept = (sumY - slope * sumX) / n;
 
-  // Step 3: Calculate starting value of input
-  const first = input[0];
+  // Step 3: Calculate the average line
+  const middle = avg(Array.from(input));
 
   // Step 4: Subtract difference between original and trend from original
   const output: Buffer = input.map((value, index) => {
     const trendValue = Math.exp(intercept + slope * index);
-    const results = first + value - trendValue;
+    const results = middle + value - trendValue;
     // console.log(`Index: ${index}, Value: ${value}, Trend Value: ${trendValue}, Results: ${results}`);
     return results;
   });

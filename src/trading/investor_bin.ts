@@ -4,7 +4,7 @@ import { Investor } from "📚/investor/mod.ts";
 import { detrendExponential } from "../timing/untrend.ts";
 import { Timing } from "../timing/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
+import { makeTimer, Rater } from "📚/trading/raters.ts";
 
 // Display information about an investor
 
@@ -22,7 +22,7 @@ console.log("Customer ID:", investor.CustomerID || "N/A");
 
 // Display chart
 const chart: Chart = investor.chart;
-console.log("Chart:");
+console.log("Combined chart:");
 console.log(chart.plot());
 
 // Display chart without trend

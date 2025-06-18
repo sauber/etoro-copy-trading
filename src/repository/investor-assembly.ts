@@ -16,6 +16,7 @@ import {
   type StatsExport,
 } from "📚/repository/stats.ts";
 import { today } from "📚/time/calendar.ts";
+import { detrendExponential } from "../timing/untrend.ts";
 
 type MirrorsByDate = Record<DateFormat, Mirror[]>;
 type StatsByDate = Record<DateFormat, StatsExport>;
@@ -34,6 +35,7 @@ export type InvestorExport = {
   customerid: number;
   chartend: DateFormat;
   chart: number[];
+  flat: number[];
   mirrors: MirrorsByDate;
   stats: StatsByDate;
 };
@@ -143,13 +145,12 @@ export class InvestorAssembly {
 
       // Load older chart
       const loaded: Chart = new Chart(await this.chartAsset.retrieve(date));
-      const sooner: Trimmer =
-        new Trimmer(loaded.values, loaded.end).trim;
+      const sooner: Trimmer = new Trimmer(loaded.values, loaded.end).trim;
 
       // Confirm even after trimming, there is still overlap
       if (sooner.end < start) {
         console.warn(
-          `${this.UserName} sooner chart after trimming no longer overlaps.`,
+          `${this.UserName} sooner chart after trimming no longer overlaps. Keeping newest chart only.`,
         );
         break;
       }
@@ -250,6 +251,7 @@ export class InvestorAssembly {
     return zip;
   }
 
+  /** Confirm if raw data is sufficiently complete to compile an investor */
   private async validate(): Promise<boolean> {
     // At least on chart file
     const chartDates: DateFormat[] = await this.chartAsset.dates();
@@ -276,6 +278,7 @@ export class InvestorAssembly {
 
   /** Load previously compiled investor, or generate */
   private async compile(): Promise<InvestorExport> {
+    console.log("Compile data for", this.UserName);
     const chart: OverlappingCharts = await this.chart();
     const chartend: DateFormat = chart.end;
     const stats: StatsByDate = await this.stats(chart);
@@ -288,6 +291,9 @@ export class InvestorAssembly {
       customerid,
       chartend,
       chart: chart.values,
+      flat: Array.from(detrendExponential(new Float32Array(chart.values))).map((
+        v,
+      ) => +v.toFixed(2)),
       mirrors,
       stats,
     };
@@ -295,10 +301,28 @@ export class InvestorAssembly {
 
   /** Confirm if compiled data is valid */
   private compiled(data: InvestorExport): boolean {
+    // Confirm all required properties are present
+    for (
+      const prop of [
+        "username",
+        "customerid",
+        "chartend",
+        "chart",
+        "flat",
+        "mirrors",
+        "stats",
+      ]
+    ) {
+      if (!(prop in data)) return false;
+    }
     // Confirm mirrors have Value parameter
     for (const [_date, mirrors] of Object.entries(data.mirrors)) {
       for (const mirror of mirrors) if (!mirror.Value) return false;
     }
+
+    // Confirm no negative values in charts
+    for (const value of data.chart) if (value < 0) return false;
+    for (const value of data.flat) if (value < 0) return false;
     return true;
   }
 
@@ -321,10 +345,33 @@ export class InvestorAssembly {
     await this.compiledAsset.erase();
   }
 
+  /** Load or generate investor */
+  private async refresh(): Promise<InvestorExport> {
+    // Does cache exist and is valid?
+    const cached: InvestorExport | undefined = await this.cached();
+    if (cached) return cached;
+
+    // Compile investor from asset
+    const compiled: InvestorExport = await this.compile();
+
+    // Validate compiled data
+    if (!this.compiled(compiled)) {
+      throw new Error(
+        `Investor ${this.UserName} data is invalid. Cannot compile.`,
+      );
+    }
+
+    // Store compiled data
+    const date = await this.end();
+    await this.compiledAsset.store(compiled, date);
+    console.warn("Investor data cached for", this.UserName);
+    return compiled;
+  }
+
   /** Generate investor object from raw data */
-  private generate(data: InvestorExport): Investor {
+  private generate(data: InvestorExport, series: number[]): Investor {
     const end: Bar = diffDate(data.chartend, today());
-    const chart = new BackTestChart(new Float32Array(data.chart), end);
+    const chart = new BackTestChart(new Float32Array(series), end);
     return new Investor(
       this.UserName,
       data.customerid,
@@ -335,16 +382,15 @@ export class InvestorAssembly {
     );
   }
 
-  /** Load or generate investor */
+  /** Create investor object from cached data */
   public async investor(): Promise<Investor> {
-    // Does cache exist and is valid?
-    const cached: InvestorExport | undefined = await this.cached();
-    if (cached) return this.generate(cached);
+    const loaded: InvestorExport = await this.refresh();
+    return this.generate(loaded, loaded.chart);
+  }
 
-    // Compile investor from asset
-    const compiled: InvestorExport = await this.compile();
-    const date = await this.end();
-    await this.compiledAsset.store(compiled, date);
-    return this.generate(compiled);
+  /** Create investor object from cached data, with untrended chart */
+  public async testInvestor(): Promise<Investor> {
+    const loaded: InvestorExport = await this.refresh();
+    return this.generate(loaded, loaded.flat);
   }
 }

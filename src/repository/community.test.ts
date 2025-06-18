@@ -1,8 +1,8 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { JournaledAsset, HeapBackend } from "📚/storage/mod.ts";
+import { HeapBackend, JournaledAsset } from "📚/storage/mod.ts";
 import { nextDate, today } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { Community } from "📚/repository/community.ts";
+import { Community, Names } from "📚/repository/community.ts";
 import { repo as temprepo } from "📚/repository/testdata.ts";
 
 Deno.test("Initialization", () => {
@@ -38,8 +38,12 @@ Deno.test("Heap repo", async (t) => {
           },
         },
       }),
-      new JournaledAsset(`${name}.stats`, repo).store({ Data: { CustomerId: name } }),
-      new JournaledAsset(`${name}.portfolio`, repo).store({ AggregatedMirrors: [] }),
+      new JournaledAsset(`${name}.stats`, repo).store({
+        Data: { CustomerId: name },
+      }),
+      new JournaledAsset(`${name}.portfolio`, repo).store({
+        AggregatedMirrors: [],
+      }),
     ]);
     const names: Set<string> = await community.namesByDate(date);
     assertEquals(names, new Set([name]));
@@ -60,7 +64,18 @@ Deno.test("Disk repo", async (t) => {
   const community: Community = new Community(temprepo);
 
   await t.step("all names", async () => {
-    const names: Investor[] = await community.all();
-    assertEquals(names.length, 25);
+    const names: Names = await community.allNames();
+    assertEquals(names.size, 25);
+  });
+});
+
+Deno.test("Test Investor", async (t) => {
+  const community: Community = new Community(temprepo);
+
+  await t.step("all names", async () => {
+    const names: Names = await community.samples(1);
+    const name: string = [...names][0];
+    const investor: Investor = await community.testInvestor(name);
+    assertInstanceOf(investor, Investor);
   });
 });
