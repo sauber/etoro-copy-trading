@@ -15,6 +15,11 @@ import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 import { Timing } from "📚/timing/timing.ts";
+import { Iteration } from "@sauber/ml-cli-dashboard";
+
+// ANSI escape codes
+const ESC = "\u001B[";
+const LINEUP = "F";
 
 type Samples = Array<{ input: Parameters; output: number }>;
 type Score = number;
@@ -68,10 +73,14 @@ export class Optimize {
     count: number,
     ranker: Rater,
   ): Optimize {
+    console.log(`Searching for best starting point from ${count} samples...`);
+    console.log("");
+    const progress: Iteration = new Iteration(count, 78);
     let best: [Score, Optimize] = Optimize.sample(exchange, ranker);
     for (let i = 1; i < count; i++) {
       const result: [Score, Optimize] = Optimize.sample(exchange, ranker);
       if (result[0] > best[0]) best = result;
+      console.log(ESC + LINEUP + progress.render(i));
     }
     return best[1];
   }
