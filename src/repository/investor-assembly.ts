@@ -278,7 +278,7 @@ export class InvestorAssembly {
 
   /** Load previously compiled investor, or generate */
   private async compile(): Promise<InvestorExport> {
-    console.log("Compile data for", this.UserName);
+    // console.log("Compile data for", this.UserName);
     const chart: OverlappingCharts = await this.chart();
     const chartend: DateFormat = chart.end;
     const stats: StatsByDate = await this.stats(chart);
@@ -300,7 +300,8 @@ export class InvestorAssembly {
   }
 
   /** Confirm if compiled data is valid */
-  private compiled(data: InvestorExport): boolean {
+  private compiled(data: InvestorExport): true | string {
+    const username: string = data.username;
     // Confirm all required properties are present
     for (
       const prop of [
@@ -313,16 +314,26 @@ export class InvestorAssembly {
         "stats",
       ]
     ) {
-      if (!(prop in data)) return false;
+      if (!(prop in data)) {
+        return `Investor ${username} is missing property ${prop}`;
+      }
     }
     // Confirm mirrors have Value parameter
     for (const [_date, mirrors] of Object.entries(data.mirrors)) {
-      for (const mirror of mirrors) if (!mirror.Value) return false;
+      for (const mirror of mirrors) {
+        if (
+          !mirror.Value
+        ) return `Investor ${username} mirror is missing Value property`;
+      }
     }
 
     // Confirm no negative values in charts
-    for (const value of data.chart) if (value < 0) return false;
-    for (const value of data.flat) if (value < 0) return false;
+    for (const value of data.chart) {
+      if (value < 0) return `Investor ${username} chart has negative value`;
+    }
+    for (const value of data.flat) {
+      if (value < 0) return `Investor ${username} flat has negative value`;
+    }
     return true;
   }
 
@@ -341,7 +352,7 @@ export class InvestorAssembly {
 
     // Confirm asset validates, otherwise erase
     const loaded = await this.compiledAsset.last();
-    if (this.compiled(loaded)) return loaded;
+    if (this.compiled(loaded) === true) return loaded;
     await this.compiledAsset.erase();
   }
 
@@ -355,7 +366,9 @@ export class InvestorAssembly {
     const compiled: InvestorExport = await this.compile();
 
     // Validate compiled data
-    if (!this.compiled(compiled)) {
+    const error: true | string = this.compiled(compiled);
+    if (typeof error === "string") {
+      console.error(error);
       throw new Error(
         `Investor ${this.UserName} data is invalid. Cannot compile.`,
       );
@@ -364,7 +377,7 @@ export class InvestorAssembly {
     // Store compiled data
     const date = await this.end();
     await this.compiledAsset.store(compiled, date);
-    console.warn("Investor data cached for", this.UserName);
+    console.warn("Investor data cached for", this.UserName, "end", date);
     return compiled;
   }
 

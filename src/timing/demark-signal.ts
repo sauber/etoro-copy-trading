@@ -21,6 +21,11 @@ export function demark_signal(
       (v) => v !== undefined && !isNaN(v),
     );
 
+
+  // When there is a continuous streak of higher highs or lower lows,
+  // what is the accumulated change of value?
+  // When exceeding the current maximum streak, expand the maximum accordingly.
+  // When the trend reverses start a new one.
   let previous_streak: number = 0;
   let current_streak: number = 0;
   let max_streak: number = 0;

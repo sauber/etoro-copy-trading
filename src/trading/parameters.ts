@@ -53,8 +53,8 @@ export function makeParameters(value: ParameterValues | [] = []): Parameters {
     new IntegerParameter("buy_threshold", 5, 45, value[2]),
     new IntegerParameter("sell_window", 3, 100, value[3]),
     new IntegerParameter("sell_threshold", 55, 95, value[4]),
-    new Parameter("position_size", 0.01, 0.05, value[5]),
-    new Parameter("stoploss", 0.05, 0.99, value[6]),
-    new IntegerParameter("limit", 1, 5, value[7])
+    new Parameter("position_size", 0.01, 0.20, value[5]),
+    new Parameter("stoploss", 0.05, 0.95, value[6]),
+    new IntegerParameter("limit", 1, 20, value[7])
   ];
 }

@@ -207,7 +207,7 @@ export class Loader {
 
     const lock = this.investor_semaphore(username);
     return await lock.use(async () => {
-      const investor: Investor = await this.assets.community.investor(username);
+      const investor: Investor = await this.assets.community.testInvestor(username);
       this._investors.set(username, investor);
       return investor;
     });
