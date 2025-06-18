@@ -29,6 +29,7 @@ export function demark_signal(
   let previous_streak: number = 0;
   let current_streak: number = 0;
   let max_streak: number = 0;
+  let streak_number: number = 0;
   const signal: Buffer = ema_series.map((_, index) => {
     if (index === 0) return 0;
     const diff = ema_series[index] - ema_series[index - 1];
@@ -47,9 +48,13 @@ export function demark_signal(
       if (Math.abs(current_streak) > max_streak) {
         max_streak = Math.abs(current_streak);
       }
+      streak_number++;
     }
 
     const signal = (-current_streak - previous_streak) / max_streak;
+
+    // No signal until we are in third streak, at least
+    if (streak_number < 2) return 0;
 
     if (signal > 0) {
       const threshold = (50 - buy_threshold) / 50;
