@@ -119,11 +119,7 @@ export class InvestorAssembly {
   }
 
   /** Combination of as few charts as possible from start to end */
-  // private _chart: number[] | null = null;
   public async chart(): Promise<OverlappingCharts> {
-    // Caching
-    // if (this._chart) return this._chart;
-
     // All dates having a chart
     const dates: DateFormat[] = await this.chartAsset.dates();
 
@@ -168,7 +164,6 @@ export class InvestorAssembly {
       const prepend: number[] = sooner.values
         .slice(0, days)
         .map((value) => value * scale);
-      //console.log({date, days, scale, prepend});
       values.splice(0, 0, ...prepend);
 
       // New start
@@ -178,7 +173,6 @@ export class InvestorAssembly {
     // Truncate floating digits to 2
     const price = values.map((v) => +v.toFixed(2));
     // Caching
-    // this._chart = price;
     return {
       start: start,
       end: end,

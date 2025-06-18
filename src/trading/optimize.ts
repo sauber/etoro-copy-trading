@@ -35,9 +35,8 @@ export class Optimize {
   public static import(data: ParameterData, ranker: Rater): Optimize {
     const values: ParameterValues = [
       data.weekday,
-      data.buy_window,
+      data.smoothing,
       data.buy_threshold,
-      data.sell_window,
       data.sell_threshold,
       data.position_size,
       data.stoploss,
@@ -80,13 +79,12 @@ export class Optimize {
     for (let i = 1; i < count; i++) {
       const result: [Score, Optimize] = Optimize.sample(exchange, ranker);
       if (result[0] > best[0]) best = result;
-      console.log(ESC + LINEUP + progress.render(i));
+      console.log(ESC + LINEUP + progress.render(i+1));
     }
     return best[1];
   }
 
   /** Calculate score of simulation */
-  // TODO: Factor in some sort of stability measure
   private score(simulation: Simulation): number {
     const trades: number = simulation.account.trades.length;
     if (trades == 0) return 0;
@@ -135,9 +133,8 @@ export class Optimize {
       parameter.map((p) => [p.name, p.value]),
     );
     const timingModel: Timing = new Timing(
-      settings.buy_window,
+      settings.smoothing,
       settings.buy_threshold,
-      settings.sell_window,
       settings.sell_threshold,
     );
     const timer: Rater = makeTimer(timingModel);

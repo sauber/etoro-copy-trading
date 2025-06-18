@@ -6,18 +6,16 @@ export class Timing {
   private readonly charts = new Map<string, Chart>();
 
   constructor(
-    private readonly buy_window: number,
+    private readonly smoothing: number,
     private readonly buy_threshold: number,
-    private readonly sell_window: number,
     private readonly sell_threshold: number,
-  ) {
-  }
+  ) {}
 
   /** Create signal chart with custom parameters */
   private create_chart(instrument: Instrument): Chart {
     const signal: Buffer = demark_signal(
       instrument.buffer,
-      this.buy_window,
+      this.smoothing,
       this.buy_threshold,
       this.sell_threshold,
     );

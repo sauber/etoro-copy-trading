@@ -1,3 +1,4 @@
+import { Semaphore } from "semaphore";
 import {
   Amount,
   Bar,
@@ -14,6 +15,19 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/mod.ts";
+import { Diary, Investor } from "📚/investor/mod.ts";
+import { sum } from "📚/math/statistics.ts";
+import { InvestorRanking } from "📚/ranking/mod.ts";
+import { Mirror, Names } from "📚/repository/mod.ts";
+import {
+  CascadeStrategy,
+  FutureStrategy,
+  LimitStrategy,
+  RoundingStrategy,
+  StopLossStrategy,
+  TrailingStrategy,
+  UnionStrategy,
+} from "📚/strategy/mod.ts";
 import {
   DateFormat,
   dateFromWeekday,
@@ -22,18 +36,6 @@ import {
   nextDate,
   today,
 } from "📚/time/mod.ts";
-import { Mirror, Names } from "📚/repository/mod.ts";
-import { Diary, Investor } from "📚/investor/mod.ts";
-import { sum } from "📚/math/statistics.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
-import {
-  CascadeStrategy,
-  FutureStrategy,
-  RoundingStrategy,
-  StopLossStrategy,
-  TrailingStrategy,
-  UnionStrategy,
-} from "📚/strategy/mod.ts";
 import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import {
@@ -42,8 +44,6 @@ import {
 } from "📚/trading/parameters.ts";
 import { Policy } from "📚/trading/policy.ts";
 import { makeRanker, makeTimer } from "📚/trading/raters.ts";
-import { Semaphore } from "semaphore";
-import { LimitStrategy } from "📚/strategy/limit-strategy.ts";
 
 const NOW: DateFormat = today();
 
@@ -88,13 +88,10 @@ export class Loader {
       this.cached[key] = value;
       this.cache_loaded[key] ??= 0;
       this.cache_loaded[key]++;
-      // if ( this.cache_loaded[key] > 1 ) console.log("Cache reload", this.cache_loaded[key], key);
     } else this.cache_hit++;
     this.cache_access++;
-    // console.log(`Cache create/access: ${this.cache_loaded[key]}/${this.cache_access}`, key);
 
     return this.cached[key] as T;
-    // });
   }
 
   /** Trading strategy parameters */
@@ -207,7 +204,9 @@ export class Loader {
 
     const lock = this.investor_semaphore(username);
     return await lock.use(async () => {
-      const investor: Investor = await this.assets.community.testInvestor(username);
+      const investor: Investor = await this.assets.community.testInvestor(
+        username,
+      );
       this._investors.set(username, investor);
       return investor;
     });
@@ -348,9 +347,7 @@ export class Loader {
       async () => {
         const instrument = await this.instrument(username);
         const startDate: DateFormat = await this.positionStart(username);
-        // const tradingDate: DateFormat = await this.tradingDate();
         const startBar: Bar = diffDate(startDate, NOW);
-        // const endBar: Bar = diffDate(tradingDate, NOW);
         const endBar: Bar = instrument.end;
         const startPrice: Price = instrument.price(startBar);
         const endPrice: Price = instrument.price(endBar);
@@ -385,20 +382,6 @@ export class Loader {
       this._positions = positions;
       return positions;
     });
-
-    // return this.cache<Positions>(
-    //   "positions",
-    //   async () => {
-    //     const mirrors: Mirrors = await this.mirrors();
-    //     const scale: number = (await this.value()) / 100;
-    //     const positions: Positions = await Promise.all(
-    //       mirrors.map((m: Mirror) =>
-    //         this.position(m.UserName, m.Value * scale)
-    //       ),
-    //     );
-    //     return positions;
-    //   },
-    // );
   }
 
   /** Amount available for investing */
@@ -409,9 +392,6 @@ export class Loader {
     return await this.amount_lock.use(async () => {
       if (this._amount !== null) return this._amount;
 
-      // return this.cache<Amount>(
-      //   "amount",
-      //   async () => {
       const bar: Bar = await this.tradingBar();
       const value: Amount = await this.value();
       const positions: Positions = await this.positions();
@@ -421,8 +401,6 @@ export class Loader {
       const amount: Amount = value - invested;
       this._amount = amount;
       return amount;
-      //   },
-      // );
     });
   }
 

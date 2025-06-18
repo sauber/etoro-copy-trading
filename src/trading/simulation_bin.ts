@@ -20,9 +20,8 @@ const strategy: Strategy = await loader.strategy();
 
 // Exchange
 const instruments: Instruments = await loader.instrumentSamples(400);
-console.log("Instruments loaded:", instruments.length);
+console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
-// TODO: Convert instruments to untrended instruments
 const exchange: Exchange = new Exchange(instruments, spread);
 
 // Simulation

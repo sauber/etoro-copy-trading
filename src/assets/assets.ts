@@ -43,9 +43,8 @@ export class Assets {
     const settings = await this.config.get("trading") as ParameterData ||
       default_parameters;
     const model = new Timing(
-      settings.buy_window,
+      settings.smoothing,
       settings.buy_threshold,
-      settings.sell_window,
       settings.sell_threshold,
     );
     return model;
