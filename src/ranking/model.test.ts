@@ -32,7 +32,7 @@ Deno.test("Generate", () => {
 Deno.test("Export / Import", () => {
   const m = Model.generate(features);
   const e: NetworkData = m.export();
-  assertEquals(e.layers.length, 6);
+  assertEquals(e.layers.length, 12);
   assertEquals(e.inputs, features);
   const i = Model.import(e);
   assertInstanceOf(i, Model);
