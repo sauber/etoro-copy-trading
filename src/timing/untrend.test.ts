@@ -16,8 +16,9 @@ Deno.test("Convert buffer", () => {
     19,
   ]);
   const flatten = detrendExponential(source);
-  assertLess(flatten[0], 10);
-  assertGreater(flatten[4], 10);
-  assertGreater(flatten[5], 10);
-  assertLess(flatten[9], 10);
+  const mid = 14.5; // Average of the source values
+  assertLess(flatten[0], mid);
+  assertGreater(flatten[4], mid);
+  assertGreater(flatten[5], mid);
+  assertLess(flatten[9], mid);
 });
