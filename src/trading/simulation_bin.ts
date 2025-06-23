@@ -53,5 +53,5 @@ console.log(
   "Average invested:",
   pct(account.InvestedRatio),
   "Win Ratio:",
-  pct(account.WinRatio),
+  pct(account.WinRatioTrades),
 );

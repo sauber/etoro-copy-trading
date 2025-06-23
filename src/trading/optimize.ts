@@ -90,7 +90,7 @@ export class Optimize {
     if (trades == 0) return 0;
     if (trades == 0) return 0;
     const profit: number = simulation.account.profit;
-    const win: number = simulation.account.WinRatio;
+    const win: number = simulation.account.WinRatioTrades;
     const frag: number = simulation.account.fragility;
 
     // Normalize costs: 0=no cost, 1=worst cost
