@@ -22,13 +22,8 @@
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
     "@sauber/optimize": "jsr:@sauber/optimize@^0.4.2",
     "@sauber/statistics": "jsr:@sauber/statistics@^0.5.0",
-    "@sauber/table": "jsr:@sauber/table@^0.1.0",
-    "@sauber/trading-account": "jsr:@sauber/trading-account@^0.3.1",
-    "@std/assert": "jsr:@std/assert@^1.0.10",
-    "@std/datetime": "jsr:@std/datetime@^0.225.2",
+    "@std/assert": "jsr:@std/assert@^1.0.13",
     "@std/fmt": "jsr:@std/fmt@^1.0.2",
-    "@std/path": "jsr:@std/path@^1.0.6",
-    "asciichart": "npm:asciichart@^1.5.25",
     "semaphore": "https://deno.land/x/semaphore@v1.1.2/semaphore.ts",
     "📚/": "./src/"
   }
