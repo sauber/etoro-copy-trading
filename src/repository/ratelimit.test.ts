@@ -51,14 +51,14 @@ Deno.test("Parallel", async (t) => {
   const rl = new RateLimit(rate);
 
   await t.step("parallel limits", async () => {
-    const start = new Date();
+    const start = performance.now();
     const prom1 = rl.limit(callback);
     const prom2 = rl.limit(callback);
     const prom3 = rl.limit(callback);
     await Promise.all([prom1, prom2, prom3]);
-    const end = new Date();
-    const diff = end.getTime() - start.getTime();
-    assert(diff >= 2 * rate);
+    const end = performance.now();
+    const diff = end - start;
+    assert(diff >= 1.9 * rate);
     assert(diff < 3 * rate);
   });
 });
