@@ -256,7 +256,7 @@ export class Loader {
       const start: DateFormat = dates[0];
       const recent: DateFormat = dates.findLast((d) => d <= trading) || start;
       const mirrors: Mirrors = journal.before(recent);
-      console.log("Mirrors loaded from date", recent, mirrors.length);
+      // console.log("Mirrors loaded from date", recent, mirrors.length);
       this._mirrors = mirrors;
       return mirrors;
     });
