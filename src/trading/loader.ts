@@ -16,7 +16,7 @@ import {
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
-import { sum } from "📚/math/statistics.ts";
+import { sum } from "@sauber/statistics";
 import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Mirror, Names } from "📚/repository/mod.ts";
 import {

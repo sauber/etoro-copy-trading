@@ -1,7 +1,7 @@
 import { assertNotEquals } from "@std/assert";
 import { Buffer, Price } from "@sauber/backtest";
 import { randn } from "@sauber/statistics";
-import { sharpe_ratio } from "📚/math/sharperatio.ts";
+import { sharpe_ratio } from "./sharperatio.ts";
 
 function makeBuffer(count: number): Buffer {
   const chart = Array<number>(count);
