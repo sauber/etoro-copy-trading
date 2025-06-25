@@ -53,7 +53,6 @@ export class Model {
     this.network.adapt(xs);
     const train = new Train(this.network, xs, ys);
     if (callback) train.callback = callback;
-    console.log("batch_size", batch_size);
     train.batchSize = batch_size;
     train.callbackFrequency = 10;
     const iterations: number = train.run(max_iterations, learning_rate);
