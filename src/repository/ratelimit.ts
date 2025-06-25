@@ -1,8 +1,8 @@
-import { Semaphore } from "semaphore";
+import { createMutex } from "@117/mutex";
 
 export class RateLimit {
   private available: Date = new Date();
-  private semaphore = new Semaphore(1);
+  private mutex = createMutex();
 
   /** rate is number of milliseconds since start of previous call */
   constructor(private readonly rate: number) {}
@@ -13,7 +13,10 @@ export class RateLimit {
   }
 
   public async limit<T>(callback: () => T): Promise<T> {
-    return await this.semaphore.use(async () => {
+    await this.mutex.acquire();
+    let result: T;
+
+    try {
       // How many ms until timeout
       const now: Date = new Date();
       const wait: number = this.available.getTime() - now.getTime();
@@ -24,7 +27,10 @@ export class RateLimit {
       this.available = new Date(next);
 
       // Executing callback and return result
-      return callback();
-    });
+      result = callback();
+    } finally {
+      this.mutex.release();
+    }
+    return result;
   }
 }
