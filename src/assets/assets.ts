@@ -3,7 +3,7 @@ import {
   CachingBackend,
   DiskBackend,
   HeapBackend,
-} from "📚/storage/mod.ts";
+} from "@sauber/journal";
 import { Community } from "📚/repository/mod.ts";
 import { Config } from "📚/config/mod.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";

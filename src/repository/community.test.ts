@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { HeapBackend, JournaledAsset } from "📚/storage/mod.ts";
+import { HeapBackend, JournaledAsset } from "@sauber/journal";
 import { nextDate, today } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import { Community, Names } from "📚/repository/community.ts";

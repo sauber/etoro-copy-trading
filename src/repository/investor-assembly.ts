@@ -1,5 +1,5 @@
 import { type DateFormat, diffDate, today } from "@sauber/dates";
-import { Backend, JournaledAsset } from "📚/storage/mod.ts";
+import { Backend, JournaledAsset } from "@sauber/journal";
 import { Trimmer } from "📚/repository/trimmer.ts";
 import { Bar, Chart as BackTestChart } from "@sauber/backtest";
 import { Diary, Investor } from "📚/investor/mod.ts";

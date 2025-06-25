@@ -1,7 +1,7 @@
 import { assertInstanceOf, assertNotEquals } from "@std/assert";
 import { Bar } from "@sauber/backtest";
 import { InvestorRanking } from "./investor-ranking.ts";
-import { HeapBackend } from "📚/storage/mod.ts";
+import { HeapBackend } from "@sauber/journal";
 import { RankingCache } from "📚/ranking/ranking-cache.ts";
 import { investor } from "📚/ranking/testdata.ts";
 

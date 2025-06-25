@@ -1,5 +1,5 @@
 import { assertInstanceOf, assertNotEquals } from "@std/assert";
-import { HeapBackend } from "📚/storage/mod.ts";
+import { HeapBackend } from "@sauber/journal";
 import { InvestorRanking } from "./investor-ranking.ts";
 import { investor } from "📚/ranking/testdata.ts";
 import { Bar } from "@sauber/backtest";

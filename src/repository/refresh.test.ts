@@ -7,7 +7,7 @@ import {
   investorId,
   testAssets,
 } from "./testdata.ts";
-import { HeapBackend } from "../storage/heap-backend.ts";
+import { HeapBackend } from "@sauber/journal";
 
 Deno.test("Initialize", () => {
   const repo: HeapBackend = new HeapBackend();

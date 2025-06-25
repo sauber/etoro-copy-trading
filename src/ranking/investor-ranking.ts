@@ -1,6 +1,6 @@
 import { Network, NetworkData } from "@sauber/neurons";
 import { Investor } from "📚/investor/mod.ts";
-import { Asset, Backend } from "📚/storage/mod.ts";
+import { Asset, Backend } from "@sauber/journal";
 
 import { Model } from "📚/ranking/model.ts";
 import { Features } from "📚/ranking/features.ts";

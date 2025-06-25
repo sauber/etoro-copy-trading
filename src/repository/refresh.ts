@@ -1,4 +1,4 @@
-import { Backend, JournaledAsset } from "📚/storage/mod.ts";
+import { Backend, JournaledAsset } from "@sauber/journal";
 
 import { Discover } from "./discover.ts";
 import type { DiscoverData } from "./discover.ts";

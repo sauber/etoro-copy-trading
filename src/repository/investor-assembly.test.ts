@@ -15,7 +15,7 @@ import {
 import { repo } from "📚/repository/testdata.ts";
 import type { InvestorId } from "📚/repository/types.ts";
 import type { Buffer, Chart } from "@sauber/backtest";
-import { JournaledAsset } from "📚/storage/mod.ts";
+import { JournaledAsset } from "@sauber/journal";
 
 // Test Data
 const username = "Schnaub123";

@@ -1,4 +1,4 @@
-import { AssetNames, Backend } from "📚/storage/mod.ts";
+import { AssetNames, Backend } from "@sauber/journal";
 import { DateFormat, diffDate, nextDate, today } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import { Bar, Chart } from "@sauber/backtest";
