@@ -1,5 +1,5 @@
 import { FetchURL } from "📚/repository/fetch-url.ts";
-import { RateLimit } from "📚/repository/ratelimit.ts";
+import { RateLimit } from "@sauber/ratelimit";
 import { fetchjson } from "📚/repository/fetch-json.ts";
 
 import type { DiscoverData } from "📚/repository/discover.ts";
