@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { type DateFormat, today } from "📚/time/mod.ts";
+import { type DateFormat, today } from "@sauber/dates";
 import { HeapBackend } from "📚/storage/mod.ts";
 import { JournaledAsset } from "📚/storage/journaled-asset.ts";
 

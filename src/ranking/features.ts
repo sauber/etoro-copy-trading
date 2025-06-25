@@ -1,4 +1,4 @@
-import { barToDate, DateFormat } from "📚/time/mod.ts";
+import { barToDate, type DateFormat } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
 import { input_labels } from "📚/ranking/types.ts";

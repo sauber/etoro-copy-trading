@@ -1,6 +1,5 @@
 import { Investor } from "📚/investor/mod.ts";
-import type { DateFormat } from "📚/time/mod.ts";
-import { diffDate, today } from "📚/time/mod.ts";
+import { type DateFormat, diffDate, today } from "@sauber/dates";
 import { Features } from "📚/ranking/features.ts";
 import { Bar, Chart } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";

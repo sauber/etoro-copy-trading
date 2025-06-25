@@ -4,7 +4,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { DateFormat, nextDate, today, weekdayFromDate } from "📚/time/mod.ts";
+import { type DateFormat, nextDate, today, weekdayFromDate } from "@sauber/dates";
 
 /** Filter close and open orders through strategies as long as thare stil any orders left */
 export class CascadeStrategy implements Strategy {

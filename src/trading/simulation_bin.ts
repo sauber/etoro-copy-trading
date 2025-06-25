@@ -7,7 +7,7 @@ import {
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { barToDate } from "📚/time/mod.ts";
+import { barToDate } from "@sauber/dates";
 
 // Repo
 const path: string = Deno.args[0];

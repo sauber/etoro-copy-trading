@@ -29,13 +29,13 @@ import {
   UnionStrategy,
 } from "📚/strategy/mod.ts";
 import {
-  DateFormat,
+  type DateFormat,
   dateFromWeekday,
   dateToBar,
   diffDate,
   nextDate,
   today,
-} from "📚/time/mod.ts";
+} from "@sauber/dates";
 import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
 import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import {

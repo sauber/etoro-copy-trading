@@ -4,7 +4,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { barToDate } from "📚/time/calendar.ts";
+import { barToDate } from "@sauber/dates";
 
 /** Print debug information */
 export class DebugStrategy implements Strategy {

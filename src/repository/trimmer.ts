@@ -1,4 +1,4 @@
-import { DateFormat, diffDate, nextDate } from "📚/time/mod.ts";
+import { type DateFormat, diffDate, nextDate } from "@sauber/dates";
 
 // Series of numbers
 type Numbers = number[];

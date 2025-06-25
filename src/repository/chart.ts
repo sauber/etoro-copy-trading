@@ -1,5 +1,4 @@
-import type { DateFormat } from "📚/time/mod.ts";
-import { nextDate, today } from "📚/time/mod.ts";
+import { type DateFormat, nextDate, today } from "@sauber/dates";
 
 type ChartEntry = {
   timestamp: string;

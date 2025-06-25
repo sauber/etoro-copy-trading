@@ -6,7 +6,7 @@ import {
 import { community } from "📚/ranking/testdata.ts";
 import { Features } from "📚/ranking/features.ts";
 import type { Input, Output } from "📚/ranking/types.ts";
-import { DateFormat, dateToBar } from "📚/time/mod.ts";
+import { DateFormat, dateToBar } from "@sauber/dates";
 import { Bar } from "@sauber/backtest";
 
 const investor = await community.investor("Robier89");

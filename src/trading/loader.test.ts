@@ -12,7 +12,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { DateFormat, diffDate, today } from "📚/time/mod.ts";
+import { type DateFormat, diffDate, today } from "@sauber/dates";
 import { Mirror } from "📚/repository/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";

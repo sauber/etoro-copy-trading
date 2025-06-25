@@ -1,12 +1,11 @@
 import { AssetNames, Backend } from "📚/storage/mod.ts";
-import { DateFormat, diffDate, nextDate } from "📚/time/mod.ts";
+import { DateFormat, diffDate, nextDate, today } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import { Bar, Chart } from "@sauber/backtest";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import { Config } from "📚/config/config.ts";
 import { Mirror } from "📚/repository/mod.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
-import { today } from "📚/time/calendar.ts";
 
 export type Names = Set<string>;
 export type Investors = Array<Investor>;

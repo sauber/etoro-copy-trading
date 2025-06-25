@@ -1,4 +1,4 @@
-import { type DateFormat, diffDate } from "📚/time/mod.ts";
+import { type DateFormat, diffDate, today } from "@sauber/dates";
 import { Backend, JournaledAsset } from "📚/storage/mod.ts";
 import { Trimmer } from "📚/repository/trimmer.ts";
 import { Bar, Chart as BackTestChart } from "@sauber/backtest";
@@ -15,7 +15,6 @@ import {
   type StatsData,
   type StatsExport,
 } from "📚/repository/stats.ts";
-import { today } from "📚/time/calendar.ts";
 import { detrendExponential } from "../timing/untrend.ts";
 
 type MirrorsByDate = Record<DateFormat, Mirror[]>;

@@ -3,7 +3,7 @@ import {
   assertInstanceOf,
   assertThrows,
 } from "@std/assert";
-import { DateFormat } from "📚/time/mod.ts";
+import type { DateFormat } from "@sauber/dates";
 import { Diary } from "📚/investor/diary.ts";
 
 type TestData = {

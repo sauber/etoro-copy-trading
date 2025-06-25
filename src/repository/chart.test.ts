@@ -2,7 +2,7 @@ import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Chart } from "./chart.ts";
 import type { ChartData } from "./chart.ts";
 import { testAssets } from "./testdata.ts";
-import { DateFormat, diffDate, today } from "📚/time/mod.ts";
+import { type DateFormat, diffDate, today } from "@sauber/dates";
 
 const chartData: ChartData = testAssets.chart;
 const end: DateFormat = "2023-10-13";
