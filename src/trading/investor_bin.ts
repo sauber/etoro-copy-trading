@@ -24,7 +24,7 @@ console.log("Customer ID:", investor.CustomerID || "N/A");
 
 // Display chart
 const chart: Chart = investor.chart;
-console.log("Combined chart:");
+console.log("Simulation chart:");
 console.log(chart.plot());
 
 // Display chart without trend
@@ -36,16 +36,15 @@ console.log(flattened.plot());
 const loader: Loader | null = new Loader(repo);
 const settings: ParameterData = await loader.settings();
 const emaPeriod: number = settings.smoothing;
+console.log(`Smoothing with EMA(${emaPeriod})`);
 const ema = new EMA(emaPeriod);
-const ema_series: Buffer = chart.values.map((v) => ema.nextValue(v))
+const ema_series: Buffer = chart.values.map((v: number) => ema.nextValue(v))
   .filter(
-    (v) => v !== undefined && !isNaN(v),
+    (v: number) => v !== undefined && !isNaN(v),
   );
-  console.log(ema_series);
 const ema_chart: Chart = new Chart(ema_series, chart.end);
 console.log(`Chart with EMA(${emaPeriod}) smoothing applied:`);
 console.log(ema_chart.plot());
-
 
 // Display buy/sell signal strength
 console.log("Signal (<0=sell, >0=buy):");
