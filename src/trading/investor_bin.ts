@@ -5,6 +5,8 @@ import { detrendExponential } from "../timing/untrend.ts";
 import { Timing } from "../timing/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
+import { ParameterData } from "./parameters.ts";
+import { EMA } from "@debut/indicators";
 
 // Display information about an investor
 
@@ -30,9 +32,23 @@ const flattened = new Chart(detrendExponential(chart.values));
 console.log("Detrended chart:");
 console.log(flattened.plot());
 
+// Display chart with EMA filter applied
+const loader: Loader | null = new Loader(repo);
+const settings: ParameterData = await loader.settings();
+const emaPeriod: number = settings.smoothing;
+const ema = new EMA(emaPeriod);
+const ema_series: Buffer = chart.values.map((v) => ema.nextValue(v))
+  .filter(
+    (v) => v !== undefined && !isNaN(v),
+  );
+  console.log(ema_series);
+const ema_chart: Chart = new Chart(ema_series, chart.end);
+console.log(`Chart with EMA(${emaPeriod}) smoothing applied:`);
+console.log(ema_chart.plot());
+
+
 // Display buy/sell signal strength
 console.log("Signal (<0=sell, >0=buy):");
-const loader: Loader = new Loader(repo);
 const timing: Timing = await loader.timingModel();
 const timer: Rater = makeTimer(timing);
 const instrument: Instrument = await loader.instrument(username);
