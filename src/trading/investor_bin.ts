@@ -36,13 +36,13 @@ console.log(flattened.plot());
 const loader: Loader | null = new Loader(repo);
 const settings: ParameterData = await loader.settings();
 const emaPeriod: number = settings.smoothing;
-console.log(`Smoothing with EMA(${emaPeriod})`);
 const ema = new EMA(emaPeriod);
 const ema_series: Buffer = chart.values.map((v: number) => ema.nextValue(v))
   .filter(
     (v: number) => v !== undefined && !isNaN(v),
   );
 const ema_chart: Chart = new Chart(ema_series, chart.end);
+// console.log(`Smoothing with EMA(${emaPeriod}). Orignal length: ${chart.values.length}. New length: ${ema_chart.values.length}`);
 console.log(`Chart with EMA(${emaPeriod}) smoothing applied:`);
 console.log(ema_chart.plot());
 
