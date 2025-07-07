@@ -220,7 +220,37 @@ export class Loader {
 
     const lock = this.investor_semaphore(username);
     await lock.acquire();
+    if (this._investors.has(username)) {
+      const investor: Investor = this._investors.get(username) as Investor;
+      return investor;
+    }
     try {
+      console.log("Loading Real Investor", username);
+      const investor: Investor = await this.assets.community.investor(
+        username,
+      );
+      this._investors.set(username, investor);
+      return investor;
+    } finally {
+      lock.release();
+    }
+  }
+
+  /** Data for an investor with test data */
+  private async testInvestor(username: string): Promise<Investor> {
+    const prev = this._investors.get(username);
+    if (prev) return prev;
+
+    const lock = this.investor_semaphore("test_" + username);
+    await lock.acquire();
+
+    // If investor already loaded, return it
+    if (this._investors.has(username)) {
+      const investor: Investor = this._investors.get(username) as Investor;
+      return investor;
+    }
+    try {
+      console.log("Loading Test Investor", username);
       const investor: Investor = await this.assets.community.testInvestor(
         username,
       );
