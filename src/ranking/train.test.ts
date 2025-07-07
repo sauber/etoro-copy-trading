@@ -11,7 +11,7 @@ Deno.test("Instance", () => {
 });
 
 Deno.test("Run Training", () => {
-  const train = new Train(model, investors, {epochs: 2});
+  const train = new Train(model, investors, {epochs: 2, bar_count: 15});
   const iterations: number = train.run()
   assertGreater(iterations, 1);
 });

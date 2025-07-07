@@ -26,7 +26,7 @@ export function makeRanker(ranking: Ranking): Rater {
 /** Given a Timing model, create callback to evaluate instrument at bar */
 export function makeTimer(timing: Timing): Rater {
   const timer = (instrument: Instrument, bar: Bar) => {
-    if (instrument.active(bar + 2)) {
+    if (instrument.has(bar + 2)) {
       return timing.predict(instrument, bar);
     } else return 0;
   };

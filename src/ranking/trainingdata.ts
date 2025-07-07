@@ -2,7 +2,7 @@ import { Investor } from "📚/investor/mod.ts";
 import type { DateFormat } from "📚/time/mod.ts";
 import { diffDate, today } from "📚/time/mod.ts";
 import { Features } from "📚/ranking/features.ts";
-import { Bar, Chart } from "@sauber/backtest";
+import { Bar, Instrument } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";
 import { DataFrame } from "@sauber/dataframe";
 import { Investors } from "📚/repository/mod.ts";
@@ -44,7 +44,7 @@ export class TrainingData {
     const samples: Samples = [];
     const dates: DateFormat[] = investor.stats.dates;
 
-    const chart: Chart = investor.chart;
+    const chart: Instrument = investor.chart;
     const end: Bar = chart.end;
 
     // Test if each date of where stats are available have

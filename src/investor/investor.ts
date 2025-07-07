@@ -1,4 +1,4 @@
-import { Bar, Chart } from "@sauber/backtest";
+import { Bar, Instrument } from "@sauber/backtest";
 import { Diary } from "📚/investor/diary.ts";
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
 
@@ -7,7 +7,7 @@ export class Investor {
     public readonly UserName: string,
     public readonly CustomerID: number,
     public readonly FullName: string | undefined,
-    public readonly chart: Chart,
+    public readonly chart: Instrument,
     public readonly mirrors: Diary<Mirror[]>,
     public readonly stats: Diary<StatsExport>,
   ) {}

@@ -1,14 +1,25 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import {
-  type Amount,
   Bar,
   CloseOrder,
-  makePosition,
+  createTestInstrument,
+  Instrument,
   Position,
+  PositionID,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { TrailingStrategy } from "📚/strategy/trailing-strategy.ts";
+
+// Generate a position
+function makePosition(amount: number): Position {
+  const instr: Instrument = createTestInstrument();
+  const price = instr.price(instr.start);
+  const units = amount / price;
+  const id: PositionID = Math.floor(Math.random() * 1024 ** 3);
+  const position = new Position(instr, amount, price, units, instr.start, id);
+  return position;
+}
 
 Deno.test("Instance", () => {
   assertInstanceOf(new TrailingStrategy(1), TrailingStrategy);

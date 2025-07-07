@@ -5,7 +5,7 @@ import {
   assertLessOrEqual,
 } from "@std/assert";
 import { Dashboard, Parameters, Output } from "@sauber/optimize";
-import { Bar, Exchange, Instrument, TestInstrument } from "@sauber/backtest";
+import { Bar, Exchange, Instrument, createTestInstrument } from "@sauber/backtest";
 import { Optimize } from "📚/trading/optimize.ts";
 import { Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
@@ -13,7 +13,7 @@ import { ParameterData } from "📚/trading/mod.ts";
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
   return new Exchange(
-    Array.from(Array(count).keys().map(() => new TestInstrument())),
+    Array.from(Array(count).keys().map(() => createTestInstrument())),
   );
 }
 

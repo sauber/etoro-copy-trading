@@ -1,7 +1,7 @@
 import { type DateFormat, diffDate } from "📚/time/mod.ts";
 import { Backend, JournaledAsset } from "📚/storage/mod.ts";
 import { Trimmer } from "📚/repository/trimmer.ts";
-import { Bar, Chart as BackTestChart } from "@sauber/backtest";
+import { Bar, Instrument } from "@sauber/backtest";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
 import { Chart, type ChartData } from "📚/repository/chart.ts";
@@ -371,7 +371,7 @@ export class InvestorAssembly {
   /** Generate investor object from raw data */
   private generate(data: InvestorExport, series: number[]): Investor {
     const end: Bar = diffDate(data.chartend, today());
-    const chart = new BackTestChart(new Float32Array(series), end);
+    const chart = new Instrument(new Float32Array(series), end);
     return new Investor(
       this.UserName,
       data.customerid,
