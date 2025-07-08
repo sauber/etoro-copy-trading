@@ -57,7 +57,7 @@ Deno.test("FullName", async () => {
 Deno.test("Chart", async () => {
   const assembly = new InvestorAssembly(username, repo);
   const investor: Investor = await assembly.investor();
-  const chart: Instrument = investor.chart;
+  const chart: Instrument = investor;
   const series: Buffer = chart.values;
   assertEquals(series.length, 449);
   assertAlmostEquals(series[0], 620.58);
@@ -96,7 +96,7 @@ Deno.test("Test Investor", async () => {
   const assembly = new InvestorAssembly(username, repo);
   const investor: Investor = await assembly.testInvestor();
   assertInstanceOf(investor, Investor);
-  const chart: Instrument = investor.chart;
+  const chart: Instrument = investor;
   const series: Buffer = chart.values;
   assertEquals(series.length, 449);
   assertAlmostEquals(series[0], 3190.99);

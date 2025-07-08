@@ -15,10 +15,10 @@ Deno.test("Instance", ()=>{
 });
 
 Deno.test("Predict at dates", () => {
-  const bar: Bar = investor.chart.end;
+  const bar: Bar = investor.end;
   const cache = new RankingCache(rank);
   const out1 = cache.predict(investor, bar-10);
-  const out2 = cache.predict(investor, investor.chart.start+10);
+  const out2 = cache.predict(investor, investor.start+10);
   assertNotEquals(out1, 0);
   assertNotEquals(out2, 0);
 });

@@ -13,7 +13,7 @@ Deno.test("Initialize", () => {
 
 Deno.test("Predict at date", () => {
   const rank = new InvestorRanking(repo).generate();
-  const end: Bar = investor.chart.end;
+  const end: Bar = investor.end;
   const out = rank.predict(investor, end);
   assertNotEquals(out, 0);
 });

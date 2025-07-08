@@ -4,6 +4,7 @@ import {
   Bar,
   CloseOrder,
   CloseOrders,
+  Instrument,
   Position,
   Price,
   PurchaseOrder,
@@ -14,12 +15,11 @@ import { RankingStrategy } from "../ranking/ranking-strategy.ts";
 import { assets } from "../assets/testdata.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 
 const ranking: InvestorRanking = assets.ranking;
 await ranking.load();
 const investor: Investor = await assets.community.any();
-const instrument = new InvestorInstrument(investor);
+const instrument: Instrument = investor;
 const amount: Amount = 1000;
 const start: Bar = instrument.start;
 const end: Bar = instrument.end;

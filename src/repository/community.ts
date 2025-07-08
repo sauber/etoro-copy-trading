@@ -167,15 +167,15 @@ export class Community {
   }
 
   /** Load a list of investor charts from list of names */
-  private loadCharts(names: Names): Promise<Array<Instrument>> {
-    return Promise.all(
-      Array.from(names).map((name) => this.investor(name).then((i) => i.chart)),
-    );
-  }
+  // private loadCharts(names: Names): Promise<Array<Instrument>> {
+  //   return Promise.all(
+  //     Array.from(names).map((name) => this.investor(name).then((i) => i.chart)),
+  //   );
+  // }
 
   /** Charts for all investors */
-  public async allCharts(): Promise<Array<Instrument>> {
-    const names: Names = await this.allNames();
-    return this.loadCharts(names);
-  }
+  // public async allCharts(): Promise<Array<Instrument>> {
+  //   const names: Names = await this.allNames();
+  //   return this.loadCharts(names);
+  // }
 }

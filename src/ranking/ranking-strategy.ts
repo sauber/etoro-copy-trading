@@ -4,8 +4,8 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { InvestorRanking } from "📚/ranking/mod.ts";
-import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import { PassThroughStrategy } from "📚/strategy/mod.ts";
+import { Investor } from "📚/investor/mod.ts";
 
 /** Lookup ranking of each investor */
 export class RankingStrategy extends PassThroughStrategy {
@@ -44,9 +44,9 @@ export class RankingStrategy extends PassThroughStrategy {
     return context.purchaseorders
       // Add ranking score
       .map((po: PurchaseOrder) => {
-        const instrument = po.instrument as InvestorInstrument;
+        const instrument = po.instrument as Investor;
         const score: number = this.model.predict(
-          instrument.investor,
+          instrument,
           instrument.end,
         );
         return [po, score] as [PurchaseOrder, number];

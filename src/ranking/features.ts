@@ -26,8 +26,8 @@ export class Features {
 
   /** Prediction output parameters */
   public output(bar: Bar): Output {
-    const buffer = this.investor.chart.values;
-    const end = this.investor.chart.end;
+    const buffer = this.investor.values;
+    const end = this.investor.end;
     const start: number = buffer.length - (bar - end) + 1;
     const subchart: Buffer = buffer.slice(start);
     const sr: number = score(subchart);

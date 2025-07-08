@@ -35,7 +35,6 @@ import {
   UnionStrategy,
 } from "📚/strategy/mod.ts";
 import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
-import { InvestorInstrument } from "📚/trading/investor-instrument.ts";
 import {
   default_parameters,
   type ParameterData,
@@ -270,7 +269,7 @@ export class Loader {
       async () => {
         const investor: Investor | null = await this.mirror(username);
         if (investor) {
-          return new InvestorInstrument(investor);
+          return investor;
         } else {
           // Create placeholder instrument
           const start: DateFormat = await this.start();

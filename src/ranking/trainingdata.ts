@@ -44,7 +44,7 @@ export class TrainingData {
     const samples: Samples = [];
     const dates: DateFormat[] = investor.stats.dates;
 
-    const chart: Instrument = investor.chart;
+    const chart: Instrument = investor;
     const end: Bar = chart.end;
 
     // Test if each date of where stats are available have

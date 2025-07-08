@@ -2,19 +2,23 @@ import { Bar, Instrument } from "@sauber/backtest";
 import { Diary } from "📚/investor/diary.ts";
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
 
-export class Investor {
+type Series = Array<number>;
+
+export class Investor extends Instrument {
   constructor(
     public readonly UserName: string,
     public readonly CustomerID: number,
     public readonly FullName: string | undefined,
-    public readonly chart: Instrument,
+    chart: Instrument,
     public readonly mirrors: Diary<Mirror[]>,
     public readonly stats: Diary<StatsExport>,
-  ) {}
+  ) {
+    super(chart.values, chart.end, UserName, FullName);
+  }
 
   /** Confirm if investor has chart data at this bar */
   public isActive(bar: Bar): boolean {
-    return this.chart.has(bar);
+    return this.has(bar);
   }
 
   /** Is Fund? */
