@@ -5,7 +5,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { DateFormat, nextDate, today } from "📚/time/mod.ts";
+import { type DateFormat, nextDate, today } from "@sauber/dates";
 
 /** Only trade on certain day of week */
 export class WeekdayStrategy implements Strategy {

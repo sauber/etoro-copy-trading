@@ -15,6 +15,11 @@ import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 import { Timing } from "📚/timing/timing.ts";
+import { Iteration } from "@sauber/ml-cli-dashboard";
+
+// ANSI escape codes
+const ESC = "\u001B[";
+const LINEUP = "F";
 
 type Samples = Array<{ input: Parameters; output: number }>;
 type Score = number;
@@ -30,9 +35,8 @@ export class Optimize {
   public static import(data: ParameterData, ranker: Rater): Optimize {
     const values: ParameterValues = [
       data.weekday,
-      data.buy_window,
+      data.smoothing,
       data.buy_threshold,
-      data.sell_window,
       data.sell_threshold,
       data.position_size,
       data.stoploss,
@@ -68,22 +72,25 @@ export class Optimize {
     count: number,
     ranker: Rater,
   ): Optimize {
+    console.log(`Searching for best starting point from ${count} samples...`);
+    console.log("");
+    const progress: Iteration = new Iteration(count, 78);
     let best: [Score, Optimize] = Optimize.sample(exchange, ranker);
     for (let i = 1; i < count; i++) {
       const result: [Score, Optimize] = Optimize.sample(exchange, ranker);
       if (result[0] > best[0]) best = result;
+      console.log(ESC + LINEUP + progress.render(i+1));
     }
     return best[1];
   }
 
   /** Calculate score of simulation */
-  // TODO: Factor in some sort of stability measure
   private score(simulation: Simulation): number {
     const trades: number = simulation.account.trades.length;
     if (trades == 0) return 0;
     if (trades == 0) return 0;
     const profit: number = simulation.account.profit;
-    const win: number = simulation.account.WinRatio;
+    const win: number = simulation.account.WinRatioTrades;
     const frag: number = simulation.account.fragility;
 
     // Normalize costs: 0=no cost, 1=worst cost
@@ -126,9 +133,8 @@ export class Optimize {
       parameter.map((p) => [p.name, p.value]),
     );
     const timingModel: Timing = new Timing(
-      settings.buy_window,
+      settings.smoothing,
       settings.buy_threshold,
-      settings.sell_window,
       settings.sell_threshold,
     );
     const timer: Rater = makeTimer(timingModel);

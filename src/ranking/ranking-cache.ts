@@ -1,8 +1,7 @@
 import { InvestorRanking } from "./investor-ranking.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Bar } from "@sauber/backtest";
-import { dateToBar } from "📚/time/calendar.ts";
-import { DateFormat } from "📚/time/mod.ts";
+import { type DateFormat, dateToBar } from "@sauber/dates";
 import { Ranking } from "📚/ranking/mod.ts";
 
 type Range = [Bar, Bar];

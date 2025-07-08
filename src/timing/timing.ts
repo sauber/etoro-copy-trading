@@ -1,18 +1,15 @@
 import { Bar, Series, Instrument } from "@sauber/backtest";
 import { demark_signal } from "📚/timing/demark-signal.ts";
-import { detrendExponential } from "./untrend.ts";
 
 /** Asset buying or sell opportunity from instrument */
 export class Timing {
   private readonly charts = new Map<string, Instrument>();
 
   constructor(
-    private readonly buy_window: number,
+    private readonly smoothing: number,
     private readonly buy_threshold: number,
-    private readonly sell_window: number,
     private readonly sell_threshold: number,
-  ) {
-  }
+  ) {}
 
   /** Create signal chart with custom parameters */
   private create_chart(instrument: Instrument): Instrument {

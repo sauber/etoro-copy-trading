@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { HeapBackend, type JSONValue } from "📚/storage/mod.ts";
+import { HeapBackend, type JSONValue } from "@sauber/journal";
 import { Config } from "📚/config/config.ts";
 
 Deno.test("Get/Set", async (t) => {

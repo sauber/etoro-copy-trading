@@ -3,7 +3,7 @@ import {
   Backend,
   type JSONObject,
   type JSONValue,
-} from "📚/storage/mod.ts";
+} from "@sauber/journal";
 
 export class Config {
   private static readonly assetname = "config";

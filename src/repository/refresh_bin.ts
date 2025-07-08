@@ -1,4 +1,4 @@
-import { DiskBackend } from "📚/storage/disk-backend.ts";
+import { DiskBackend } from "@sauber/journal";
 import { FetchWebBackend } from "📚/repository/fetch-web.ts";
 import { Refresh } from "📚/repository/refresh.ts";
 import { Config } from "📚/config/config.ts";

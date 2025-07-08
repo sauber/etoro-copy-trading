@@ -8,8 +8,7 @@ import {
   PurchaseOrders,
   Symbol,
 } from "@sauber/backtest";
-import { DateFormat } from "📚/time/mod.ts";
-import { barToDate } from "📚/time/calendar.ts";
+import { type DateFormat, barToDate } from "@sauber/dates";
 
 /** Export data examples
 | UserName   | Open       | Days | Gain | Rank | Timing | Score | Value |  Buy | Sell | Action   |

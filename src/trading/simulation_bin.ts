@@ -7,7 +7,7 @@ import {
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { barToDate } from "📚/time/mod.ts";
+import { barToDate } from "@sauber/dates";
 
 // Repo
 const path: string = Deno.args[0];
@@ -20,9 +20,8 @@ const strategy: Strategy = await loader.strategy();
 
 // Exchange
 const instruments: Instruments = await loader.instrumentSamples(400);
-console.log("Instruments loaded:", instruments.length);
+console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
-// TODO: Convert instruments to untrended instruments
 const exchange: Exchange = new Exchange(instruments, spread);
 
 // Simulation
@@ -54,5 +53,5 @@ console.log(
   "Average invested:",
   pct(account.InvestedRatio),
   "Win Ratio:",
-  pct(account.WinRatio),
+  pct(account.WinRatioTrades),
 );

@@ -1,4 +1,4 @@
-import { JournaledAsset, CachingBackend, DiskBackend } from "📚/storage/mod.ts";
+import { JournaledAsset, CachingBackend, DiskBackend } from "@sauber/journal";
 import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
 import type { DiscoverData } from "📚/repository/discover.ts";
 import type { ChartData } from "📚/repository/chart.ts";

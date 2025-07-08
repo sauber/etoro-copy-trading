@@ -1,4 +1,4 @@
-import type { DateFormat } from "../time/mod.ts";
+import type { DateFormat } from "@sauber/dates";
 
 /** Collection of same objects from various dates */
 export class Diary<T> {

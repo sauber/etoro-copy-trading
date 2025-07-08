@@ -28,10 +28,31 @@ export function detrendExponential(input: Series): Series {
   // Step 4: Subtract difference between original and trend from original
   const output: Series = input.map((value, index) => {
     const trendValue = Math.exp(intercept + slope * index);
-    const results = middle + value - trendValue;
-    // console.log(`Index: ${index}, Value: ${value}, Trend Value: ${trendValue}, Results: ${results}`);
-    return results;
+    return value - trendValue;
   });
 
+  // Step 4: Calculate the average base line
+  const base = Math.max(
+    avg(Array.from(input)),
+    -Math.min(...Array.from(adjust)),
+  );
+
+  // Step 5: Lift gap line to center around base line
+  const output: Buffer = adjust.map((value) => base + value);
+
+  // Step 6: Confirm all values are positive
+  for (let i = 0; i < output.length; i++) {
+    if (output[i] < 0) {
+      throw new Error(
+        `Detrended value at index ${i} is negative: ${
+          output[i]
+        }. Input values must be positive. Input=${input[i]}, Adjust=${
+          adjust[i]
+        }, Base=${base}.`,
+      );
+    }
+  }
+
+  // Step 7: Return the adjusted buffer
   return output;
 }

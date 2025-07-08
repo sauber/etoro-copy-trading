@@ -1,7 +1,7 @@
 import { assertNotEquals } from "@std/assert";
 import { Series, Price } from "@sauber/backtest";
 import { randn } from "@sauber/statistics";
-import { sharpe_ratio } from "📚/math/sharperatio.ts";
+import { sharpe_ratio } from "./sharperatio.ts";
 
 function makeSeries(count: number): Series {
   const chart = Array<number>(count);

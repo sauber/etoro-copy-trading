@@ -14,26 +14,27 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/mod.ts";
-import {
-  DateFormat,
-  dateFromWeekday,
-  dateToBar,
-  diffDate,
-  nextDate,
-  today,
-} from "📚/time/mod.ts";
-import { Mirror, Names } from "📚/repository/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
-import { sum } from "📚/math/statistics.ts";
+import { sum } from "@sauber/statistics";
 import { InvestorRanking } from "📚/ranking/mod.ts";
+import { Mirror, Names } from "📚/repository/mod.ts";
 import {
   CascadeStrategy,
   FutureStrategy,
+  LimitStrategy,
   RoundingStrategy,
   StopLossStrategy,
   TrailingStrategy,
   UnionStrategy,
 } from "📚/strategy/mod.ts";
+import {
+  type DateFormat,
+  dateFromWeekday,
+  dateToBar,
+  diffDate,
+  nextDate,
+  today,
+} from "@sauber/dates";
 import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
 import {
   default_parameters,
@@ -41,8 +42,7 @@ import {
 } from "📚/trading/parameters.ts";
 import { Policy } from "📚/trading/policy.ts";
 import { makeRanker, makeTimer } from "📚/trading/raters.ts";
-import { Semaphore } from "semaphore";
-import { LimitStrategy } from "📚/strategy/limit-strategy.ts";
+import { createMutex, Mutex } from "@117/mutex";
 
 const NOW: DateFormat = today();
 
@@ -71,7 +71,7 @@ type Journal = Diary<Mirrors>;
 export class Loader {
   constructor(private readonly assets: Assets) {}
 
-  private readonly semaphores = new Map<string, Semaphore>();
+  private readonly semaphores = new Map<string, Mutex>();
 
   /** Load data from repo and cache */
   private readonly cached: Record<string, CacheValue> = {};
@@ -87,41 +87,46 @@ export class Loader {
       this.cached[key] = value;
       this.cache_loaded[key] ??= 0;
       this.cache_loaded[key]++;
-      // if ( this.cache_loaded[key] > 1 ) console.log("Cache reload", this.cache_loaded[key], key);
     } else this.cache_hit++;
     this.cache_access++;
-    // console.log(`Cache create/access: ${this.cache_loaded[key]}/${this.cache_access}`, key);
 
     return this.cached[key] as T;
-    // });
   }
 
   /** Trading strategy parameters */
-  private readonly settings_lock = new Semaphore(1);
+  private readonly settings_lock = createMutex();
   private _settings: ParameterData | null = null;
   public async settings(): Promise<ParameterData> {
     if (this._settings !== null) return this._settings;
-    return await this.settings_lock.use(async () => {
+    await this.settings_lock.acquire();
+    try {
+      // If settings already loaded, return them
       if (this._settings !== null) return this._settings;
       const settings: ParameterData =
         (await this.assets.config.get("trading")) as ParameterData ||
         default_parameters;
       this._settings = settings;
       return settings;
-    });
+    } finally {
+      this.settings_lock.release();
+    }
   }
 
   /** ID and value of account */
-  private readonly account_lock = new Semaphore(1);
+  private readonly account_lock = createMutex();
   private _account: Mirror | null = null;
   private async account(): Promise<Mirror> {
     if (this._account !== null) return this._account;
-    return await this.account_lock.use(async () => {
+    await this.account_lock.acquire();
+    try {
+      // If account already loaded, return it
       if (this._account !== null) return this._account;
       const account: Mirror = await this.assets.config.get("account") as Mirror;
       this._account = account;
       return account;
-    });
+    } finally {
+      this.account_lock.release();
+    }
   }
 
   /** Username of account */
@@ -153,11 +158,12 @@ export class Loader {
   }
 
   /** Which date of trading weekday is most recent to last date in repo */
-  private readonly tradingDate_lock = new Semaphore(1);
+  private readonly tradingDate_lock = createMutex();
   private _tradingDate: DateFormat | null = null;
   public async tradingDate(): Promise<DateFormat> {
     if (this._tradingDate !== null) return this._tradingDate;
-    return await this.tradingDate_lock.use(async () => {
+    await this.tradingDate_lock.acquire();
+    try {
       if (this._tradingDate !== null) return this._tradingDate;
       console.log("Loading TradingDate");
       const repoEnd: DateFormat | null = await this.end();
@@ -167,7 +173,9 @@ export class Loader {
         : NOW;
       this._tradingDate = tradingDate;
       return tradingDate;
-    });
+    } finally {
+      this.tradingDate_lock.release();
+    }
   }
 
   /** tradingDate as Bar */
@@ -176,24 +184,29 @@ export class Loader {
   }
 
   /** Load list of names */
-  private readonly names_lock = new Semaphore(1);
+  private readonly names_lock = createMutex();
   private _names: Set<string> | null = null;
   private async names(): Promise<Set<string>> {
     if (this._names !== null) return this._names;
-    return await this.names_lock.use(async () => {
+    // Acquire lock to prevent multiple loads
+    // This is needed because names are used in multiple places
+    await this.names_lock.acquire();
+    try {
       if (this._names !== null) return this._names;
       const names: Set<string> = await this.assets.community.allNames();
       this._names = names;
       return names;
-    });
+    } finally {
+      this.names_lock.release();
+    }
   }
 
   /** A semaphore for each investor */
-  private readonly investorSemaphores = new Map<string, Semaphore>();
-  private investor_semaphore(username: string): Semaphore {
+  private readonly investorSemaphores = new Map<string, Mutex>();
+  private investor_semaphore(username: string): Mutex {
     const lock = this.investorSemaphores.get(username);
     if (lock) return lock;
-    const created = new Semaphore(1);
+    const created = createMutex();
     this.investorSemaphores.set(username, created);
     return created;
   }
@@ -205,11 +218,46 @@ export class Loader {
     if (prev) return prev;
 
     const lock = this.investor_semaphore(username);
-    return await lock.use(async () => {
-      const investor: Investor = await this.assets.community.investor(username);
+    await lock.acquire();
+    if (this._investors.has(username)) {
+      const investor: Investor = this._investors.get(username) as Investor;
+      return investor;
+    }
+    try {
+      console.log("Loading Real Investor", username);
+      const investor: Investor = await this.assets.community.investor(
+        username,
+      );
       this._investors.set(username, investor);
       return investor;
-    });
+    } finally {
+      lock.release();
+    }
+  }
+
+  /** Data for an investor with test data */
+  private async testInvestor(username: string): Promise<Investor> {
+    const prev = this._investors.get(username);
+    if (prev) return prev;
+
+    const lock = this.investor_semaphore("test_" + username);
+    await lock.acquire();
+
+    // If investor already loaded, return it
+    if (this._investors.has(username)) {
+      const investor: Investor = this._investors.get(username) as Investor;
+      return investor;
+    }
+    try {
+      console.log("Loading Test Investor", username);
+      const investor: Investor = await this.assets.community.testInvestor(
+        username,
+      );
+      this._investors.set(username, investor);
+      return investor;
+    } finally {
+      lock.release();
+    }
   }
 
   /** Data for an investor or null if missing*/
@@ -238,14 +286,15 @@ export class Loader {
   }
 
   /** List of mirrors most recent to trading date */
-  private readonly mirrors_lock = new Semaphore(1);
+  private readonly mirrors_lock = createMutex();
   private _mirrors: Mirrors | null = null;
   private async mirrors(): Promise<Mirrors> {
     // Mirrors already generated
     if (this._mirrors !== null) return this._mirrors;
 
     // Acquire lock
-    return await this.mirrors_lock.use(async () => {
+    await this.mirrors_lock.acquire();
+    try {
       // Confirm if resolved before lock acquired
       if (this._mirrors !== null) return this._mirrors;
 
@@ -256,10 +305,12 @@ export class Loader {
       const start: DateFormat = dates[0];
       const recent: DateFormat = dates.findLast((d) => d <= trading) || start;
       const mirrors: Mirrors = journal.before(recent);
-      console.log("Mirrors loaded from date", recent, mirrors.length);
+      // console.log("Mirrors loaded from date", recent, mirrors.length);
       this._mirrors = mirrors;
       return mirrors;
-    });
+    } finally {
+      this.mirrors_lock.release();
+    }
   }
 
   /** Convert investor to instrument */
@@ -347,9 +398,7 @@ export class Loader {
       async () => {
         const instrument = await this.instrument(username);
         const startDate: DateFormat = await this.positionStart(username);
-        // const tradingDate: DateFormat = await this.tradingDate();
         const startBar: Bar = diffDate(startDate, NOW);
-        // const endBar: Bar = diffDate(tradingDate, NOW);
         const endBar: Bar = instrument.end;
         const startPrice: Price = instrument.price(startBar);
         const endPrice: Price = instrument.price(endBar);
@@ -369,11 +418,12 @@ export class Loader {
   }
 
   /** All mirrors of account */
-  private readonly positions_lock = new Semaphore(1);
+  private readonly positions_lock = createMutex();
   private _positions: Positions | null = null;
   private async positions(): Promise<Positions> {
     if (this._positions !== null) return this._positions;
-    return await this.positions_lock.use(async () => {
+    await this.positions_lock.acquire();
+    try {
       if (this._positions !== null) return this._positions;
 
       const mirrors: Mirrors = await this.mirrors();
@@ -383,34 +433,20 @@ export class Loader {
       );
       this._positions = positions;
       return positions;
-    });
-
-    // return this.cache<Positions>(
-    //   "positions",
-    //   async () => {
-    //     const mirrors: Mirrors = await this.mirrors();
-    //     const scale: number = (await this.value()) / 100;
-    //     const positions: Positions = await Promise.all(
-    //       mirrors.map((m: Mirror) =>
-    //         this.position(m.UserName, m.Value * scale)
-    //       ),
-    //     );
-    //     return positions;
-    //   },
-    // );
+    } finally {
+      this.positions_lock.release();
+    }
   }
 
   /** Amount available for investing */
-  private readonly amount_lock = new Semaphore(1);
+  private readonly amount_lock = createMutex();
   private _amount: Amount | null = null;
   private async amount(): Promise<Amount> {
     if (this._amount !== null) return this._amount;
-    return await this.amount_lock.use(async () => {
+    await this.amount_lock.acquire();
+    try {
       if (this._amount !== null) return this._amount;
 
-      // return this.cache<Amount>(
-      //   "amount",
-      //   async () => {
       const bar: Bar = await this.tradingBar();
       const value: Amount = await this.value();
       const positions: Positions = await this.positions();
@@ -420,9 +456,9 @@ export class Loader {
       const amount: Amount = value - invested;
       this._amount = amount;
       return amount;
-      //   },
-      // );
-    });
+    } finally {
+      this.amount_lock.release();
+    }
   }
 
   /** Investors available for purchase */

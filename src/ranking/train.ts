@@ -58,21 +58,6 @@ function createDashboard(
   );
 }
 
-// Validation of random inputs
-// function validation(model: Model, data: DataFrame, count: number = 5): void {
-//   console.log("Validation");
-//   const samples = data.shuffle.slice(0, count);
-//   const inputs: Inputs = samples.exclude(["Score"]).records as Inputs;
-//   const outputs: Outputs = samples.values("Score") as Outputs;
-//   // Compare training output with predicted output
-//   inputs.forEach((input: Input, sample: number) => {
-//     console.log("sample");
-//     console.log("  xs:", input);
-//     console.log("  ys:", outputs[sample]);
-//     console.log("  yp:", model.predict(input));
-//   });
-// }
-
 ////////////////////////////////////////////////////////////////////////
 
 /** Train Ranking model with Training data */
