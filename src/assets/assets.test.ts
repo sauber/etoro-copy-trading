@@ -1,6 +1,6 @@
 import { assertInstanceOf } from "@std/assert";
 import { Config } from "📚/config/config.ts";
-import { Community } from "📚/repository/mod.ts";
+import { Community, TestCommunity } from "📚/repository/mod.ts";
 import { Assets } from "./assets.ts";
 import { path } from "./testdata.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
@@ -26,9 +26,14 @@ Deno.test("Community", () => {
   assertInstanceOf(assets.community, Community);
 });
 
+Deno.test("Test Community", () => {
+  const assets = Assets.heap();
+  assertInstanceOf(assets.testcommunity, TestCommunity);
+});
+
 Deno.test("Ranking", () => {
   const assets = Assets.heap();
-  assertInstanceOf((assets.ranking), InvestorRanking);
+  assertInstanceOf(assets.ranking, InvestorRanking);
 });
 
 Deno.test("Timing", async () => {

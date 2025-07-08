@@ -4,7 +4,7 @@ import {
   DiskBackend,
   HeapBackend,
 } from "@sauber/journal";
-import { Community } from "📚/repository/mod.ts";
+import { Community, TestCommunity } from "📚/repository/mod.ts";
 import { Config } from "📚/config/mod.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Timing } from "📚/timing/mod.ts";
@@ -13,11 +13,13 @@ import { default_parameters, type ParameterData } from "📚/trading/mod.ts";
 export class Assets {
   public readonly config: Config;
   public readonly community: Community;
+  public readonly testcommunity: TestCommunity;
   public readonly ranking: InvestorRanking;
 
   constructor(private readonly repo: Backend) {
     this.config = new Config(repo);
     this.community = new Community(repo);
+    this.testcommunity = new TestCommunity(repo);
     this.ranking = new InvestorRanking(repo);
   }
 

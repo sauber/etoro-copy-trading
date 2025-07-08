@@ -4,6 +4,7 @@ import { nextDate, today } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import { Community, Names } from "📚/repository/community.ts";
 import { repo as temprepo } from "📚/repository/testdata.ts";
+import { TestCommunity } from "./test-community.ts";
 
 Deno.test("Initialization", () => {
   const repo = new HeapBackend();
@@ -70,12 +71,12 @@ Deno.test("Disk repo", async (t) => {
 });
 
 Deno.test("Test Investor", async (t) => {
-  const community: Community = new Community(temprepo);
+  const community: Community = new TestCommunity(temprepo);
 
   await t.step("all names", async () => {
     const names: Names = await community.samples(1);
     const name: string = [...names][0];
-    const investor: Investor = await community.testInvestor(name);
+    const investor: Investor = await community.investor(name);
     assertInstanceOf(investor, Investor);
   });
 });

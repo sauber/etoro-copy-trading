@@ -19,7 +19,7 @@ const loader = new Loader(repo);
 const strategy: Strategy = await loader.strategy();
 
 // Exchange
-const instruments: Instruments = await loader.instrumentSamples(400);
+const instruments: Instruments = await loader.instrumentTestSamples(400);
 console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);

@@ -1,7 +1,6 @@
 import {
   Amount,
   Bar,
-  Series,
   CloseOrders,
   Instrument,
   Instruments,
@@ -10,6 +9,7 @@ import {
   Positions,
   Price,
   PurchaseOrders,
+  Series,
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
@@ -224,10 +224,10 @@ export class Loader {
       return investor;
     }
     try {
-      console.log("Loading Real Investor", username);
       const investor: Investor = await this.assets.community.investor(
         username,
       );
+      console.log("Loaded Real Investor", username);
       this._investors.set(username, investor);
       return investor;
     } finally {
@@ -249,10 +249,10 @@ export class Loader {
       return investor;
     }
     try {
-      console.log("Loading Test Investor", username);
-      const investor: Investor = await this.assets.community.testInvestor(
+      const investor: Investor = await this.assets.testcommunity.investor(
         username,
       );
+      console.log("Loaded Test Investor", username);
       this._investors.set(username, investor);
       return investor;
     } finally {
@@ -270,6 +270,18 @@ export class Loader {
       },
     );
   }
+
+  /** Data for an investor or null if missing*/
+  private testMirror(username: string): Promise<Investor | null> {
+    return this.cache<Investor | null>(
+      "mirror_" + username,
+      async () => {
+        const names: Set<string> = await this.names();
+        return names.has(username) ? await this.testInvestor(username) : null;
+      },
+    );
+  }
+
 
   /** Investor data for account */
   private async accountInvestor(): Promise<Investor> {
@@ -336,10 +348,41 @@ export class Loader {
     );
   }
 
+  public testInstrument(username: string): Promise<Instrument> {
+    return this.cache<Instrument>(
+      "instrument_" + username,
+      async () => {
+        const investor: Investor | null = await this.testMirror(username);
+        if (investor) {
+          return investor;
+        } else {
+          // Create placeholder instrument
+          const start: DateFormat = await this.start();
+          const end: DateFormat = await this.end();
+          const series: Series = new Float32Array(diffDate(start, end) + 1)
+            .fill(
+              10000,
+            );
+          const bar: Bar = diffDate(end, NOW);
+          return new Instrument(series, bar, username, "Placeholder");
+        }
+      },
+    );
+  }
+
+
   /** Load instruments by list of investor names */
   private async instruments(names: Names): Promise<Instruments> {
     const instruments: Instruments = await Promise.all(
       Array.from(names).map((name: string) => this.instrument(name)),
+    );
+    return instruments;
+  }
+
+  /** Load instruments by list of investor names */
+  private async testInstruments(names: Names): Promise<Instruments> {
+    const instruments: Instruments = await Promise.all(
+      Array.from(names).map((name: string) => this.testInstrument(name)),
     );
     return instruments;
   }
@@ -361,6 +404,12 @@ export class Loader {
   public async instrumentSamples(count: number): Promise<Instruments> {
     const names: Names = await this.assets.community.samples(count);
     return this.instruments(names);
+  }
+
+  /** Load a number of random Instrument */
+  public async instrumentTestSamples(count: number): Promise<Instruments> {
+    const names: Names = await this.assets.testcommunity.samples(count);
+    return this.testInstruments(names);
   }
 
   /** Start date of position.

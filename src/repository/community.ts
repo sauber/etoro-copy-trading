@@ -14,7 +14,7 @@ type Dates = Array<DateFormat>;
 /** Handle Community I/O requests to local repository */
 export class Community {
   private readonly config: Config;
-  constructor(private readonly repo: Backend) {
+  constructor(protected readonly repo: Backend) {
     this.config = new Config(repo);
   }
 
@@ -114,23 +114,13 @@ export class Community {
     return names;
   }
 
-  private _loaded: Record<string, Investor> = {};
+  protected _loaded: Record<string, Investor> = {};
   /** Create and cache Investor object */
   public async investor(username: string): Promise<Investor> {
     const key = username.toLowerCase();
     if (!(key in this._loaded)) {
       const assembly = new InvestorAssembly(username, this.repo);
       this._loaded[key] = await assembly.investor();
-    }
-    return this._loaded[key];
-  }
-
-  /** Create and cache Investor test object */
-  public async testInvestor(username: string): Promise<Investor> {
-    const key = username.toLowerCase() + "_test";
-    if (!(key in this._loaded)) {
-      const assembly = new InvestorAssembly(username, this.repo);
-      this._loaded[key] = await assembly.testInvestor();
     }
     return this._loaded[key];
   }
