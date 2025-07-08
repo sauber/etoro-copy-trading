@@ -3,11 +3,11 @@ import {
   assertInstanceOf,
   assertLessOrEqual,
 } from "@std/assert";
-import { Buffer, Instrument, Price } from "@sauber/backtest";
+import { Series, Instrument, Price } from "@sauber/backtest";
 import { Timing } from "📚/timing/timing.ts";
 import { randn } from "@sauber/statistics";
 
-function makeBuffer(count: number): Buffer {
+function makeSeries(count: number): Series {
   const chart: number[] = [];
   let price: Price = 1000 * Math.random();
   for (let i = 0; i < count; i++) {
@@ -19,7 +19,7 @@ function makeBuffer(count: number): Buffer {
 }
 
 const instrument = {
-  buffer: makeBuffer(100),
+  series: makeSeries(100),
   end: 0,
   symbol: "TEST",
 } as Instrument;

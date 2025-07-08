@@ -14,7 +14,7 @@ import {
 // import { InvestorId } from "📚/repository/mod.ts";
 import { repo } from "📚/repository/testdata.ts";
 import type { InvestorId } from "📚/repository/types.ts";
-import type { Buffer, Instrument } from "@sauber/backtest";
+import type { Series, Instrument } from "@sauber/backtest";
 import { JournaledAsset } from "📚/storage/mod.ts";
 
 // Test Data
@@ -58,7 +58,7 @@ Deno.test("Chart", async () => {
   const assembly = new InvestorAssembly(username, repo);
   const investor: Investor = await assembly.investor();
   const chart: Instrument = investor;
-  const series: Buffer = chart.values;
+  const series: Series = chart.series;
   assertEquals(series.length, 449);
   assertAlmostEquals(series[0], 620.58);
   assertAlmostEquals(series[series.length - 1], 12565.32);
@@ -97,7 +97,7 @@ Deno.test("Test Investor", async () => {
   const investor: Investor = await assembly.testInvestor();
   assertInstanceOf(investor, Investor);
   const chart: Instrument = investor;
-  const series: Buffer = chart.values;
+  const series: Series = chart.series;
   assertEquals(series.length, 449);
   assertAlmostEquals(series[0], 3190.99);
   assertAlmostEquals(series[series.length - 1], 9943.52);

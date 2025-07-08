@@ -1,7 +1,7 @@
 import {
   Amount,
   Bar,
-  Buffer,
+  Series,
   CloseOrders,
   Instrument,
   Instruments,
@@ -274,7 +274,7 @@ export class Loader {
           // Create placeholder instrument
           const start: DateFormat = await this.start();
           const end: DateFormat = await this.end();
-          const series: Buffer = new Float32Array(diffDate(start, end) + 1)
+          const series: Series = new Float32Array(diffDate(start, end) + 1)
             .fill(
               10000,
             );

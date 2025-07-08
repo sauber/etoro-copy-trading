@@ -1,7 +1,7 @@
 import { AssetNames, Backend } from "📚/storage/mod.ts";
 import { DateFormat, diffDate, nextDate } from "📚/time/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { Bar, Instrument } from "@sauber/backtest";
+import { Bar } from "@sauber/backtest";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import { Config } from "📚/config/config.ts";
 import { Mirror } from "📚/repository/mod.ts";
@@ -120,7 +120,6 @@ export class Community {
   public async investor(username: string): Promise<Investor> {
     const key = username.toLowerCase();
     if (!(key in this._loaded)) {
-
       const assembly = new InvestorAssembly(username, this.repo);
       this._loaded[key] = await assembly.investor();
     }
@@ -165,17 +164,4 @@ export class Community {
     const names: Names = await this.namesByDate(chartend);
     return this.load(names);
   }
-
-  /** Load a list of investor charts from list of names */
-  // private loadCharts(names: Names): Promise<Array<Instrument>> {
-  //   return Promise.all(
-  //     Array.from(names).map((name) => this.investor(name).then((i) => i.chart)),
-  //   );
-  // }
-
-  /** Charts for all investors */
-  // public async allCharts(): Promise<Array<Instrument>> {
-  //   const names: Names = await this.allNames();
-  //   return this.loadCharts(names);
-  // }
 }

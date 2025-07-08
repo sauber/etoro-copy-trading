@@ -1,4 +1,4 @@
-import { Bar, Buffer, Chart, Instrument } from "@sauber/backtest";
+import { Bar, Series, Instrument } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { detrendExponential } from "../timing/untrend.ts";
@@ -21,12 +21,11 @@ console.log("Name:", investor.FullName || "N/A");
 console.log("Customer ID:", investor.CustomerID || "N/A");
 
 // Display chart
-const chart: Chart = investor.chart;
 console.log("Combined chart:");
-console.log(chart.plot());
+console.log(investor.plot());
 
 // Display chart without trend
-const flattened = new Chart(detrendExponential(chart.values));
+const flattened = new Instrument(detrendExponential(investor.series));
 console.log("Detrended chart:");
 console.log(flattened.plot());
 
@@ -36,12 +35,12 @@ const loader: Loader = new Loader(repo);
 const timing: Timing = await loader.timingModel();
 const timer: Rater = makeTimer(timing);
 const instrument: Instrument = await loader.instrument(username);
-const start: Bar = chart.start;
-const end: Bar = chart.end;
+const start: Bar = investor.start;
+const end: Bar = investor.end;
 const signals: Array<number> = [];
 for (let bar: Bar = start; bar >= end; bar--) {
   signals.push(timer(instrument, bar));
 }
-const signalbuffer: Buffer = Float32Array.from(signals);
-const signalchart: Chart = new Chart(signalbuffer, end);
+const signalseries: Series = Float32Array.from(signals);
+const signalchart = new Instrument(signalseries, end);
 console.log(signalchart.plot());

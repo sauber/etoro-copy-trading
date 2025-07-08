@@ -1,14 +1,14 @@
-import { Buffer } from "@sauber/backtest";
+import { Series } from "@sauber/backtest";
 import { avg } from "@sauber/statistics";
 
 /**
- * Removes exponential trend from a buffer of values.
- * @param input Buffer of positive numbers.
- * @returns Buffer with exponential trend removed.
+ * Removes exponential trend from a series of values.
+ * @param input Series of positive numbers.
+ * @returns Series with exponential trend removed.
  */
-export function detrendExponential(input: Buffer): Buffer {
+export function detrendExponential(input: Series): Series {
   // Step 1: Take log of all values
-  const logVals: Buffer = input.map((v) => Math.log(v));
+  const logVals: Series = input.map((v) => Math.log(v));
 
   // Step 2: Linear regression on logVals
   const n = logVals.length;
@@ -26,7 +26,7 @@ export function detrendExponential(input: Buffer): Buffer {
   const middle = avg(Array.from(input));
 
   // Step 4: Subtract difference between original and trend from original
-  const output: Buffer = input.map((value, index) => {
+  const output: Series = input.map((value, index) => {
     const trendValue = Math.exp(intercept + slope * index);
     const results = middle + value - trendValue;
     // console.log(`Index: ${index}, Value: ${value}, Trend Value: ${trendValue}, Results: ${results}`);

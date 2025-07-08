@@ -1,8 +1,8 @@
 import { EMA } from "@debut/indicators";
-import { Buffer } from "@sauber/backtest";
+import { Series } from "@sauber/backtest";
 
 /**
- * Create a buffer of signals in range [-1,1] based on demark style indicator.
+ * Create a series of signals in range [-1,1] based on demark style indicator.
  * Take ema of prices.
  * Find longest continues streak of higher highs and lower lows.
  * Calculate previous continuous streak as a ratio of longest streak.
@@ -10,13 +10,13 @@ import { Buffer } from "@sauber/backtest";
  * Signal strength is ratio of previous streak to largest streak divided by number of bars since previous streak.
  */
 export function demark_signal(
-  source: Buffer,
+  source: Series,
   window: number,
   buy_threshold: number,
   sell_threshold: number,
-): Buffer {
+): Series {
   const ema = new EMA(window);
-  const ema_series: Buffer = source.map((v) => ema.nextValue(v))
+  const ema_series: Series = source.map((v) => ema.nextValue(v))
     .filter(
       (v) => v !== undefined && !isNaN(v),
     );
@@ -24,7 +24,7 @@ export function demark_signal(
   let previous_streak: number = 0;
   let current_streak: number = 0;
   let max_streak: number = 0;
-  const signal: Buffer = ema_series.map((_, index) => {
+  const signal: Series = ema_series.map((_, index) => {
     if (index === 0) return 0;
     const diff = ema_series[index] - ema_series[index - 1];
     // Continue same trend

@@ -1,15 +1,15 @@
 import { RSI } from "@debut/indicators";
 import { assert } from "@std/assert";
-import { Buffer } from "@sauber/backtest";
+import { Series } from "@sauber/backtest";
 
-/** Create a buffer of signals in range [-1,1] based on RSI indicator of value chart */
+/** Create a series of signals in range [-1,1] based on RSI indicator of value chart */
 export function rsi_signal(
-  source: Buffer,
+  source: Series,
   buy_window: number,
   buy_threshold: number,
   sell_window: number,
   sell_threshold: number,
-): Buffer {
+): Series {
   assert(buy_window > 1, `buy_window out of range (1,): ${buy_window}`);
   assert(
     buy_threshold > 0 && buy_threshold <= 50,
@@ -22,17 +22,17 @@ export function rsi_signal(
   );
 
   const buy_indicator = new RSI(buy_window);
-  const buy_series: Buffer = source.map((v) => buy_indicator.nextValue(v))
+  const buy_series: Series = source.map((v) => buy_indicator.nextValue(v))
     .filter(
       (v) => v !== undefined && !isNaN(v),
     );
   const sell_indicator = new RSI(sell_window);
-  const sell_series: Buffer = source.map((v) => sell_indicator.nextValue(v))
+  const sell_series: Series = source.map((v) => sell_indicator.nextValue(v))
     .filter(
       (v) => v !== undefined && !isNaN(v),
     );
 
-  const signal: Buffer = buy_series.map((buy_value, index) => {
+  const signal: Series = buy_series.map((buy_value, index) => {
     if (buy_value < buy_threshold) {
       return (buy_threshold - buy_value) / buy_threshold;
     }

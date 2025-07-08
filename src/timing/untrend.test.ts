@@ -1,11 +1,11 @@
-import { Buffer } from "@sauber/backtest";
+import { Series } from "@sauber/backtest";
 import { assertGreater, assertLess } from "@std/assert";
 import { avg } from "@sauber/statistics";
 import { detrendExponential } from "📚/timing/untrend.ts";
 
-Deno.test("Convert buffer", () => {
+Deno.test("Convert series", () => {
   const s = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
-  const flatten: Buffer = detrendExponential(new Float32Array(s));
+  const flatten: Series = detrendExponential(new Float32Array(s));
   const mid: number = avg(s);
   assertLess(flatten[0], mid);
   assertGreater(flatten[4], mid);
