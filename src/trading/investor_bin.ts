@@ -1,4 +1,4 @@
-import { Bar, Series, Instrument, Instruments } from "@sauber/backtest";
+import { Bar, Series, Instrument } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { detrendExponential } from "../timing/untrend.ts";
@@ -23,9 +23,8 @@ console.log("Name:", investor.FullName || "N/A");
 console.log("Customer ID:", investor.CustomerID || "N/A");
 
 // Display chart
-const chart: Chart = investor;
 console.log("Simulation chart:");
-console.log(chart.plot());
+console.log(investor.plot());
 
 // Display chart without trend
 const flattened = new Instrument(detrendExponential(investor.series));
@@ -37,12 +36,12 @@ const loader: Loader | null = new Loader(repo);
 const settings: ParameterData = await loader.settings();
 const emaPeriod: number = settings.smoothing;
 const ema = new EMA(emaPeriod);
-const ema_series: Series = chart.values.map((v: number) => ema.nextValue(v))
+const ema_series: Series = investor.series.map((v: number) => ema.nextValue(v))
   .filter(
     (v: number) => v !== undefined && !isNaN(v),
   );
-const ema_chart: Instrument = new Instrument(ema_series, chart.end);
-// console.log(`Smoothing with EMA(${emaPeriod}). Orignal length: ${chart.values.length}. New length: ${ema_chart.values.length}`);
+const ema_chart: Instrument = new Instrument(ema_series, investor.end);
+// console.log(`Smoothing with EMA(${emaPeriod}). Orignal length: ${investor.series.length}. New length: ${ema_chart.values.length}`);
 console.log(`Chart with EMA(${emaPeriod}) smoothing applied:`);
 console.log(ema_chart.plot());
 

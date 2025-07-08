@@ -1,5 +1,6 @@
 import { Bar, Series, Instrument } from "@sauber/backtest";
 import { demark_signal } from "📚/timing/demark-signal.ts";
+import { detrendExponential } from "./untrend.ts";
 
 /** Asset buying or sell opportunity from instrument */
 export class Timing {
@@ -17,7 +18,7 @@ export class Timing {
     const flattened: Series = detrendExponential(instrument.series);
     const signal: Series = demark_signal(
       flattened,
-      this.buy_window,
+      this.smoothing,
       this.buy_threshold,
       this.sell_threshold,
     );

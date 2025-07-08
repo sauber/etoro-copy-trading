@@ -23,10 +23,10 @@ export function detrendExponential(input: Series): Series {
   const intercept = (sumY - slope * sumX) / n;
 
   // Step 3: Calculate the average line
-  const middle = avg(Array.from(input));
+  // const middle = avg(Array.from(input));
 
   // Step 4: Subtract difference between original and trend from original
-  const output: Series = input.map((value, index) => {
+  const adjust: Series = input.map((value, index) => {
     const trendValue = Math.exp(intercept + slope * index);
     return value - trendValue;
   });
@@ -38,7 +38,7 @@ export function detrendExponential(input: Series): Series {
   );
 
   // Step 5: Lift gap line to center around base line
-  const output: Buffer = adjust.map((value) => base + value);
+  const output: Series = adjust.map((value) => base + value);
 
   // Step 6: Confirm all values are positive
   for (let i = 0; i < output.length; i++) {
