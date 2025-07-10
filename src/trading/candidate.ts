@@ -8,7 +8,7 @@ import {
   PurchaseOrders,
   Symbol,
 } from "@sauber/backtest";
-import { type DateFormat, barToDate } from "@sauber/dates";
+import { barToDate, type DateFormat } from "@sauber/dates";
 
 /** Export data examples
 | UserName   | Open       | Days | Gain | Rank | Timing | Score | Value |  Buy | Sell | Action   |
@@ -210,7 +210,12 @@ export class Candidate {
       }
     } // Open new Candidate
     else if (this.rank > 0 && this.timing > 0) {
-      const amount: { Score: number; Target:Amount, Buy: Amount; Action: "Open" } = {
+      const amount: {
+        Score: number;
+        Target: Amount;
+        Buy: Amount;
+        Action: "Open";
+      } = {
         Score: this.score,
         Target: this.target,
         Buy: this.BuyAmount,

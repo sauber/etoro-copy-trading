@@ -93,6 +93,10 @@ export class Classifier {
       .filter((c: Candidate) => c.isSell)
       .map((c: Candidate) => c.positions)
       .flat()
-      .map((position: Position) => ({ position, confidence: 1, reason: "Close" }));
+      .map((position: Position) => ({
+        position,
+        confidence: 1,
+        reason: "Close",
+      }));
   }
 }

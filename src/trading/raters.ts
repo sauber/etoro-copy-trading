@@ -15,9 +15,9 @@ export type Rater = (instrument: Instrument, bar: Bar) => number;
 /** Given a Ranking model, create callback to evaluate instrument at bar */
 export function makeRanker(ranking: Ranking): Rater {
   const ranker = (instrument: Instrument, bar: Bar) =>
-    ("investor" in instrument)
+    ("stats" in instrument)
       // Ensure value is in range [-1,1]
-      ? Math.tanh(ranking.predict(instrument.investor as Investor, bar))
+      ? Math.tanh(ranking.predict(instrument as Investor, bar))
       // No ranking of non-investor instruments
       : 0;
   return ranker;
