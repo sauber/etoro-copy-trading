@@ -1,12 +1,13 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
-import { Optimize } from "📚/trading/optimize.ts";
+import { Optimize } from "./optimize.ts";
 import { Assets } from "📚/assets/mod.ts";
-import { Loader } from "📚/trading/loader.ts";
-import { makeRanker, Rater } from "📚/trading/raters.ts";
+import { Loader } from "./loader.ts";
+import { makeRanker, Rater } from "./raters.ts";
 import { InvestorRanking, Ranking } from "📚/ranking/mod.ts";
-import { ParameterData } from "📚/trading/parameters.ts";
+import { ParameterData } from "./parameters.ts";
 import { RankingCache } from "📚/ranking/ranking-cache.ts";
+import { TestLoader } from "./test-loader.ts";
 
 ////////////////////////////////////////////////////////////////////////
 /// Main
@@ -18,7 +19,7 @@ const modelAssetName = "trading";
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo: Assets = Assets.disk(path);
-const loader: Loader = new Loader(repo);
+const loader: Loader = new TestLoader(repo);
 
 // Ranking Model
 const ranking: InvestorRanking = await loader.rankingModel();

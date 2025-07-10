@@ -6,20 +6,20 @@ import {
   Strategy,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
-import { Loader } from "📚/trading/loader.ts";
+import { TestLoader } from "📚/trading/test-loader.ts";
 import { barToDate } from "@sauber/dates";
 
 // Repo
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
-const loader = new Loader(repo);
+const loader = new TestLoader(repo);
 
 // Strategy
 const strategy: Strategy = await loader.strategy();
 
 // Exchange
-const instruments: Instruments = await loader.instrumentTestSamples(400);
+const instruments: Instruments = await loader.instrumentSamples(40);
 console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);

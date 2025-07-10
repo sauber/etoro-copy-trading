@@ -69,7 +69,7 @@ type Journal = Diary<Mirrors>;
 
 /** Load data to generate Strategy context */
 export class Loader {
-  constructor(private readonly assets: Assets) {}
+  constructor(protected readonly assets: Assets) {}
 
   private readonly semaphores = new Map<string, Mutex>();
 
@@ -202,8 +202,8 @@ export class Loader {
   }
 
   /** A semaphore for each investor */
-  private readonly investorSemaphores = new Map<string, Mutex>();
-  private investor_semaphore(username: string): Mutex {
+  protected readonly investorSemaphores = new Map<string, Mutex>();
+  protected investor_semaphore(username: string): Mutex {
     const lock = this.investorSemaphores.get(username);
     if (lock) return lock;
     const created = createMutex();
@@ -212,8 +212,8 @@ export class Loader {
   }
 
   /** Data for an investor */
-  private readonly _investors = new Map<string, Investor>();
-  private async investor(username: string): Promise<Investor> {
+  protected readonly _investors = new Map<string, Investor>();
+  protected async investor(username: string): Promise<Investor> {
     const prev = this._investors.get(username);
     if (prev) return prev;
 
@@ -235,31 +235,6 @@ export class Loader {
     }
   }
 
-  /** Data for an investor with test data */
-  private async testInvestor(username: string): Promise<Investor> {
-    const prev = this._investors.get(username);
-    if (prev) return prev;
-
-    const lock = this.investor_semaphore("test_" + username);
-    await lock.acquire();
-
-    // If investor already loaded, return it
-    if (this._investors.has(username)) {
-      const investor: Investor = this._investors.get(username) as Investor;
-      return investor;
-    }
-    try {
-      const investor: Investor = await this.assets.testcommunity.investor(
-        username,
-      );
-      console.log("Loaded Test Investor", username);
-      this._investors.set(username, investor);
-      return investor;
-    } finally {
-      lock.release();
-    }
-  }
-
   /** Data for an investor or null if missing*/
   private mirror(username: string): Promise<Investor | null> {
     return this.cache<Investor | null>(
@@ -270,18 +245,6 @@ export class Loader {
       },
     );
   }
-
-  /** Data for an investor or null if missing*/
-  private testMirror(username: string): Promise<Investor | null> {
-    return this.cache<Investor | null>(
-      "mirror_" + username,
-      async () => {
-        const names: Set<string> = await this.names();
-        return names.has(username) ? await this.testInvestor(username) : null;
-      },
-    );
-  }
-
 
   /** Investor data for account */
   private async accountInvestor(): Promise<Investor> {
@@ -348,41 +311,10 @@ export class Loader {
     );
   }
 
-  public testInstrument(username: string): Promise<Instrument> {
-    return this.cache<Instrument>(
-      "instrument_" + username,
-      async () => {
-        const investor: Investor | null = await this.testMirror(username);
-        if (investor) {
-          return investor;
-        } else {
-          // Create placeholder instrument
-          const start: DateFormat = await this.start();
-          const end: DateFormat = await this.end();
-          const series: Series = new Float32Array(diffDate(start, end) + 1)
-            .fill(
-              10000,
-            );
-          const bar: Bar = diffDate(end, NOW);
-          return new Instrument(series, bar, username, "Placeholder");
-        }
-      },
-    );
-  }
-
-
   /** Load instruments by list of investor names */
   private async instruments(names: Names): Promise<Instruments> {
     const instruments: Instruments = await Promise.all(
       Array.from(names).map((name: string) => this.instrument(name)),
-    );
-    return instruments;
-  }
-
-  /** Load instruments by list of investor names */
-  private async testInstruments(names: Names): Promise<Instruments> {
-    const instruments: Instruments = await Promise.all(
-      Array.from(names).map((name: string) => this.testInstrument(name)),
     );
     return instruments;
   }
@@ -404,12 +336,6 @@ export class Loader {
   public async instrumentSamples(count: number): Promise<Instruments> {
     const names: Names = await this.assets.community.samples(count);
     return this.instruments(names);
-  }
-
-  /** Load a number of random Instrument */
-  public async instrumentTestSamples(count: number): Promise<Instruments> {
-    const names: Names = await this.assets.testcommunity.samples(count);
-    return this.testInstruments(names);
   }
 
   /** Start date of position.
