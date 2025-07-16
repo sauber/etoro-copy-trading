@@ -10,14 +10,13 @@ type KD = {
 };
 
 /** Generate signal based on Stochastic Oscillator indicator */
-export class Stochastic extends Signal {
+export class Stochastic implements Signal {
   constructor(
     private readonly period: number = 14,
     private readonly smoothing: number = 3,
     private readonly buy_level: number = 20,
     private readonly sell_level: number = 80,
   ) {
-    super();
   }
 
   /** All tunable parameters for this indicator */
@@ -29,6 +28,8 @@ export class Stochastic extends Signal {
       new IntegerParameter("sell", 51, 99, 80),
     ];
   }
+
+  public parameters: Parameters = Stochastic.parameters();
 
   /** Convert series of values to series of signals */
   public get(series: Series): Series {

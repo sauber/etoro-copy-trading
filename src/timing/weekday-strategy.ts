@@ -17,10 +17,12 @@ export class WeekdayStrategy implements Strategy {
     return this.weekday === weekday;
   }
 
+  /** Only close on specific day of week */
   public close(context: StrategyContext): CloseOrders {
     return this.trading(context.bar) ? context.closeorders : [];
   }
 
+  /** Only open on specific day of week */
   public open(context: StrategyContext): PurchaseOrders {
     return this.trading(context.bar) ? context.purchaseorders : [];
   }
