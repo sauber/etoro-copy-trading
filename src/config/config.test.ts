@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { HeapBackend, type JSONValue } from "@sauber/journal";
+import { HeapBackend, type StorableValue } from "@sauber/journal";
 import { Config } from "📚/config/config.ts";
 
 Deno.test("Get/Set", async (t) => {
@@ -8,13 +8,13 @@ Deno.test("Get/Set", async (t) => {
   assertInstanceOf(config, Config);
 
   await t.step("get unknown value", async () => {
-    const value: JSONValue = await config.get("foo");
+    const value: StorableValue = await config.get("foo");
     assertEquals(value, null);
   });
 
   await t.step("set and get value", async () => {
     await config.set("foo", "bar");
-    const value: JSONValue = await config.get("foo");
+    const value: StorableValue = await config.get("foo");
     assertEquals(value, "bar");
   });
 });
@@ -25,7 +25,7 @@ Deno.test("Defaults", async (t) => {
   const configWithDefaults = new Config(repo, { standard: "normal" });
 
   await t.step("set default", async () => {
-    const value: JSONValue = await configWithDefaults.get("standard");
+    const value: StorableValue = await configWithDefaults.get("standard");
     assertEquals(value, "normal");
   });
 });

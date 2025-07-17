@@ -20,7 +20,7 @@
     "@sauber/backtest": "jsr:@sauber/backtest@^2.2.0",
     "@sauber/dataframe": "jsr:@sauber/dataframe@^0.6.1",
     "@sauber/dates": "jsr:@sauber/dates@^0.1.2",
-    "@sauber/journal": "jsr:@sauber/journal@^0.1.2",
+    "@sauber/journal": "jsr:@sauber/journal@^1.0.0",
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.6.1",
     "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
     "@sauber/optimize": "jsr:@sauber/optimize@^0.4.2",
