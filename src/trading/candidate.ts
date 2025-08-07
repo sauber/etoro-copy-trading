@@ -13,11 +13,11 @@ import { barToDate, type DateFormat } from "@sauber/dates";
 /** Export data examples
 | UserName   | Open       | Days | Gain | Rank | Timing | Score | Value |  Buy | Sell | Action   |
 |=======================================|=======================|=====================|==========|
-| MilanIvann | 2025-01-01 |   10 |  10% |  0.7 |    0.7 |   0.5 |  4000 | 3000 |      | Increase |
-| SanjaySoni |            |      |      |  1.0 |    1.0 |   1.0 |       | 6000 |      | Open     |
-| Robier     |            |      |      | -0.6 |    0.3 |  -0.2 |       |      |      | Ignore   |
-| SCoudreau  | 2024-12-01 |   30 |  20% | -0.7 |    0.7 |  -0.5 |  3000 |      |      | Keep     |
-| AndrewJW   | 2024-11-01 |   40 |  30% |  0.4 |   -0.7 |  -0.7 |  5000 |      | 5000 | Close    |
+| MilanIvann | 2025-01-01 |   10 |  10% |  0.7 |   -0.7 |   0.5 |  4000 | 3000 |      | Increase |
+| SanjaySoni |            |      |      |  1.0 |   -1.0 |   1.0 |       | 6000 |      | Open     |
+| Robier     |            |      |      | -0.6 |   -0.3 |  -0.2 |       |      |      | Ignore   |
+| SCoudreau  | 2024-12-01 |   30 |  20% | -0.7 |   -0.7 |  -0.5 |  3000 |      |      | Keep     |
+| AndrewJW   | 2024-11-01 |   40 |  30% |  0.4 |    0.7 |  -0.7 |  5000 |      | 5000 | Close    |
 */
 
 type Rank = number;
@@ -71,7 +71,7 @@ export type CandidateExport =
 
 /** Combination of purchase potential and existing open positions */
 export class Candidate {
-  /** List of already open positions */
+  /** List of already open positions for this instrument */
   public readonly positions: Positions = [];
 
   /** List of purchase orders available */
@@ -90,6 +90,7 @@ export class Candidate {
   public addPosition(position: Position): void {
     this.positions.push(position);
   }
+
   /** Add a PurchaseOrder to list */
   public addPurchaseOrder(purchaseorder: PurchaseOrder): void {
     this.purchaseorders.push(purchaseorder);
@@ -151,17 +152,19 @@ export class Candidate {
     return profitRatio;
   }
 
+  /** Amount when sell, which is a complete sell of whole value */
   public get sell(): Amount {
     return this.value;
   }
 
+  /** Buying score = Rank * Timing */
   public get score(): number {
-    return Math.max(this.rank, 0) * Math.max(this.timing, 0);
+    return Math.max(this.rank, 0) * Math.max(-this.timing, 0);
   }
 
   /** When open or increase, by which amount */
   public get BuyAmount(): Amount {
-    return Math.min(this.target * this.timing, this.target - this.value);
+    return Math.min(this.target * -this.timing, this.target - this.value);
   }
 
   public export(): CandidateExport {
@@ -180,7 +183,7 @@ export class Candidate {
       });
 
       // Opportunity to sell
-      if (this.timing < 0) {
+      if (this.timing > 0) {
         const amount: { Sell: Amount; Action: "Close" } = {
           Sell: this.value,
           Action: "Close",
@@ -188,7 +191,7 @@ export class Candidate {
         const sell: CloseCandidate = Object.assign({}, open, amount);
         return sell;
       } // Opportunity to buy more
-      else if (this.rank > 0 && this.timing > 0 && this.value < this.target) {
+      else if (this.rank > 0 && this.timing < 0 && this.value < this.target) {
         const amount: {
           Score: number;
           Target: number;
@@ -209,7 +212,7 @@ export class Candidate {
         return keep;
       }
     } // Open new Candidate
-    else if (this.rank > 0 && this.timing > 0) {
+    else if (this.rank > 0 && this.timing < 0) {
       const amount: {
         Score: number;
         Target: Amount;
@@ -230,13 +233,13 @@ export class Candidate {
 
   /** Candidate has positions and sell opportunity exists */
   public get isSell(): boolean {
-    return this.start != undefined && this.timing < 0;
+    return this.start != undefined && this.timing > 0;
   }
 
   /** Candidate is underinvested and buy opportunity exists */
   public get isBuy(): boolean {
     if (
-      this.purchaseorders.length > 0 && this.rank > 0 && this.timing > 0 &&
+      this.purchaseorders.length > 0 && this.rank > 0 && this.timing < 0 &&
       this.gap > 0
     ) return true;
     return false;

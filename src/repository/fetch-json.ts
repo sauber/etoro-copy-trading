@@ -1,6 +1,6 @@
-import { JSONObject } from "@sauber/journal";
+import { StorableObject } from "@sauber/journal";
 
-export function fetchjson(url: string): Promise<JSONObject> {
+export function fetchjson(url: string): Promise<StorableObject> {
   console.log(url);
 
   return fetch(url, {

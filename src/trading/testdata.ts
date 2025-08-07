@@ -21,6 +21,6 @@ export const test_ranking = (instr: Instrument) => {
 
 // Calculate a dummy timing score based on first letter
 export const test_timing = (instr: Instrument) => {
-  const score: number = (instr.symbol.toUpperCase().charCodeAt(0) - 78) / 13;
+  const score: number = -(instr.symbol.toUpperCase().charCodeAt(0) - 78) / 13;
   return score;
 };

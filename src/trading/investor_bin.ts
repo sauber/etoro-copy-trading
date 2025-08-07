@@ -41,12 +41,11 @@ const ema_series: Series = investor.series.map((v: number) => ema.nextValue(v))
     (v: number) => v !== undefined && !isNaN(v),
   );
 const ema_chart: Instrument = new Instrument(ema_series, investor.end);
-// console.log(`Smoothing with EMA(${emaPeriod}). Orignal length: ${investor.series.length}. New length: ${ema_chart.values.length}`);
 console.log(`Chart with EMA(${emaPeriod}) smoothing applied:`);
 console.log(ema_chart.plot());
 
 // Display buy/sell signal strength
-console.log("Signal (<0=sell, >0=buy):");
+console.log("Signal (>0=sell, <0=buy):");
 const timing: Timing = await loader.timingModel();
 const timer: Rater = makeTimer(timing);
 const instrument: Instrument = await loader.instrument(username);

@@ -12,7 +12,7 @@ type KD = {
 /** Generate signal based on Stochastic Oscillator indicator */
 export class Stochastic implements Signal {
   constructor(
-    private readonly period: number = 14,
+    private readonly window: number = 14,
     private readonly smoothing: number = 3,
     private readonly buy_level: number = 20,
     private readonly sell_level: number = 80,
@@ -35,7 +35,7 @@ export class Stochastic implements Signal {
   public get(series: Series): Series {
     // Stochastic Oscillator calculation
     const indicator = new Indicator(
-      this.period,
+      this.window,
       this.smoothing,
     );
     let prev: number;

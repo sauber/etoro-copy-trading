@@ -1,6 +1,5 @@
-import { Bar, Series, Instrument } from "@sauber/backtest";
-import { demark_signal } from "📚/timing/demark-signal.ts";
-import { detrendExponential } from "./untrend.ts";
+import { Bar, Instrument } from "@sauber/backtest";
+import { Stochastic } from "./stochastic-signal.ts";
 
 /** Asset buying or sell opportunity from instrument */
 export class Timing {
@@ -14,15 +13,16 @@ export class Timing {
 
   /** Create signal chart with custom parameters */
   private create_chart(instrument: Instrument): Instrument {
-    // XXX: This is too late to flatten, since simulation trades should use same flattened series
-    const flattened: Series = detrendExponential(instrument.series);
-    const signal: Series = demark_signal(
-      flattened,
+    const signal = new Stochastic(
+      14, // TODO: Load from config
       this.smoothing,
       this.buy_threshold,
       this.sell_threshold,
     );
-    const chart: Instrument = new Instrument(signal, instrument.end);
+    const chart: Instrument = new Instrument(
+      signal.get(instrument.series),
+      instrument.end,
+    );
     return chart;
   }
 

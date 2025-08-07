@@ -17,7 +17,7 @@ const ranking = (instr: Instrument) => {
 
 // Calculate a dummy timing score based on first letter
 const timing = (instr: Instrument) => {
-  const score: number = (instr.symbol.toUpperCase().charCodeAt(0) - 78) / 13;
+  const score: number = -(instr.symbol.toUpperCase().charCodeAt(0) - 78) / 13;
   // console.log(instr.symbol, "timing score is", score);
   return score;
 };

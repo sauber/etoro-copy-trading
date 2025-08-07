@@ -98,7 +98,7 @@ export function demark_signal(
     //   d(signal),
     // );
 
-    return signal;
+    return -signal;
   });
 
   return signal;

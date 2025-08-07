@@ -8,6 +8,6 @@ Deno.test("Convert series", () => {
   const signals = demark_signal(source, window, 50, 50);
   assertEquals(signals[0], 0);
   assertEquals(signals[1], 0);
-  assertEquals(signals[14], -0.5);
-  assertEquals(signals[15], -0.25);
+  assertEquals(signals[14], 0.5);
+  assertEquals(signals[15], 0.25);
 });
