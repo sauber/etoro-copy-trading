@@ -6,14 +6,10 @@ import { IntegerParameter } from "@sauber/optimize";
 Deno.test("Stochastic Oscillator Signal", () => {
   // Test chart
   const chart = createTestInstrument(70);
-  // console.log(chart.plot());
 
   // Signals
-  const indicator = new Stochastic();
+  const indicator = new Stochastic({window: 14, smoothing: 3, buy: 20, sell: 80});
   const signals = indicator.get(chart.series);
-  // const instrument = new Instrument(signals, 0, "SO %k");
-  // console.log(instrument.plot());
-
   // Confirm signal values are in range [-1, 1]
   signals.forEach((value, index) =>
     assert(

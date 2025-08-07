@@ -132,11 +132,12 @@ export class Optimize {
     const settings = Object.fromEntries(
       parameter.map((p) => [p.name, p.value]),
     );
-    const timingModel: Timing = new Timing(
-      settings.smoothing,
-      settings.buy_threshold,
-      settings.sell_threshold,
-    );
+    const timingModel: Timing = new Timing({
+      window: settings.window,
+      smoothing: settings.smoothing,
+      buy: settings.buy_threshold,
+      sell: settings.sell_threshold,
+    });
     const timer: Rater = makeTimer(timingModel);
     const policy = new Policy(this.ranker, timer, settings.position_size);
 

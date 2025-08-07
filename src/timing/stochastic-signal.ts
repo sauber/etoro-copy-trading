@@ -11,12 +11,20 @@ type KD = {
 
 /** Generate signal based on Stochastic Oscillator indicator */
 export class Stochastic implements Signal {
-  constructor(
-    private readonly window: number = 14,
-    private readonly smoothing: number = 3,
-    private readonly buy_level: number = 20,
-    private readonly sell_level: number = 80,
-  ) {
+  public readonly window: number = 14;
+  public readonly smoothing: number = 3;
+  public readonly buy: number = 20;
+  public readonly sell: number = 80;
+
+  constructor(values: Partial<Stochastic>) {
+    // Confirm all parameters are incluced
+    for (const param of Stochastic.parameters()) {
+      if (!(param.name in values)) {
+        throw new Error(`Missing required parameter: ${param.name}`);
+      }
+    }
+    // Apply values
+    Object.assign(this, values);
   }
 
   /** All tunable parameters for this indicator */
@@ -49,8 +57,8 @@ export class Stochastic implements Signal {
     );
 
     // Overbought and oversold levels
-    const overbought = this.sell_level;
-    const oversold = this.buy_level;
+    const overbought = this.sell;
+    const oversold = this.buy;
 
     // Compress indicator into overbought, oversold range
     const signals = momentum.map((value: KD) => {

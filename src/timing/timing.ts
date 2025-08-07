@@ -1,26 +1,22 @@
 import { Bar, Instrument } from "@sauber/backtest";
-import { Stochastic } from "./stochastic-signal.ts";
+import { Stochastic as Signal } from "./stochastic-signal.ts";
 
 /** Asset buying or sell opportunity from instrument */
 export class Timing {
+  // Cache of signal charts already created
   private readonly charts = new Map<string, Instrument>();
 
-  constructor(
-    private readonly smoothing: number,
-    private readonly buy_threshold: number,
-    private readonly sell_threshold: number,
-  ) {}
+  // Creator of signals from value charts
+  private readonly signal: Signal;
+
+  constructor(parameters: Partial<Signal>) {
+    this.signal = new Signal(parameters);
+  }
 
   /** Create signal chart with custom parameters */
   private create_chart(instrument: Instrument): Instrument {
-    const signal = new Stochastic(
-      14, // TODO: Load from config
-      this.smoothing,
-      this.buy_threshold,
-      this.sell_threshold,
-    );
     const chart: Instrument = new Instrument(
-      signal.get(instrument.series),
+      this.signal.get(instrument.series),
       instrument.end,
     );
     return chart;

@@ -38,17 +38,19 @@ export class Assets {
 
   /** Initiate Timing model with parameters from config */
   public async timing(): Promise<Timing> {
-    // TODO: Doesn't belong here. 
-    // This code should not impose defaults. 
+    // TODO: Doesn't belong here.
+    // This code should not impose defaults.
     // Higher level code should decide how to handle potential missing data.
     // Ranking also leaves decision to higher level code.
     const settings = await this.config.get("trading") as ParameterData ||
       default_parameters;
-    const model = new Timing(
-      settings.smoothing,
-      settings.buy_threshold,
-      settings.sell_threshold,
-    );
+    // TODO: Read "signal" group of values from config instead of "trading" group
+    const model = new Timing({
+      window: 14,
+      smoothing: settings.smoothing,
+      buy: settings.buy_threshold,
+      sell: settings.sell_threshold,
+    });
     return model;
   }
 }
