@@ -25,11 +25,11 @@ const instrument = {
 } as Instrument;
 
 Deno.test("instance", () => {
-  assertInstanceOf(new Timing(14, 40, 14), Timing);
+  assertInstanceOf(new Timing({window: 14, smoothing: 14, buy: 40, sell: 14}), Timing);
 });
 
 Deno.test("Buy Signal", () => {
-  const t = new Timing(14, 40, 4);
+  const t = new Timing({window: 14, smoothing: 14, buy: 40, sell: 14});
   const signal = t.predict(instrument, 0);
   assertGreaterOrEqual(signal, -1);
   assertLessOrEqual(signal, 1);
