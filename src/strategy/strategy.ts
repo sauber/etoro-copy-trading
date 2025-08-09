@@ -1,7 +1,7 @@
 
 import { makeRanker, makeTimer } from "📚/trading/raters.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
-import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
+import { createTimer, loadTimer, Timing, WeekdayStrategy } from "📚/timing/mod.ts";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
 import { ParameterData } from "📚/trading/parameters.ts";
 import { Policy } from "./policy.ts";
@@ -13,6 +13,8 @@ import { FutureStrategy } from "./future-strategy.ts";
 import { LimitStrategy } from "./limit-strategy.ts";
 import { RoundingStrategy } from "./rounding-strategy.ts";
 import { Loader } from "../trading/loader.ts";
+import { Config } from "../config/mod.ts";
+import { Backend } from "@sauber/journal";
 
 /** Rater function type
  * Assess ranking instruments, such as timing and prospect
@@ -55,10 +57,14 @@ export function buildStrategy(
 }
 
 /** Strategy with parameters and models loaded from repository */
-// TODO: Remove this function which depends on external loader
-export async function loadStrategy(loader: Loader): Promise<Strategy> {
-  const ranking: InvestorRanking = await loader.rankingModel();
-  const timing: Timing = await loader.timingModel();
-  const settings: ParameterData = await loader.settings();
-  return buildStrategy(settings, makeRanker(ranking), makeTimer(timing));
+export async function loadStrategy(repo: Backend): Promise<Strategy> {
+  const config = new Config(repo);
+  const settings: ParameterData = await config.get("trading") as ParameterData;
+
+  const rankingModel = new InvestorRanking(repo);
+  const ranker: Rater = makeRanker(rankingModel);
+
+  const timer: Rater = await loadTimer(repo);
+
+  return buildStrategy(settings, ranker, timer);
 }

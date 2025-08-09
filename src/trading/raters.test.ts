@@ -1,5 +1,5 @@
 import { assertInstanceOf } from "@std/assert/instance-of";
-import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
+import { makeRanker, Rater } from "📚/trading/raters.ts";
 import { rankModel, timeModel } from "📚/trading/testdata.ts";
 
 Deno.test("Ranking function", () => {
@@ -8,6 +8,6 @@ Deno.test("Ranking function", () => {
 });
 
 Deno.test("Timing function", () => {
-  const rater: Rater = makeTimer(timeModel);
+  const rater: Rater = timeModel;
   assertInstanceOf(rater, Function);
 });

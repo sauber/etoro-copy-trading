@@ -6,6 +6,7 @@
   },
   "discover": { "risk": 4, "daily": 6, "weekly": 11 },
   "trading": {
+    "window": 14,
     "buy_window": 2,
     "buy_threshold": 50,
     "limit": 3,

@@ -19,9 +19,8 @@ export function createTimer(setting: Settings): Rater {
   }
 
   // Create an instance of the indicator with the provided settings
-  const indicator = new Indicator(
-    Object.assign({}, ...parameters.map((p) => [p.name, setting[p.name]])),
-  );
+  const params = Object.fromEntries(parameters.map((p) => ([p.name, setting[p.name]])));
+  const indicator = new Indicator(params);
 
   // Create Signals instance with the indicator
   const signals: Signals = new Signals(indicator);

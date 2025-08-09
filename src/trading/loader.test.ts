@@ -70,9 +70,3 @@ Deno.test("Ranking Model", async () => {
   const model: InvestorRanking = await loader.rankingModel();
   assert(model);
 });
-
-Deno.test("Timing Model", async () => {
-  const loader = new Loader(assets);
-  const model: Timing = await loader.timingModel();
-  assert(model);
-});
