@@ -9,7 +9,7 @@ import {
 } from "📚/strategy/mod.ts";
 import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
 import { FutureStrategy } from "📚/strategy/future-strategy.ts";
-import { Policy } from "📚/trading/policy.ts";
+import { Policy } from "📚/strategy/policy.ts";
 
 import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";

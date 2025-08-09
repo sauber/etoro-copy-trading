@@ -6,7 +6,7 @@ import {
 import { CloseOrders, Instrument, PurchaseOrders } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { context } from "📚/trading/testdata.ts";
-import { Classifier } from "📚/trading/classifier.ts";
+import { Classifier } from "./classifier.ts";
 
 // Calculate a dummy ranking score based on length of username.
 const ranking = (instr: Instrument) => {

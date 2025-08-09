@@ -19,7 +19,9 @@ export function createTimer(setting: Settings): Rater {
   }
 
   // Create an instance of the indicator with the provided settings
-  const indicator = new Indicator(...parameters.map((p) => setting[p.name]));
+  const indicator = new Indicator(
+    Object.assign({}, ...parameters.map((p) => [p.name, setting[p.name]])),
+  );
 
   // Create Signals instance with the indicator
   const signals: Signals = new Signals(indicator);
@@ -44,7 +46,7 @@ export async function loadTimer(repo: Backend): Promise<Rater> {
   let missing: boolean = false;
   for (const param of parameters) {
     if (!(param.name in settings)) {
-      settings[param.name] = param.value; 
+      settings[param.name] = param.value;
       missing = true;
     }
   }

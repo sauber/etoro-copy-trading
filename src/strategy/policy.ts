@@ -5,7 +5,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { Classifier } from "📚/trading/classifier.ts";
+import { Classifier } from "../strategy/classifier.ts";
 import { Rater } from "📚/trading/raters.ts";
 
 export class Policy implements Strategy {

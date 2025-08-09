@@ -40,7 +40,7 @@ import {
   default_parameters,
   type ParameterData,
 } from "📚/trading/parameters.ts";
-import { Policy } from "📚/trading/policy.ts";
+import { Policy } from "📚/strategy/policy.ts";
 import { makeRanker, makeTimer } from "📚/trading/raters.ts";
 import { createMutex, Mutex } from "@117/mutex";
 

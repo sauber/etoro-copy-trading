@@ -7,7 +7,7 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { assert } from "@std/assert";
-import { Candidate, CandidateExport } from "📚/trading/candidate.ts";
+import { Candidate, CandidateExport } from "./candidate.ts";
 import { Rater } from "📚/trading/raters.ts";
 
 type Rank = number;
@@ -42,6 +42,7 @@ export class Classifier {
         timing(instrument, bar),
         target,
       );
+      // TODO: bundle positions into multipositions first, instead of drip feeding into a candidate
       candidate.addPurchaseOrder(po);
       this.candidates.set(username, candidate);
     });

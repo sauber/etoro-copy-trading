@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Amount, Bar, Position, Price, PurchaseOrder } from "@sauber/backtest";
 import { context, instrument, test_ranking, test_timing } from "📚/trading/testdata.ts";
-import { Candidate } from "📚/trading/candidate.ts";
+import { Candidate } from "./candidate.ts";
 
 const start: Bar = instrument.start;
 const first: Price = instrument.price(start);
