@@ -36,7 +36,7 @@ Deno.test("Generate best model from random parameters", () => {
 Deno.test("Export / Import", () => {
   const optimizer = makeOptimizer();
   const data: ParameterData = optimizer.export();
-  const count = 7;
+  const count = 8;
   assertEquals(Object.keys(data).length, count);
   const imported = Optimize.import(data, ranker);
   assertInstanceOf(imported, Optimize);

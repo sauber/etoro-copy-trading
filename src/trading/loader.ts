@@ -10,7 +10,6 @@ import {
   Price,
   PurchaseOrders,
   Series,
-  Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/mod.ts";
@@ -19,15 +18,6 @@ import { sum } from "@sauber/statistics";
 import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Mirror, Names } from "📚/repository/mod.ts";
 import {
-  CascadeStrategy,
-  FutureStrategy,
-  LimitStrategy,
-  RoundingStrategy,
-  StopLossStrategy,
-  TrailingStrategy,
-  UnionStrategy,
-} from "📚/strategy/mod.ts";
-import {
   type DateFormat,
   dateFromWeekday,
   dateToBar,
@@ -35,13 +25,11 @@ import {
   nextDate,
   today,
 } from "@sauber/dates";
-import { Timing, WeekdayStrategy } from "📚/timing/mod.ts";
+import { Timing } from "📚/timing/mod.ts";
 import {
   default_parameters,
   type ParameterData,
 } from "📚/trading/parameters.ts";
-import { Policy } from "📚/strategy/policy.ts";
-import { makeRanker, makeTimer } from "📚/trading/raters.ts";
 import { createMutex, Mutex } from "@117/mutex";
 
 const NOW: DateFormat = today();
@@ -505,35 +493,5 @@ export class Loader {
     const size = settings.position_size;
     if (isNaN(size)) throw new Error("Position Size missing in settings");
     return size;
-  }
-
-  /** Trading Policy */
-  public async strategy(): Promise<Strategy> {
-    const settings: ParameterData = await this.settings();
-    const ranking: InvestorRanking = await this.rankingModel();
-    const timing: Timing = await this.timingModel();
-    const ranker = makeRanker(ranking);
-    const timer = makeTimer(timing);
-
-    const policy: Strategy = new Policy(ranker, timer, settings.position_size);
-    const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
-    const trailing: Strategy = new TrailingStrategy(settings.stoploss);
-    const strategy: Strategy = new UnionStrategy([
-      stoploss,
-      new CascadeStrategy([
-        new WeekdayStrategy(settings.weekday),
-        new UnionStrategy([
-          trailing,
-          new CascadeStrategy([
-            new FutureStrategy(180),
-            policy,
-            new LimitStrategy(settings.limit),
-            new RoundingStrategy(200),
-          ]),
-        ]),
-      ]),
-    ]);
-
-    return strategy;
   }
 }

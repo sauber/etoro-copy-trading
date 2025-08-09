@@ -1,16 +1,6 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters, Status } from "@sauber/optimize";
-import {
-  CascadeStrategy,
-  LimitStrategy,
-  RoundingStrategy,
-  TrailingStrategy,
-  UnionStrategy,
-} from "📚/strategy/mod.ts";
-import { WeekdayStrategy } from "📚/timing/weekday-strategy.ts";
-import { FutureStrategy } from "📚/strategy/future-strategy.ts";
-import { Policy } from "📚/strategy/policy.ts";
-
+import { buildStrategy } from "📚/strategy/mod.ts";
 import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { makeTimer, Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
@@ -34,6 +24,7 @@ export class Optimize {
   /** Generate model from saved parameters */
   public static import(data: ParameterData, ranker: Rater): Optimize {
     const values: ParameterValues = [
+      data.window,
       data.weekday,
       data.smoothing,
       data.buy_threshold,
@@ -79,7 +70,7 @@ export class Optimize {
     for (let i = 1; i < count; i++) {
       const result: [Score, Optimize] = Optimize.sample(exchange, ranker);
       if (result[0] > best[0]) best = result;
-      console.log(ESC + LINEUP + progress.render(i+1));
+      console.log(ESC + LINEUP + progress.render(i + 1));
     }
     return best[1];
   }
@@ -131,7 +122,7 @@ export class Optimize {
   private strategy(parameter: Parameters): Strategy {
     const settings = Object.fromEntries(
       parameter.map((p) => [p.name, p.value]),
-    );
+    ) as ParameterData;
     const timingModel: Timing = new Timing({
       window: settings.window,
       smoothing: settings.smoothing,
@@ -139,23 +130,24 @@ export class Optimize {
       sell: settings.sell_threshold,
     });
     const timer: Rater = makeTimer(timingModel);
-    const policy = new Policy(this.ranker, timer, settings.position_size);
+    // const policy = new Policy(this.ranker, timer, settings.position_size);
 
-    const trailing: Strategy = new TrailingStrategy(settings.stoploss);
-    const strategy: Strategy = new CascadeStrategy([
-      new WeekdayStrategy(settings.weekday),
-      new UnionStrategy([
-        trailing,
-        new CascadeStrategy([
-          new FutureStrategy(180),
-          policy,
-          new LimitStrategy(settings.limit),
-          new RoundingStrategy(200),
-        ]),
-      ]),
-    ]);
+    // const trailing: Strategy = new TrailingStrategy(settings.stoploss);
+    // const strategy: Strategy = new CascadeStrategy([
+    //   new WeekdayStrategy(settings.weekday),
+    //   new UnionStrategy([
+    //     trailing,
+    //     new CascadeStrategy([
+    //       new FutureStrategy(180),
+    //       policy,
+    //       new LimitStrategy(settings.limit),
+    //       new RoundingStrategy(200),
+    //     ]),
+    //   ]),
+    // ]);
+    // return strategy;
 
-    return strategy;
+    return buildStrategy(settings, this.ranker, timer);
   }
 
   /** Run simulation from input parameters and return score */

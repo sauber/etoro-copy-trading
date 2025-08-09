@@ -9,7 +9,6 @@ import {
   Bar,
   CloseOrders,
   PurchaseOrders,
-  Strategy,
   StrategyContext,
 } from "@sauber/backtest";
 import { type DateFormat, diffDate, today } from "@sauber/dates";
@@ -76,10 +75,4 @@ Deno.test("Timing Model", async () => {
   const loader = new Loader(assets);
   const model: Timing = await loader.timingModel();
   assert(model);
-});
-
-Deno.test("Strategy", async () => {
-  const loader = new Loader(assets);
-  const strategy: Strategy = await loader.strategy();
-  assert(strategy);
 });

@@ -8,6 +8,7 @@ import {
 import { Assets } from "📚/assets/assets.ts";
 import { TestLoader } from "📚/trading/test-loader.ts";
 import { barToDate } from "@sauber/dates";
+import { loadStrategy } from "../strategy/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -16,7 +17,7 @@ const repo = Assets.disk(path);
 const loader = new TestLoader(repo);
 
 // Strategy
-const strategy: Strategy = await loader.strategy();
+const strategy: Strategy = await loadStrategy(loader);
 
 // Exchange
 const instruments: Instruments = await loader.instrumentSamples(40);
