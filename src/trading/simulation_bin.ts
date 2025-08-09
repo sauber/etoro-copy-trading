@@ -17,7 +17,7 @@ const repo = Assets.disk(path);
 const loader = new TestLoader(repo);
 
 // Strategy
-const strategy: Strategy = await loadStrategy(loader);
+const strategy: Strategy = await loadStrategy(repo.repo);
 
 // Exchange
 const instruments: Instruments = await loader.instrumentSamples(40);

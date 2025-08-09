@@ -482,11 +482,6 @@ export class Loader {
     return model;
   }
 
-  /** Timing Model */
-  // public timingModel(): Promise<Timing> {
-  //   return this.assets.timing();
-  // }
-
   /** Target size of positions */
   public async positionSize(): Promise<Amount> {
     const settings: ParameterData = await this.settings();

@@ -62,6 +62,7 @@ export async function loadStrategy(repo: Backend): Promise<Strategy> {
   const settings: ParameterData = await config.get("trading") as ParameterData;
 
   const rankingModel = new InvestorRanking(repo);
+  await rankingModel.load();
   const ranker: Rater = makeRanker(rankingModel);
 
   const timer: Rater = await loadTimer(repo);
