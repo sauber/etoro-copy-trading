@@ -15,7 +15,6 @@ import {
 import { Assets } from "📚/assets/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "@sauber/statistics";
-import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Mirror, Names } from "📚/repository/mod.ts";
 import {
   type DateFormat,
@@ -25,7 +24,6 @@ import {
   nextDate,
   today,
 } from "@sauber/dates";
-import { Timing } from "📚/timing/mod.ts";
 import {
   default_parameters,
   type ParameterData,

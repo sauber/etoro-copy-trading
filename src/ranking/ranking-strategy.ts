@@ -3,7 +3,7 @@ import {
   PurchaseOrders,
   StrategyContext,
 } from "@sauber/backtest";
-import { InvestorRanking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { PassThroughStrategy } from "📚/strategy/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 

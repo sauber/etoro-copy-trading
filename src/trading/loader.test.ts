@@ -16,8 +16,6 @@ import { Mirror } from "📚/repository/mod.ts";
 import { Loader } from "📚/trading/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
 import { ParameterData } from "📚/trading/parameters.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
-import { Timing } from "📚/timing/mod.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Loader(assets), Loader);

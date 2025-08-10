@@ -1,6 +1,5 @@
 
 import { createRanker } from "📚/ranking/ranker.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
 import { loadTimer, WeekdayStrategy } from "📚/timing/mod.ts";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
 import { ParameterData } from "📚/trading/parameters.ts";
@@ -14,6 +13,7 @@ import { LimitStrategy } from "./limit-strategy.ts";
 import { RoundingStrategy } from "./rounding-strategy.ts";
 import { Config } from "../config/mod.ts";
 import { Backend } from "@sauber/journal";
+import { loadRanker } from "../ranking/mod.ts";
 
 /** Rater function type
  * Assess ranking instruments, such as timing and prospect
@@ -59,11 +59,7 @@ export function buildStrategy(
 export async function loadStrategy(repo: Backend): Promise<Strategy> {
   const config = new Config(repo);
   const settings: ParameterData = await config.get("trading") as ParameterData;
-
-  const rankingModel = new InvestorRanking(repo);
-  await rankingModel.load();
-  const ranker: Rater = createRanker(rankingModel);
-
+  const ranker: Rater = await loadRanker(repo);
   const timer: Rater = await loadTimer(repo);
 
   return buildStrategy(settings, ranker, timer);

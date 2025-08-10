@@ -3,10 +3,10 @@ import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
 import { Assets } from "📚/assets/assets.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Classifier } from "📚/strategy/classifier.ts";
-import { Timing } from "📚/timing/mod.ts";
-import { makeRanker, makeTimer, Rater } from "📚/trading/raters.ts";
+import { loadTimer } from "📚/timing/mod.ts";
+import { Rater } from "📚/trading/raters.ts";
+import { loadRanker } from "../ranking/mod.ts";
 
 const start: number = performance.now();
 
@@ -17,10 +17,8 @@ const repo = Assets.disk(path);
 let loader: Loader | null = new Loader(repo);
 
 // Models
-const ranking: InvestorRanking = await loader.rankingModel();
-const ranker: Rater = makeRanker(ranking);
-const timing: Timing = await loader.timingModel();
-const timer: Rater = makeTimer(timing);
+const ranker: Rater = await loadRanker(repo.repo);
+const timer: Rater = await loadTimer(repo.repo);
 
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();

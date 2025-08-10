@@ -13,7 +13,7 @@ import {
 } from "@sauber/backtest";
 import { RankingStrategy } from "📚/ranking/ranking-strategy.ts";
 import { assets } from "📚/assets/testdata.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { Investor } from "📚/investor/mod.ts";
 
 const ranking: InvestorRanking = new InvestorRanking(assets.repo);

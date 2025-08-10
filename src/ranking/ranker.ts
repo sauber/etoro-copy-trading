@@ -1,6 +1,6 @@
 import { Backend } from "@sauber/journal";
 import { Rater } from "📚/trading/raters.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { Bar, Instrument } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
 import { Ranking } from "📚/ranking/mod.ts";

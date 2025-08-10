@@ -3,8 +3,6 @@ import { Config } from "📚/config/config.ts";
 import { Community, TestCommunity } from "📚/repository/mod.ts";
 import { Assets } from "./assets.ts";
 import { path } from "./testdata.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
-import { Timing } from "📚/timing/mod.ts";
 
 Deno.test("Heap Backend", () => {
   const assets = Assets.heap();
