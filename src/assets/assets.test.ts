@@ -30,8 +30,3 @@ Deno.test("Test Community", () => {
   const assets = Assets.heap();
   assertInstanceOf(assets.testcommunity, TestCommunity);
 });
-
-Deno.test("Ranking", () => {
-  const assets = Assets.heap();
-  assertInstanceOf(assets.ranking, InvestorRanking);
-});

@@ -2,14 +2,13 @@ import { Instrument, StrategyContext } from "@sauber/backtest";
 import { Assets } from "📚/assets/mod.ts";
 import { path } from "📚/assets/testdata.ts";
 import { Loader } from "📚/trading/loader.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
 import { loadTimer } from "../timing/mod.ts";
 import { Rater } from "./raters.ts";
 
 export const assets = Assets.disk(path);
 export const investor = await assets.community.any();
-export const rankModel: InvestorRanking = assets.ranking;
-await rankModel.load();
+// export const rankModel: InvestorRanking = assets.ranking;
+// await rankModel.load();
 const loader = new Loader(assets);
 export const context: StrategyContext = await loader.strategyContext();
 export const instrument: Instrument = (await loader.instrumentSamples(1))[0];

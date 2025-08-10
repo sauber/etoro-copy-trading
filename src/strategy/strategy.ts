@@ -1,7 +1,7 @@
 
-import { makeRanker, makeTimer } from "📚/trading/raters.ts";
+import { createRanker } from "📚/ranking/ranker.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
-import { createTimer, loadTimer, Timing, WeekdayStrategy } from "📚/timing/mod.ts";
+import { loadTimer, WeekdayStrategy } from "📚/timing/mod.ts";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
 import { ParameterData } from "📚/trading/parameters.ts";
 import { Policy } from "./policy.ts";
@@ -12,7 +12,6 @@ import { CascadeStrategy } from "./cascade-strategy.ts";
 import { FutureStrategy } from "./future-strategy.ts";
 import { LimitStrategy } from "./limit-strategy.ts";
 import { RoundingStrategy } from "./rounding-strategy.ts";
-import { Loader } from "../trading/loader.ts";
 import { Config } from "../config/mod.ts";
 import { Backend } from "@sauber/journal";
 
@@ -63,7 +62,7 @@ export async function loadStrategy(repo: Backend): Promise<Strategy> {
 
   const rankingModel = new InvestorRanking(repo);
   await rankingModel.load();
-  const ranker: Rater = makeRanker(rankingModel);
+  const ranker: Rater = createRanker(rankingModel);
 
   const timer: Rater = await loadTimer(repo);
 

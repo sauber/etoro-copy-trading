@@ -475,12 +475,12 @@ export class Loader {
   }
 
   /** Ranking model */
-  public async rankingModel(): Promise<InvestorRanking> {
-    const model: InvestorRanking = this.assets.ranking;
-    const loaded: boolean = await model.load();
-    if (!loaded) throw new Error("Ranking model not found");
-    return model;
-  }
+  // public async rankingModel(): Promise<InvestorRanking> {
+  //   const model: InvestorRanking = this.assets.ranking;
+  //   const loaded: boolean = await model.load();
+  //   if (!loaded) throw new Error("Ranking model not found");
+  //   return model;
+  // }
 
   /** Target size of positions */
   public async positionSize(): Promise<Amount> {

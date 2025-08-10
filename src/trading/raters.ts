@@ -13,22 +13,22 @@ import { Timing } from "📚/timing/mod.ts";
 export type Rater = (instrument: Instrument, bar: Bar) => number;
 
 /** Given a Ranking model, create callback to evaluate instrument at bar */
-export function makeRanker(ranking: Ranking): Rater {
-  const ranker = (instrument: Instrument, bar: Bar) =>
-    ("stats" in instrument)
-      // Ensure value is in range [-1,1]
-      ? Math.tanh(ranking.predict(instrument as Investor, bar))
-      // No ranking of non-investor instruments
-      : 0;
-  return ranker;
-}
+// export function makeRanker(ranking: Ranking): Rater {
+//   const ranker = (instrument: Instrument, bar: Bar) =>
+//     ("stats" in instrument)
+//       // Ensure value is in range [-1,1]
+//       ? Math.tanh(ranking.predict(instrument as Investor, bar))
+//       // No ranking of non-investor instruments
+//       : 0;
+//   return ranker;
+// }
 
 /** Given a Timing model, create callback to evaluate instrument at bar */
-export function makeTimer(timing: Timing): Rater {
-  const timer = (instrument: Instrument, bar: Bar) => {
-    if (instrument.has(bar + 2)) {
-      return timing.predict(instrument, bar);
-    } else return 0;
-  };
-  return timer;
-}
+// export function makeTimer(timing: Timing): Rater {
+//   const timer = (instrument: Instrument, bar: Bar) => {
+//     if (instrument.has(bar + 2)) {
+//       return timing.predict(instrument, bar);
+//     } else return 0;
+//   };
+//   return timer;
+// }

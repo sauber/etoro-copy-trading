@@ -65,8 +65,8 @@ Deno.test("Settings", async () => {
   assert("weekday" in settings);
 });
 
-Deno.test("Ranking Model", async () => {
-  const loader = new Loader(assets);
-  const model: InvestorRanking = await loader.rankingModel();
-  assert(model);
-});
+// Deno.test("Ranking Model", async () => {
+//   const loader = new Loader(assets);
+//   const model: InvestorRanking = await loader.rankingModel();
+//   assert(model);
+// });

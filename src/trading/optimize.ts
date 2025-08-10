@@ -2,10 +2,10 @@ import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters, Status } from "@sauber/optimize";
 import { buildStrategy } from "📚/strategy/mod.ts";
 import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
-import { makeTimer, Rater } from "📚/trading/raters.ts";
+import { Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "📚/trading/mod.ts";
-import { Timing } from "📚/timing/timing.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
+import { createTimer } from "📚/timing/mod.ts";
 
 // ANSI escape codes
 const ESC = "\u001B[";
@@ -27,8 +27,8 @@ export class Optimize {
       data.window,
       data.weekday,
       data.smoothing,
-      data.buy_threshold,
-      data.sell_threshold,
+      data.buy,
+      data.sell,
       data.position_size,
       data.stoploss,
       data.limit,
@@ -123,30 +123,7 @@ export class Optimize {
     const settings = Object.fromEntries(
       parameter.map((p) => [p.name, p.value]),
     ) as ParameterData;
-    const timingModel: Timing = new Timing({
-      window: settings.window,
-      smoothing: settings.smoothing,
-      buy: settings.buy_threshold,
-      sell: settings.sell_threshold,
-    });
-    const timer: Rater = makeTimer(timingModel);
-    // const policy = new Policy(this.ranker, timer, settings.position_size);
-
-    // const trailing: Strategy = new TrailingStrategy(settings.stoploss);
-    // const strategy: Strategy = new CascadeStrategy([
-    //   new WeekdayStrategy(settings.weekday),
-    //   new UnionStrategy([
-    //     trailing,
-    //     new CascadeStrategy([
-    //       new FutureStrategy(180),
-    //       policy,
-    //       new LimitStrategy(settings.limit),
-    //       new RoundingStrategy(200),
-    //     ]),
-    //   ]),
-    // ]);
-    // return strategy;
-
+    const timer: Rater = createTimer(settings);
     return buildStrategy(settings, this.ranker, timer);
   }
 

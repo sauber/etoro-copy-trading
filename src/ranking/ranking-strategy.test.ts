@@ -16,7 +16,7 @@ import { assets } from "📚/assets/testdata.ts";
 import { InvestorRanking } from "📚/ranking/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 
-const ranking: InvestorRanking = assets.ranking;
+const ranking: InvestorRanking = new InvestorRanking(assets.repo);
 await ranking.load();
 const investor: Investor = await assets.community.any();
 const instrument: Instrument = investor;
