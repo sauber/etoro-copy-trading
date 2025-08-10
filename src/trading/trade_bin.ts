@@ -7,6 +7,7 @@ import { Classifier } from "📚/strategy/classifier.ts";
 import { loadTimer } from "📚/timing/mod.ts";
 import { Rater } from "📚/trading/raters.ts";
 import { loadRanker } from "../ranking/mod.ts";
+import { Context } from "./context.ts";
 
 const start: number = performance.now();
 
@@ -14,7 +15,7 @@ const start: number = performance.now();
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
-let loader: Loader | null = new Loader(repo);
+let loader: Context | null = new Context(repo.repo);
 
 // Models
 const ranker: Rater = await loadRanker(repo.repo);
@@ -26,7 +27,7 @@ const situation: StrategyContext = await loader.strategyContext();
 // Settings
 const tradingDate: DateFormat = await loader.tradingDate();
 const username: string = await loader.username();
-const positionSize: number = await loader.positionSize();
+const positionSize: number = (await loader.settings()).position_size;
 const stoploss: number = (await loader.settings()).stoploss;
 const limit: number = (await loader.settings()).limit;
 
