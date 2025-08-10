@@ -2,7 +2,7 @@ import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
 import { Assets } from "📚/assets/assets.ts";
-import { Loader } from "📚/trading/loader.ts";
+import { Loader } from "../simulation/loader.ts";
 import { Classifier } from "📚/strategy/classifier.ts";
 import { loadTimer } from "📚/timing/mod.ts";
 import { Rater } from "📚/trading/raters.ts";

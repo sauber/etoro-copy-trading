@@ -13,7 +13,7 @@ import {
 } from "@sauber/backtest";
 import { type DateFormat, diffDate, today } from "@sauber/dates";
 import { Mirror } from "📚/repository/mod.ts";
-import { Loader } from "📚/trading/loader.ts";
+import { Loader } from "../simulation/loader.ts";
 import { assets } from "📚/trading/testdata.ts";
 import { ParameterData } from "📚/trading/parameters.ts";
 

@@ -1,7 +1,7 @@
 import { Instrument, StrategyContext } from "@sauber/backtest";
 import { Assets } from "📚/assets/mod.ts";
 import { path } from "📚/assets/testdata.ts";
-import { Loader } from "📚/trading/loader.ts";
+import { Loader } from "../simulation/loader.ts";
 import { loadTimer } from "../timing/mod.ts";
 import { Rater } from "./raters.ts";
 

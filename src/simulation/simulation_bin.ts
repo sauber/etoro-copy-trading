@@ -6,7 +6,7 @@ import {
   Strategy,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
-import { TestLoader } from "📚/trading/test-loader.ts";
+import { TestLoader } from "📚/simulation/test-loader.ts";
 import { barToDate } from "@sauber/dates";
 import { loadStrategy } from "../strategy/mod.ts";
 
