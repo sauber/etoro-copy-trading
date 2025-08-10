@@ -4,7 +4,7 @@ import {
   DiskBackend,
   HeapBackend,
 } from "@sauber/journal";
-import { Community, TestCommunity } from "📚/repository/mod.ts";
+import { Community, TestCommunity } from "📚/community/mod.ts";
 import { Config } from "📚/config/mod.ts";
 
 export class Assets {

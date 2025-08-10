@@ -1,0 +1,1 @@
+Investor is a type of Instrument with data loaded from repository

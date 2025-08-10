@@ -1,6 +1,6 @@
 import { assertInstanceOf } from "@std/assert";
 import { Config } from "📚/config/config.ts";
-import { Community, TestCommunity } from "📚/repository/mod.ts";
+import { Community, TestCommunity } from "📚/community/mod.ts";
 import { Assets } from "./assets.ts";
 import { path } from "./testdata.ts";
 

@@ -4,7 +4,7 @@ import { Features } from "📚/ranking/features.ts";
 import { Bar, Instrument } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";
 import { DataFrame } from "@sauber/dataframe";
-import { Investors } from "📚/repository/mod.ts";
+import { Investors } from "📚/community/mod.ts";
 
 // Combine input and output records
 type Sample = {

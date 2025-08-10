@@ -2,7 +2,7 @@ import { assertEquals, assertInstanceOf } from "@std/assert";
 import { HeapBackend, JournaledAsset } from "@sauber/journal";
 import { nextDate, today } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
-import { Community, Names } from "📚/repository/community.ts";
+import { Community, Names } from "../community/community.ts";
 import { repo as temprepo } from "📚/repository/testdata.ts";
 import { TestCommunity } from "./test-community.ts";
 

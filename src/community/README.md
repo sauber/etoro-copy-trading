@@ -1,0 +1,1 @@
+Collection of investors and information such a start/end of collection.

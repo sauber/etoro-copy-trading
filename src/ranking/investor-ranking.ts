@@ -5,7 +5,7 @@ import { Asset, Backend } from "@sauber/journal";
 import { Model } from "📚/ranking/model.ts";
 import { Features } from "📚/ranking/features.ts";
 import { type Input, input_labels, type Output } from "📚/ranking/types.ts";
-import { Community } from "📚/repository/mod.ts";
+import { Community } from "📚/community/mod.ts";
 import { Train } from "📚/ranking/train.ts";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
 import { Bar } from "@sauber/backtest";

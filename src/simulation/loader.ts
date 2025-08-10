@@ -15,7 +15,8 @@ import {
 import { Assets } from "📚/assets/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 import { sum } from "@sauber/statistics";
-import { Mirror, Names } from "📚/repository/mod.ts";
+import { Mirror } from "📚/repository/mod.ts";
+import { Names } from "📚/community/mod.ts";
 import {
   type DateFormat,
   dateFromWeekday,

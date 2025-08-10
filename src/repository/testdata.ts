@@ -4,7 +4,7 @@ import type { DiscoverData } from "📚/repository/discover.ts";
 import type { ChartData } from "📚/repository/chart.ts";
 import type { PortfolioData } from "📚/repository/portfolio.ts";
 import type { StatsData } from "📚/repository/stats.ts";
-import { Community } from "📚/repository/community.ts";
+import { Community } from "📚/community/community.ts";
 
 const path = "testdata";
 export const repo = new CachingBackend(new DiskBackend(path));

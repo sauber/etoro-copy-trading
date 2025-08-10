@@ -2,7 +2,7 @@ import { DataFrame } from "@sauber/dataframe";
 import { Dashboard, type Predict } from "@sauber/ml-cli-dashboard";
 import { avg } from "@sauber/statistics";
 import { Model } from "📚/ranking/model.ts";
-import { Investors } from "📚/repository/mod.ts";
+import { Investors } from "📚/community/mod.ts";
 import { TrainingData } from "📚/ranking/trainingdata.ts";
 import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
 
