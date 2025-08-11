@@ -1,7 +1,7 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Amount, Bar, Position, Price } from "@sauber/backtest";
 import { MultiPosition } from "./multiposition.ts";
-import { instrument } from "📚/trading/testdata.ts";
+import { instrument } from "📚/strategy/testdata.ts";
 
 const start: Bar = instrument.start;
 const end: Bar = instrument.end;
