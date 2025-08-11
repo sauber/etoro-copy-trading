@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Policy } from "./policy.ts";
-import { context, test_ranking, test_timing } from "📚/trading/testdata.ts";
+import { context, test_ranking, test_timing } from "./testdata.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Policy(test_ranking, test_timing, 0.1), Policy);

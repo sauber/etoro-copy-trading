@@ -38,7 +38,15 @@ type Journal = Diary<Mirrors>;
 const EXTEND = 2;
 
 /** Typs of values storable in cache */
-type CacheValue = CloseOrders | DateFormat | Instrument | Instruments| Investor | null | Position | PurchaseOrders;
+type CacheValue =
+  | CloseOrders
+  | DateFormat
+  | Instrument
+  | Instruments
+  | Investor
+  | null
+  | Position
+  | PurchaseOrders;
 
 /** Load all data for strategyContext */
 export class Context {
@@ -292,9 +300,7 @@ export class Context {
           const start: DateFormat = await this.start();
           const end: DateFormat = await this.end();
           const series: Series = new Float32Array(diffDate(start, end) + 1)
-            .fill(
-              10000,
-            );
+            .fill(10000);
           const bar: Bar = diffDate(end, NOW);
           return new Instrument(series, bar, username, "Placeholder");
         }
@@ -372,12 +378,18 @@ export class Context {
       this.amount_lock.release();
     }
   }
+
   /** Load instruments by list of investor names */
   private async instruments(names: Names): Promise<Instruments> {
     const instruments: Instruments = await Promise.all(
       Array.from(names).map((name: string) => this.instrument(name)),
     );
     return instruments;
+  }
+
+  public async anyInstrument(): Promise<Instrument> {
+    const names = await this.names();
+    return this.instrument(Array.from(names)[0]);
   }
 
   /** Investors available on (upto EXTEND days before) trading date */
