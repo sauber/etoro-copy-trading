@@ -5,11 +5,11 @@ import { type DateFormat, dateToBar } from "@sauber/dates";
 import { Ranking } from "📚/ranking/mod.ts";
 
 type Range = [Bar, Bar];
-type Series = Array<number>;
+type Series = Float16Array;
 
 /** Cache results from Ranking Model */
 export class RankingCache implements Ranking {
-  private readonly cache: Map<string, Array<number>> = new Map();
+  private readonly cache: Map<string, Series> = new Map();
 
   constructor(private readonly backend: InvestorRanking) {}
 
@@ -24,7 +24,6 @@ export class RankingCache implements Ranking {
     const bars: Bar[] = investor.stats.dates.map((date: DateFormat) =>
       dateToBar(date)
     );
-    // console.log({ bars });
     let range: Range = [bar, bar];
     for (const b of bars) {
       if (b < bar) {
@@ -33,9 +32,7 @@ export class RankingCache implements Ranking {
       }
       if (b >= bar) range = [b, range[1]];
 
-      // console.log([bar, b, range]);
     }
-    // console.log(bar, range);
     return range;
   }
 
@@ -45,7 +42,8 @@ export class RankingCache implements Ranking {
     const series: Series | undefined = this.cache.get(key);
     if (series) return series;
 
-    const created: Series = [];
+    // const created: Series = [];
+    const created: Series = new Float16Array(investor.start);
     this.cache.set(key, created);
     return created;
   }
@@ -53,7 +51,6 @@ export class RankingCache implements Ranking {
   /** Fill section of series with value */
   private fill(series: Series, value: number, range: Range): void {
     for (let i = range[0]; i >= range[1]; i--) {
-      // console.log("Fill index", i, "value", value);
       series[i] = value;
     }
   }
@@ -61,7 +58,7 @@ export class RankingCache implements Ranking {
   /** Lookup value from series, or fill if missing */
   private value(investor: Investor, bar: Bar): number {
     const series: Series = this.series(investor);
-    if (series[bar] === undefined) {
+    if (series[bar] === undefined || series[bar] === 0) {
       const value = this.backend.predict(investor, bar);
       const range = this.range(investor, bar);
       this.fill(series, value, range);
