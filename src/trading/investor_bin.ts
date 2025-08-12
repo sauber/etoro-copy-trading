@@ -1,16 +1,15 @@
 import { Bar, Instrument, Series } from "@sauber/backtest";
-import { Assets } from "📚/assets/assets.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { loadTimer } from "../timing/mod.ts";
 import { Rater } from "📚/trading/raters.ts";
 import { Community } from "../community/mod.ts";
+import { makeRepository } from "../repository/mod.ts";
 
 // Display information about an investor
 
 const path: string = Deno.args[0];
-if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
-const repo = Assets.disk(path);
-const community: Community = new Community(repo.repo);
+const repo = makeRepository(path);
+const community: Community = new Community(repo);
 
 const username: string = Deno.args[1];
 const investor: Investor = await community.investor(username);
@@ -27,7 +26,7 @@ console.log(investor.plot());
 
 // Display buy/sell signal strength
 console.log("Signal (>0=sell, <0=buy):");
-const timer: Rater = await loadTimer(repo.repo);
+const timer: Rater = await loadTimer(repo);
 const instrument: Instrument = await community.investor(username);
 const start: Bar = investor.start;
 const end: Bar = investor.end;

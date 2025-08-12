@@ -1,24 +1,23 @@
 import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
-import { Assets } from "📚/assets/assets.ts";
 import { Classifier } from "📚/strategy/classifier.ts";
 import { loadTimer } from "📚/timing/mod.ts";
 import { Rater } from "📚/trading/raters.ts";
 import { loadRanker } from "../ranking/mod.ts";
 import { Context } from "./context.ts";
+import { makeRepository } from "../repository/mod.ts";
 
 const start: number = performance.now();
 
 // Repo
 const path: string = Deno.args[0];
-if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
-const repo = Assets.disk(path);
-let loader: Context | null = new Context(repo.repo);
+const repo = makeRepository(path);
+let loader: Context | null = new Context(repo);
 
 // Models
-const ranker: Rater = await loadRanker(repo.repo);
-const timer: Rater = await loadTimer(repo.repo);
+const ranker: Rater = await loadRanker(repo);
+const timer: Rater = await loadTimer(repo);
 
 // Strategy Context
 const situation: StrategyContext = await loader.strategyContext();

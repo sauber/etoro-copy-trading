@@ -1,7 +1,9 @@
 import type { Investor } from "📚/investor/mod.ts";
-import { Investors } from "📚/community/mod.ts";
-import { assets } from "📚/assets/testdata.ts";
+import { Community, Investors } from "📚/community/mod.ts";
+import { Backend } from "@sauber/journal";
+import { makeTestRepository } from "../repository/mod.ts";
 
-export const community = assets.community;
+const repo: Backend = makeTestRepository();
+export const community: Community = new Community(repo);
 export const investors: Investors = await community.all();
 export const investor: Investor = await community.any();

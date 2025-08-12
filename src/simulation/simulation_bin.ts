@@ -5,21 +5,21 @@ import {
   Simulation,
   Strategy,
 } from "@sauber/backtest";
-import { Assets } from "📚/assets/assets.ts";
 import { barToDate } from "@sauber/dates";
 import { loadStrategy } from "../strategy/mod.ts";
 import { Names, TestCommunity } from "../community/mod.ts";
+import { makeRepository } from "../repository/mod.ts";
+import { Backend } from "@sauber/journal";
 
 // Repo
 const path: string = Deno.args[0];
-if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
-const repo = Assets.disk(path);
+const repo: Backend = makeRepository(path);
 
 // Strategy
-const strategy: Strategy = await loadStrategy(repo.repo);
+const strategy: Strategy = await loadStrategy(repo);
 
 // Exchange of test investors
-const community = new TestCommunity(repo.repo);
+const community = new TestCommunity(repo);
 const names: Names = await community.samples(40);
 const instruments: Instruments = await community.load(names);
 const spread = 0.001;
@@ -58,4 +58,3 @@ console.log(
   "Win Ratio:",
   pct(account.WinRatioTrades),
 );
-

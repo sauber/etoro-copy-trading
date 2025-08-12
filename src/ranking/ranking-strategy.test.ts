@@ -12,13 +12,17 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { RankingStrategy } from "📚/ranking/ranking-strategy.ts";
-import { assets } from "📚/assets/testdata.ts";
 import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { Investor } from "📚/investor/mod.ts";
+import { Backend } from "@sauber/journal";
+import { makeTestRepository } from "../repository/mod.ts";
+import { Community } from "../community/mod.ts";
 
-const ranking: InvestorRanking = new InvestorRanking(assets.repo);
+const repo: Backend = makeTestRepository();
+const ranking: InvestorRanking = new InvestorRanking(repo);
 await ranking.load();
-const investor: Investor = await assets.community.any();
+const community = new Community(repo);
+const investor: Investor = await community.any();
 const instrument: Instrument = investor;
 const amount: Amount = 1000;
 const start: Bar = instrument.start;

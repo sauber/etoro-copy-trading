@@ -1,9 +1,11 @@
-import { Assets } from "../assets/mod.ts";
+import { Backend } from "@sauber/journal";
 import { Context } from "../trading/context.ts";
 import { Instrument } from "@sauber/backtest";
+import { makeRepository } from "../repository/mod.ts";
 
-const repo = Assets.disk("testdata");
-const loader = new Context(repo.repo);
+const path = "testdata";
+const repo: Backend = makeRepository(path);
+const loader = new Context(repo);
 export const instrument: Instrument = (await loader.anyInstrument());
 export const context = await loader.strategyContext();
 

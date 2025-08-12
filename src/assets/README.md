@@ -1,1 +1,0 @@
-Access to all stored data through a single interface

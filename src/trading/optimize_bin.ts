@@ -1,20 +1,20 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
 import { Optimize } from "./optimize.ts";
-import { Assets } from "📚/assets/mod.ts";
 import { Rater } from "./raters.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { ParameterData } from "./parameters.ts";
 import { Community, Names, TestCommunity } from "../community/mod.ts";
+import { makeRepository } from "../repository/mod.ts";
+import { Config } from "../config/config.ts";
 
 
 const modelAssetName = "trading";
 
 // Repo
 const path: string = Deno.args[0];
-if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
-const repo: Assets = Assets.disk(path);
-const community: Community = new TestCommunity(repo.repo);
+const repo = makeRepository(path);
+const community: Community = new TestCommunity(repo);
 
 // Load a sample of random investors
 async function investors(count: number): Promise<Instruments> {
@@ -23,7 +23,7 @@ async function investors(count: number): Promise<Instruments> {
 }
 
 // Ranking Model
-const ranker: Rater = await loadRanker(repo.repo);
+const ranker: Rater = await loadRanker(repo);
 
 // Load training data
 const training_count: number = 800;
@@ -39,7 +39,7 @@ console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
 
 // Load Parameters into model
-const config = repo.config;
+const config = new Config(repo);
 const settings = await config.get(modelAssetName) as ParameterData;
 const loaded: boolean = settings !== null;
 const model = loaded

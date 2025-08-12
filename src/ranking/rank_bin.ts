@@ -1,20 +1,22 @@
 /** Display sorted ranking of most recent investors */
 
 import { DataFrame } from "@sauber/dataframe";
-import { Community, Investors } from "📚/repository/mod.ts";
+import { makeRepository } from "📚/repository/mod.ts";
 import { DateFormat, dateToBar } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import { Assets } from "📚/assets/mod.ts";
-import { InvestorRanking } from "📚/ranking/mod.ts";
+import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
+import { Community, Investors } from "../community/mod.ts";
+import { Backend } from "@sauber/journal";
 
 // Repo
-if (!Deno.args[0]) throw new Error("Path missing");
 const path: string = Deno.args[0];
-if (!Deno.statSync(path)) throw new Error(`${path} does not exist.`);
+const repo: Backend = makeRepository(path);
+
 const assets: Assets = Assets.disk(path);
 
 // Load Model
-const ranking: InvestorRanking = assets.ranking;
+const ranking = new InvestorRanking(repo);
 if (!(await ranking.load())) ranking.generate();
 
 // Load list of investors
