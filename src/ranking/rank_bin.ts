@@ -4,7 +4,6 @@ import { DataFrame } from "@sauber/dataframe";
 import { makeRepository } from "📚/repository/mod.ts";
 import { DateFormat, dateToBar } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
-import { Assets } from "📚/assets/mod.ts";
 import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { Community, Investors } from "../community/mod.ts";
 import { Backend } from "@sauber/journal";
@@ -12,8 +11,7 @@ import { Backend } from "@sauber/journal";
 // Repo
 const path: string = Deno.args[0];
 const repo: Backend = makeRepository(path);
-
-const assets: Assets = Assets.disk(path);
+const community = new Community(repo);
 
 // Load Model
 const ranking = new InvestorRanking(repo);
@@ -21,8 +19,7 @@ if (!(await ranking.load())) ranking.generate();
 
 // Load list of investors
 console.log("Loading latest investors...");
-const community: Community = assets.community;
-const investors: Investors = await assets.community.latest();
+const investors: Investors = await community.latest();
 const end: DateFormat | null = await community.end();
 if (!end) throw new Error("No end date in community");
 console.log(`${end} investor count:`, investors.length);
