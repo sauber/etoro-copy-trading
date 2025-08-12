@@ -4,6 +4,7 @@ import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { Bar, Instrument } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
 import { Ranking } from "📚/ranking/mod.ts";
+import { RankingCache } from "./ranking-cache.ts";
 
 /** Given a Ranking model, create callback to evaluate instrument at bar */
 export function createRanker(ranking: Ranking): Rater {
@@ -20,6 +21,7 @@ export function createRanker(ranking: Ranking): Rater {
 export async function loadRanker(repo: Backend): Promise<Rater> {
   const rankingModel = new InvestorRanking(repo);
   await rankingModel.load();
-  const ranker: Rater = createRanker(rankingModel);
+  const cacher = new RankingCache(rankingModel);
+  const ranker: Rater = createRanker(cacher);
   return ranker;
 }
