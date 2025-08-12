@@ -6,29 +6,33 @@ import {
   Strategy,
 } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
-import { TestLoader } from "📚/simulation/test-loader.ts";
 import { barToDate } from "@sauber/dates";
 import { loadStrategy } from "../strategy/mod.ts";
+import { Names, TestCommunity } from "../community/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo = Assets.disk(path);
-const loader = new TestLoader(repo);
 
 // Strategy
 const strategy: Strategy = await loadStrategy(repo.repo);
 
-// Exchange
-const instruments: Instruments = await loader.instrumentSamples(40);
-console.log("Testing Instruments loaded:", instruments.length);
+// Exchange of test investors
+const community = new TestCommunity(repo.repo);
+const names: Names = await community.samples(40);
+const instruments: Instruments = await Promise.all(
+  Array.from(names).map((name: string) => community.investor(name)),
+);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
 
-// Simulation
+// Run Simulation
 const simulation = new Simulation(exchange, strategy);
 console.log("Simulation starts");
 simulation.run();
+
+// Display results
 console.log(simulation.account.toString());
 console.log(simulation.account.plot());
 console.log(simulation.account.portfolio.toString(exchange.end));
@@ -56,3 +60,4 @@ console.log(
   "Win Ratio:",
   pct(account.WinRatioTrades),
 );
+
