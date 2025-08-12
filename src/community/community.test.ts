@@ -5,6 +5,7 @@ import { Investor } from "📚/investor/mod.ts";
 import { Community, Names } from "../community/community.ts";
 import { repo as temprepo } from "📚/repository/testdata.ts";
 import { TestCommunity } from "./test-community.ts";
+import { Account } from "../account/account.ts";
 
 Deno.test("Initialization", () => {
   const repo = new HeapBackend();
@@ -15,7 +16,10 @@ Deno.test("Initialization", () => {
 Deno.test("Heap repo", async (t) => {
   const repo = new HeapBackend();
   const community: Community = new Community(repo);
+  const owner = "jane";
   const name = "john";
+  const account = new Account(repo);
+  await account.setUsername(owner);
   const date = today();
 
   await t.step("incomplete write", async () => {

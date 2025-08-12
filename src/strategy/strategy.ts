@@ -1,5 +1,3 @@
-
-import { createRanker } from "📚/ranking/ranker.ts";
 import { loadTimer, WeekdayStrategy } from "📚/timing/mod.ts";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
 import { ParameterData } from "📚/trading/parameters.ts";

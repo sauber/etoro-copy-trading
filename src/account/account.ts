@@ -1,12 +1,10 @@
-// Information about trading account
-
 import { createMutex } from "@117/mutex";
-import { Config } from "../config/mod.ts";
-import { Mirror } from "../repository/portfolio.ts";
 import { Backend } from "@sauber/journal";
 import { Amount } from "@sauber/backtest";
+import { Config } from "../config/mod.ts";
+import { Mirror } from "../repository/portfolio.ts";
 
-/** Load username from config */
+/** Load account data from Config */
 export class Account {
   constructor(private readonly repo: Backend) {
   }
@@ -32,6 +30,14 @@ export class Account {
   /** Username of account */
   public async username(): Promise<string> {
     return (await this.load()).UserName;
+  }
+
+  /** Set username of account */
+  public async setUsername(username: string): Promise<void> {
+    const account: Mirror = (await this.load()) || {};
+    account.UserName = username;
+    const config = new Config(this.repo);
+    await config.set("account", account);
   }
 
   /** Total value of account */

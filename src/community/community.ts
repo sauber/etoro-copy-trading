@@ -3,9 +3,8 @@ import { DateFormat, diffDate, nextDate, today } from "@sauber/dates";
 import { Investor } from "📚/investor/mod.ts";
 import { Bar } from "@sauber/backtest";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
-import { Config } from "📚/config/config.ts";
-import { Mirror } from "📚/repository/mod.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
+import { Account } from "../account/mod.ts";
 
 export type Names = Set<string>;
 export type Investors = Array<Investor>;
@@ -13,16 +12,13 @@ type Dates = Array<DateFormat>;
 
 /** Handle Community I/O requests to local repository */
 export class Community {
-  private readonly config: Config;
-  constructor(protected readonly repo: Backend) {
-    this.config = new Config(repo);
-  }
+  constructor(protected readonly repo: Backend) {}
 
-  /** Name of owner */
+  /** UserName of owner */
   private async owner(): Promise<string> {
-    const investor = await this.config.get("account") as Mirror;
-    if (investor) return investor.UserName;
-    return "";
+    const account = new Account(this.repo);
+    const username = await account.username();
+    return username;
   }
 
   /** List of all dates in repo */
