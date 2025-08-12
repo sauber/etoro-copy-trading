@@ -42,11 +42,19 @@ const validation: Exchange = new Exchange(instruments, spread);
 const config = new Config(repo);
 const settings = await config.get(modelAssetName) as ParameterData;
 const loaded: boolean = settings !== null;
-const model = loaded
-  ? Optimize.import(settings, ranker)
-  : Optimize.generate(exchange, 150, ranker);
-if (loaded) console.log("Loaded settings:", settings);
-else console.log("Best random starting point:", model.export());
+let model: Optimize|null = null;
+if ( loaded ) {
+  try {
+    model = Optimize.import(settings, ranker);
+    console.log("Loaded settings:", settings);
+  } catch (e) {
+    console.log(e);
+  }
+}
+if ( ! model ) { 
+  model = Optimize.generate(exchange, 150, ranker);
+  console.log("Best random starting point:", model.export());
+}
 
 // Dashboard
 const epochs = 100;

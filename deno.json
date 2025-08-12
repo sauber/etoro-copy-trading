@@ -5,7 +5,7 @@
     "investor": "deno run --allow-read=../etoro-data/data src/trading/investor_bin.ts ../etoro-data/data",
 
     "optimize": "deno run --allow-read=../etoro-data/data src/trading/optimize_bin.ts ../etoro-data/data",
-    "profile": "deno run --allow-read=testdata,../etoro-data/data --v8-flags=--prof src/timing/optimize_bin.ts testdata",
+    "profile": "deno run --allow-read=testdata --v8-flags=--prof src/trading/optimize_bin.ts testdata",
     "simulation": "deno run --allow-read=../etoro-data/data src/simulation/simulation_bin.ts ../etoro-data/data",
     "scrape": "deno run --allow-read=../etoro-data/data --allow-write=/workspaces/etoro-data/data --allow-net=www.etoro.com src/repository/refresh_bin.ts ../etoro-data/data",
     "test": "deno test --allow-write=tmp,testdata --allow-read=tmp,testdata,src/neural --allow-net=www.etoro.com,jsonplaceholder.typicode.com,github.com,objects.githubusercontent.com,deno.com",

@@ -1,11 +1,12 @@
 import { barToDate, type DateFormat } from "@sauber/dates";
+import { Bar, Series } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
 import { input_labels } from "📚/ranking/types.ts";
 import type { Input, Output } from "📚/ranking/types.ts";
-import { Bar, Series } from "@sauber/backtest";
 import { score } from "📚/ranking/score.ts";
 
+/** Extract features for Investor at Bar */
 export class Features {
   constructor(private readonly investor: Investor) {}
 
