@@ -134,7 +134,7 @@ export class Community {
   }
 
   /** Load a list of investors from list of names */
-  private load(names: Names): Promise<Investors> {
+  public load(names: Names): Promise<Investors> {
     return Promise.all(Array.from(names).map((name) => this.investor(name)));
   }
 

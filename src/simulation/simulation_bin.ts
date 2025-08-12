@@ -21,9 +21,7 @@ const strategy: Strategy = await loadStrategy(repo.repo);
 // Exchange of test investors
 const community = new TestCommunity(repo.repo);
 const names: Names = await community.samples(40);
-const instruments: Instruments = await Promise.all(
-  Array.from(names).map((name: string) => community.investor(name)),
-);
+const instruments: Instruments = await community.load(names);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
 

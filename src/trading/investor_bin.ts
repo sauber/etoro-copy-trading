@@ -2,11 +2,12 @@ import { Bar, Series, Instrument } from "@sauber/backtest";
 import { Assets } from "📚/assets/assets.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { detrendExponential } from "../timing/untrend.ts";
-import { Timing } from "../timing/mod.ts";
-import { Loader } from "📚/trading/loader.ts";
-import { makeTimer, Rater } from "📚/trading/raters.ts";
+import { loadTimer } from "../timing/mod.ts";
+import { Rater } from "📚/trading/raters.ts";
 import { ParameterData } from "./parameters.ts";
 import { EMA } from "@debut/indicators";
+import { Config } from "../config/mod.ts";
+import { Community } from "../community/mod.ts";
 
 // Display information about an investor
 
@@ -32,8 +33,11 @@ console.log("Detrended chart:");
 console.log(flattened.plot());
 
 // Display chart with EMA filter applied
-const loader: Loader | null = new Loader(repo);
-const settings: ParameterData = await loader.settings();
+// const loader: Loader | null = new Loader(repo);
+const config = new Config(repo.repo);
+const settings: ParameterData =
+        (await config.get("trading")) as ParameterData;
+        
 const emaPeriod: number = settings.smoothing;
 const ema = new EMA(emaPeriod);
 const ema_series: Series = investor.series.map((v: number) => ema.nextValue(v))
@@ -46,9 +50,11 @@ console.log(ema_chart.plot());
 
 // Display buy/sell signal strength
 console.log("Signal (>0=sell, <0=buy):");
-const timing: Timing = await loader.timingModel();
-const timer: Rater = makeTimer(timing);
-const instrument: Instrument = await loader.instrument(username);
+// const timing: Timing = await loader.timingModel();
+const timer: Rater = await loadTimer(repo.repo);
+// console.log(timing);
+const community: Community = new Community(repo.repo);
+const instrument: Instrument = await community.investor(username);
 const start: Bar = investor.start;
 const end: Bar = investor.end;
 const signals: Array<number> = [];

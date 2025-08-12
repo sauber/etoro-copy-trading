@@ -2,16 +2,11 @@ import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
 import { Optimize } from "./optimize.ts";
 import { Assets } from "📚/assets/mod.ts";
-import { Loader } from "./loader.ts";
-import { makeRanker, Rater } from "./raters.ts";
-import { InvestorRanking, Ranking } from "📚/ranking/mod.ts";
+import { Rater } from "./raters.ts";
+import { loadRanker } from "📚/ranking/mod.ts";
 import { ParameterData } from "./parameters.ts";
-import { RankingCache } from "📚/ranking/ranking-cache.ts";
-import { TestLoader } from "./test-loader.ts";
+import { Community, Names, TestCommunity } from "../community/mod.ts";
 
-////////////////////////////////////////////////////////////////////////
-/// Main
-////////////////////////////////////////////////////////////////////////
 
 const modelAssetName = "trading";
 
@@ -19,27 +14,27 @@ const modelAssetName = "trading";
 const path: string = Deno.args[0];
 if (!Deno.statSync(path)) throw new Error(`Directory ${path} not found`);
 const repo: Assets = Assets.disk(path);
-const loader: Loader = new TestLoader(repo);
+const community: Community = new TestCommunity(repo.repo);
+
+// Load a sample of random investors
+async function investors(count: number): Promise<Instruments> {
+  const names: Names = await community.samples(count);
+  return community.load(names);
+}
 
 // Ranking Model
-const ranking: InvestorRanking = await loader.rankingModel();
-const cache: Ranking = new RankingCache(ranking);
-const ranker: Rater = makeRanker(cache);
+const ranker: Rater = await loadRanker(repo.repo);
 
 // Load training data
-const instrument_count: number = 800;
-const instruments: Instruments = await loader.instrumentSamples(
-  instrument_count,
-);
+const training_count: number = 800;
+const instruments: Instruments = await investors(training_count);
 console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
 
 // Load Validation data
-const validation_count: number = 800;
-const validationInstruments: Instruments = await loader.instrumentSamples(
-  validation_count,
-);
+const validation_count: number = 80;
+const validationInstruments: Instruments = await investors(validation_count);
 console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
 
