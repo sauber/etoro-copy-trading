@@ -14,7 +14,7 @@ const LINEUP = "F";
 type Samples = Array<{ input: Parameters; output: number }>;
 type Score = number;
 
-/** Generate and train parameters for timing model */
+/** Generate and train parameters for strategy */
 export class Optimize {
   constructor(
     private readonly parameters: Parameters,
