@@ -8,6 +8,7 @@ import {
 import { Classifier } from "../strategy/classifier.ts";
 import { Rater } from "📚/trading/raters.ts";
 
+/** Classify all instruments from purchase orders and open positions only once at each bar */
 export class Policy implements Strategy {
   private bar: Bar | undefined;
   private _classifier: Classifier | undefined;
