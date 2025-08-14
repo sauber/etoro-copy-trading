@@ -7,7 +7,7 @@ import {
 import { Dashboard, Parameters, Output } from "@sauber/optimize";
 import { Bar, Exchange, Instrument, createTestInstrument } from "@sauber/backtest";
 import { Optimize } from "📚/strategy/optimize.ts";
-import { Rater } from "📚/trading/raters.ts";
+import { Rater } from "./strategy.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 
 // Random instruments on an exchange

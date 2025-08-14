@@ -1,5 +1,5 @@
 import { Asset, Backend } from "@sauber/journal";
-import { Rater } from "../trading/raters.ts";
+import { Rater } from "../strategy/mod.ts";
 import { Stochastic as Indicator } from "./stochastic-signal.ts";
 import { Bar, Instrument } from "@sauber/backtest";
 import { Parameters } from "@sauber/optimize";

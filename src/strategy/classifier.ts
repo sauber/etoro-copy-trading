@@ -8,7 +8,7 @@ import {
 } from "@sauber/backtest";
 import { assert } from "@std/assert";
 import { Candidate, CandidateExport } from "./candidate.ts";
-import { Rater } from "📚/trading/raters.ts";
+import { Rater } from "./strategy.ts";
 
 type Rank = number;
 type Timing = number;

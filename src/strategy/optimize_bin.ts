@@ -1,7 +1,7 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
 import { Optimize } from "./optimize.ts";
-import { Rater } from "../trading/raters.ts";
+import { Rater } from "./strategy.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { ParameterData } from "../trading/parameters.ts";
 import { Community, Names, TestCommunity } from "../community/mod.ts";
