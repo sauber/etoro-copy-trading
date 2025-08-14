@@ -13,7 +13,7 @@ import { Rater } from "📚/trading/raters.ts";
 type Rank = number;
 type Timing = number;
 
-/** Bundle purchaseorders and closeorders by instrument */
+/** Bundle purchaseorders and closeorders together by instrument */
 export class Classifier {
   /** List of candidates */
   private readonly candidates = new Map<string, Candidate>();
@@ -78,7 +78,10 @@ export class Classifier {
 
   /** The list of positions to open */
   public open(): PurchaseOrders {
+    // List of candidates marked as buying opportunity
     const candidates = this.all.filter((c: Candidate) => c.isBuy);
+
+    // Calculate amount for each candidate
     return candidates.map((candidate: Candidate) => {
       const pos = candidate.purchaseorders;
       const po: PurchaseOrder = pos[0];
