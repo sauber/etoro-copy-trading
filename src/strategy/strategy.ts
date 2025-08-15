@@ -12,6 +12,7 @@ import { RoundingStrategy } from "./rounding-strategy.ts";
 import { Config } from "../config/mod.ts";
 import { Backend } from "@sauber/journal";
 import { loadRanker } from "../ranking/mod.ts";
+import { IntegerParameter, Parameter } from "@sauber/optimize";
 
 /** Rater function type
  * Assess ranking instruments, such as timing and prospect
@@ -22,13 +23,59 @@ import { loadRanker } from "../ranking/mod.ts";
  */
 export type Rater = (instrument: Instrument, bar: Bar) => number;
 
+/** Parameters required by Strategy */
+export type StrategyParameters = {
+  position_size: number;
+  stoploss: number;
+  limit: number;
+  weekday: number;
+};
+
+/**  Min/max values of parameters */
+const limits = [
+  new IntegerParameter("weekday", 1, 5),
+  new Parameter("position_size", 0.01, 0.07),
+  new Parameter("stoploss", 0.05, 0.95),
+  new IntegerParameter("limit", 1, 5),
+];
+
+/** Assert that parameters are within limits */
+function validation(settings: StrategyParameters): boolean {
+  for (const limit of limits) {
+    const name: string = limit.name;
+    const value: number | undefined = (function () {
+      switch (name) {
+        case "weekday":
+          return settings.weekday;
+        case "position_size":
+          return settings.position_size;
+        case "stoploss":
+          return settings.stoploss;
+        case "limit":
+          return settings.limit;
+      }
+    })();
+
+    if (value === undefined) throw new Error(`Missing parameter ${name}`);
+
+    if (value < limit.min || value > limit.max) {
+      throw new Error(
+        `Parameter ${name} out of range [${limit.min}, ${limit.max}]: ${value}`,
+      );
+    }
+  }
+
+  return true;
+}
+
 /** Generate a strategy from settings, ranking model and timing model */
 export function buildStrategy(
   // TODO: Only exempt parameters required for strategy, nothing else
-  settings: ParameterData,
+  settings: StrategyParameters,
   ranker: Rater,
   timer: Rater,
 ): Strategy {
+  validation(settings);
   const policy: Strategy = new Policy(ranker, timer, settings.position_size);
   const stoploss: Strategy = new StopLossStrategy(settings.stoploss);
   const trailing: Strategy = new TrailingStrategy(settings.stoploss);

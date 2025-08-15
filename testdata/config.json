@@ -6,13 +6,16 @@
   },
   "discover": { "risk": 4, "daily": 6, "weekly": 11 },
   "trading": {
+    "limit": 3,
+    "weekday": 1,
+    "position_size": 0.05,
+    "stoploss": 0.85
+  },
+  "signal": {
     "window": 14,
     "buy_window": 2,
     "buy": 50,
-    "limit": 3,
     "sell_window": 2,
-    "sell_threshold": 80,
-    "weekday": 1,
-    "position_size": 0.1
+    "sell_threshold": 80
   }
 }
