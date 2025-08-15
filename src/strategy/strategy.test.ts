@@ -2,7 +2,7 @@ import { loadRanker } from "../ranking/ranker.ts";
 import { buildStrategy, Rater, StrategyParameters } from "./strategy.ts";
 import { makeTestRepository } from "../repository/mod.ts";
 import { Strategy } from "@sauber/backtest";
-import { assertInstanceOf, assertRejects } from "@std/assert";
+import { assertInstanceOf, assertThrows } from "@std/assert";
 import { loadStrategy } from "./mod.ts";
 
 const repo = makeTestRepository();
@@ -27,9 +27,7 @@ Deno.test("Parameter out of range", () => {
     limit: 1,
     weekday: 0,
   };
-  assertRejects(async () =>
-    await Promise.resolve(buildStrategy(p, ranker, timer))
-  );
+  assertThrows(() => buildStrategy(p, ranker, timer));
 });
 
 Deno.test("Load Strategy", async () => {

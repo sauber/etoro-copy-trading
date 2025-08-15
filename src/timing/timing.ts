@@ -1,5 +1,5 @@
 import { Bar, Instrument } from "@sauber/backtest";
-import { Stochastic as Signal } from "./stochastic-signal.ts";
+import { Stochastic as Signal, Parameters as SignalParameters } from "./stochastic-signal.ts";
 
 /** Asset buying or sell opportunity from instrument */
 export class Timing {
@@ -9,7 +9,7 @@ export class Timing {
   // Creator of signals from value charts
   private readonly signal: Signal;
 
-  constructor(parameters: Partial<Signal>) {
+  constructor(parameters: SignalParameters) {
     this.signal = new Signal(parameters);
   }
 

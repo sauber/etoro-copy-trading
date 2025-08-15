@@ -13,9 +13,8 @@
   },
   "signal": {
     "window": 14,
-    "buy_window": 2,
     "buy": 50,
-    "sell_window": 2,
-    "sell_threshold": 80
+    "sell": 80,
+    "smoothing": 3
   }
 }

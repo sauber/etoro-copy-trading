@@ -1,4 +1,7 @@
-import { IntegerParameter, Parameters } from "@sauber/optimize";
+import {
+  IntegerParameter,
+  Parameters as TrainingParameters,
+} from "@sauber/optimize";
 import { Signal } from "./signal.ts";
 import { Stochastic as Indicator } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
@@ -9,6 +12,13 @@ type KD = {
   d: number;
 };
 
+export type Parameters = {
+  window: number;
+  smoothing: number;
+  buy: number;
+  sell: number;
+};
+
 /** Generate signal based on Stochastic Oscillator indicator */
 export class Stochastic implements Signal {
   public readonly window: number = 14;
@@ -16,7 +26,7 @@ export class Stochastic implements Signal {
   public readonly buy: number = 20;
   public readonly sell: number = 80;
 
-  constructor(values: Partial<Stochastic>) {
+  constructor(values: Parameters) {
     // Confirm all parameters are incluced
     for (const param of Stochastic.parameters()) {
       if (!(param.name in values)) {
@@ -28,7 +38,7 @@ export class Stochastic implements Signal {
   }
 
   /** All tunable parameters for this indicator */
-  public static parameters(): Parameters {
+  public static parameters(): TrainingParameters {
     return [
       new IntegerParameter("window", 2, 50, 14),
       new IntegerParameter("smoothing", 1, 49, 3),
@@ -37,7 +47,7 @@ export class Stochastic implements Signal {
     ];
   }
 
-  public parameters: Parameters = Stochastic.parameters();
+  public parameters: TrainingParameters = Stochastic.parameters();
 
   /** Convert series of values to series of signals */
   public get(series: Series): Series {
