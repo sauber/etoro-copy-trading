@@ -2,7 +2,7 @@ import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
 import { Classifier } from "📚/strategy/classifier.ts";
-import { loadTimer } from "📚/timing/mod.ts";
+import { loadTimer } from "📚/signal/mod.ts";
 import { Rater } from "📚/strategy/mod.ts";
 import { loadRanker } from "../ranking/mod.ts";
 import { Context } from "./context.ts";

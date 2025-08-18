@@ -5,7 +5,7 @@ import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
 import { Rater } from "./strategy.ts";
 import { ParameterData } from "📚/trading/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
-import { createTimer } from "📚/timing/mod.ts";
+import { createTimer } from "📚/signal/mod.ts";
 
 // ANSI escape codes
 const ESC = "\u001B[";

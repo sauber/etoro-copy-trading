@@ -5,7 +5,8 @@ import {
   stochastic as indicator,
 } from "./stochastic.ts";
 
-type Exported = Record<string, number>;
+// TODO: Move to stochastic.ts and be specific about each key required
+export type Exported = Record<string, number>;
 
 /** Calculate a series of buying and sell opportunity from instrument chart */
 export class Signal {
@@ -14,14 +15,14 @@ export class Signal {
   /** Default parameters for signal */
   public static default(): Signal {
     const p = parameters();
-    return new Signal(p);
+    return new this(p);
   }
 
   /** Random parameters for signal */
   public static random(): Signal {
     const p = parameters();
     p.forEach((param) => param.set(param.random));
-    return new Signal(p);
+    return new this(p);
   }
 
   /** Create instance from imported values */
@@ -34,7 +35,7 @@ export class Signal {
       }
       param.set(value);
     });
-    return new Signal(p);
+    return new this(p);
   }
 
   /** Dict of parameter values */

@@ -12,6 +12,8 @@ const parameters: TrainingParameters = Indicator.parameters();
 
 /** Create a function to provide timing signals for instruments */
 export function createTimer(settings: Parameters): Rater {
+  if ( ! settings) throw new Error("No settings provided");
+
   // Validate all required parameters are present
   for (const param of parameters) {
     if (!(param.name in settings)) {

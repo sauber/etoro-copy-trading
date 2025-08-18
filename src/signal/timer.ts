@@ -1,0 +1,37 @@
+import { Backend } from "@sauber/journal";
+import { Bar, Instrument } from "@sauber/backtest";
+import { Rater } from "../strategy/mod.ts";
+import { Exported } from "./signal.ts";
+import { Config } from "../config/mod.ts";
+import { CachedSignal } from "./signal-cache.ts";
+
+const assetName: string = "signal";
+const DELAY: number = 2;
+
+/** Create instance of signal and create a prediction wrapper */
+export function createTimer(params: Exported): Rater {
+  const signal = CachedSignal.import(params);
+
+  const timer = (instrument: Instrument, bar: Bar) => {
+    const effective: Bar = bar + DELAY;
+    if (!instrument.has(effective)) return 0;
+    return signal.predict(instrument, effective);
+  };
+  return timer;
+}
+
+/** Load signal parameter values from repository */
+export async function loadTimer(repo: Backend): Promise<Rater> {
+  const config = new Config(repo);
+  const settings = await config.get(assetName) as Exported;
+  return createTimer(settings);
+}
+
+/** Save signal parameters to repository */
+export async function saveTimer(
+  repo: Backend,
+  settings: Exported,
+): Promise<void> {
+  const config = new Config(repo);
+  await config.set(assetName, settings);
+}
