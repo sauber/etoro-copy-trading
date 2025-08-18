@@ -1,1 +1,0 @@
-Optimize parameters for timing strategy.

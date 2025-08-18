@@ -1,6 +1,6 @@
 import { Series } from "@sauber/backtest";
 import { assertEquals } from "@std/assert/equals";
-import { rsi_signal } from "📚/timing/rsi-signal.ts";
+import { rsi_signal } from "./rsi-signal.ts";
 
 Deno.test("Convert series", () => {
   const source: Series = new Float32Array([1, 2, 3, 4, 5]);

@@ -1,6 +1,6 @@
 import { Series } from "@sauber/backtest";
 import { assertEquals } from "@std/assert/equals";
-import { demark_signal } from "📚/timing/demark-signal.ts";
+import { demark_signal } from "./demark-signal.ts";
 
 Deno.test("Convert series", () => {
   const source: Series = new Float32Array([1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3, 4 ,5, 4, 3, 2, 1]);
