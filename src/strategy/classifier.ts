@@ -71,7 +71,7 @@ export class Classifier {
     return Array.from(this.candidates.values());
   }
 
-  /** List of candidate as exported records */
+  /** List of candidates as exported records */
   public get records(): Array<CandidateExport> {
     return this.all.map((candidate: Candidate) => candidate.export());
   }
