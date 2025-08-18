@@ -15,7 +15,7 @@ import {
   type StatsData,
   type StatsExport,
 } from "📚/repository/stats.ts";
-import { detrendExponential } from "../timing/untrend.ts";
+import { detrendExponential } from "./detrend.ts";
 
 type MirrorsByDate = Record<DateFormat, Mirror[]>;
 type StatsByDate = Record<DateFormat, StatsExport>;

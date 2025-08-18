@@ -1,7 +1,7 @@
 import { Series } from "@sauber/backtest";
 import { assertGreater, assertLess } from "@std/assert";
 import { avg } from "@sauber/statistics";
-import { detrendExponential } from "📚/timing/untrend.ts";
+import { detrendExponential } from "./detrend.ts";
 
 Deno.test("Convert series", () => {
   const s = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
