@@ -1,4 +1,4 @@
-import { WeekdayStrategy } from "📚/timing/mod.ts";
+import { WeekdayStrategy } from "./weekday-strategy.ts";
 import { loadTimer } from "📚/signal/mod.ts";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
 import { ParameterData } from "📚/trading/parameters.ts";

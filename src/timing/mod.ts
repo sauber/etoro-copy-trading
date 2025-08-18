@@ -1,5 +1,5 @@
 // import { Bar, Instrument } from "@sauber/backtest";
-export * from "📚/timing/weekday-strategy.ts";
+// export * from "../strategy/weekday-strategy.ts";
 // export * from "📚/timing/timing.ts";
 
 // export interface Timing {
