@@ -22,17 +22,6 @@ export class Optimize {
 
   /** Generate model from saved parameters */
   public static import(data: ParameterData, ranker: Rater): Optimize {
-    // TODO: Make no assumptions about names of parameters or sequence of names
-    // const values: ParameterValues = [
-    //   data.window,
-    //   data.weekday,
-    //   data.smoothing,
-    //   data.buy,
-    //   data.sell,
-    //   data.position_size,
-    //   data.stoploss,
-    //   data.limit,
-    // ];
     const parameters: Parameters = importParameters(data);
     return new Optimize(parameters, ranker);
   }
@@ -45,9 +34,9 @@ export class Optimize {
   }
 
   /** Create an optimer with random start values */
-  private static random(ranker: Rater): Optimize {
-    return new Optimize(makeParameters(), ranker);
-  }
+  // private static random(ranker: Rater): Optimize {
+  //   return new Optimize(makeParameters(), ranker);
+  // }
 
   /** Create an optimer with random start values, run simulation and return simulation score */
   private static sample(exchange: Exchange, ranker: Rater): [Score, Optimize] {

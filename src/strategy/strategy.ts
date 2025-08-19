@@ -1,6 +1,9 @@
-import { WeekdayStrategy } from "./weekday-strategy.ts";
-import { loadTimer } from "📚/signal/mod.ts";
+import { Backend } from "@sauber/journal";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
+import { loadTimer } from "📚/signal/mod.ts";
+import { loadRanker } from "../ranking/mod.ts";
+import { Limits } from "../optimize/parameters.ts";
+import { Config } from "../config/mod.ts";
 import { Policy } from "./policy.ts";
 import { StopLossStrategy } from "./stoploss-strategy.ts";
 import { TrailingStrategy } from "./trailing-strategy.ts";
@@ -9,10 +12,7 @@ import { CascadeStrategy } from "./cascade-strategy.ts";
 import { FutureStrategy } from "./future-strategy.ts";
 import { LimitStrategy } from "./limit-strategy.ts";
 import { RoundingStrategy } from "./rounding-strategy.ts";
-import { Config } from "../config/mod.ts";
-import { Backend } from "@sauber/journal";
-import { loadRanker } from "../ranking/mod.ts";
-import { IntegerParameter, Parameter } from "@sauber/optimize";
+import { WeekdayStrategy } from "./weekday-strategy.ts";
 
 /** Rater function type
  * Assess ranking instruments, such as timing and prospect
@@ -31,60 +31,20 @@ export type StrategyParameters = {
   weekday: number;
 };
 
-/** Required input to signal function */
-export type Parameters = [
-  IntegerParameter,
-  Parameter,
-  Parameter,
-  IntegerParameter,
-];
-
-/** List of parameters used by signal and default values */
-export const parameters = (): Parameters => [
-  new IntegerParameter("weekday", 0, 6, 1),
-  new Parameter("position_size", 0.005, 0.2, 0.07),
-  new Parameter("stoploss", 0.05, 0.95, 0.85),
-  new IntegerParameter("limit", 1, 15, 3),
-];
-
-/** Generate parameters from custom values */
-export const makeParameters = (
-  weekday: number,
-  position_size: number,
-  stoploss: number,
-  limit: number,
-): Parameters => [
-  new IntegerParameter("weekday", 0, 6, weekday),
-  new Parameter("position_size", 0.005, 0.2, position_size),
-  new Parameter("stoploss", 0.05, 0.95, stoploss),
-  new IntegerParameter("limit", 1, 15, limit),
-];
-
-// TODO: Remove imports from @sauber/optimize
-/** Range of parameter */
-// type ParameterRange = {
-//   min: number;
-//   max: number;
-//   default: number;
-//   int?: boolean;
-// };
-// const inputParameters: Record<string, ParameterRange> = {
-//   weekday: { min: 0, max: 6, default: 1, int: true },
-//   position_size: { min: 0.005, max: 0.2, default: 0.07 },
-//   stoploss: { min: 0.05, max: 0.95, default: 0.85 },
-//   limit: { min: 1, max: 15, default: 3, int: true },
-// };
-// type Input = Record<keyof typeof inputParameters, number>;
+export const inputParameters: Limits = {
+  weekday: { min: 0, max: 6, default: 1, int: true },
+  position_size: { min: 0.005, max: 0.2, default: 0.07 },
+  stoploss: { min: 0.05, max: 0.95, default: 0.85 },
+  limit: { min: 1, max: 15, default: 3, int: true },
+};
+type Input = Record<keyof typeof inputParameters, number>;
 
 /** Assert that parameters are within limits */
-function validation(settings: StrategyParameters): boolean {
-  const limits = parameters();
-  for (const limit of limits) {
-    const name = limit.name as keyof StrategyParameters;
+function validation(settings: Input): boolean {
+  const limits = inputParameters;
+  for (const [name, limit] of Object.entries(limits)) {
     const value = settings[name];
-
     if (value === undefined) throw new Error(`Missing parameter ${name}`);
-
     if (value < limit.min || value > limit.max) {
       throw new Error(
         `Parameter ${name} out of range [${limit.min}, ${limit.max}]: ${value}`,
@@ -97,8 +57,8 @@ function validation(settings: StrategyParameters): boolean {
 
 /** Generate a strategy from settings, ranking model and timing model */
 export function buildStrategy(
-  // TODO: Only exempt parameters required for strategy, nothing else
-  settings: StrategyParameters,
+  // TODO: Only accept parameters required for strategy, nothing else
+  settings: Input,
   ranker: Rater,
   timer: Rater,
 ): Strategy {
@@ -130,7 +90,7 @@ export function buildStrategy(
 /** Strategy with parameters and models loaded from repository */
 export async function loadStrategy(repo: Backend): Promise<Strategy> {
   const config = new Config(repo);
-  const settings = await config.get("trading") as StrategyParameters;
+  const settings = await config.get("trading") as Input;
   const ranker: Rater = await loadRanker(repo);
   const timer: Rater = await loadTimer(repo);
 
