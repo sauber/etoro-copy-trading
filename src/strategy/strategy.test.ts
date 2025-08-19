@@ -22,7 +22,7 @@ Deno.test("Build Strategy", () => {
 
 Deno.test("Parameter out of range", () => {
   const p = {
-    position_size: 0.1,
+    position_size: 1,
     stoploss: 0.85,
     limit: 1,
     weekday: 0,

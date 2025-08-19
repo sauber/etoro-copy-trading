@@ -4,10 +4,15 @@ import {
   assertInstanceOf,
   assertLessOrEqual,
 } from "@std/assert";
-import { Dashboard, Parameters, Output } from "@sauber/optimize";
-import { Bar, Exchange, Instrument, createTestInstrument } from "@sauber/backtest";
-import { Optimize } from "📚/strategy/optimize.ts";
-import { Rater, StrategyParameters } from "./strategy.ts";
+import { Dashboard, Output, Parameters } from "@sauber/optimize";
+import {
+  Bar,
+  createTestInstrument,
+  Exchange,
+  Instrument,
+} from "@sauber/backtest";
+import { Optimize } from "./optimize.ts";
+import { Rater, StrategyParameters } from "../strategy/strategy.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {

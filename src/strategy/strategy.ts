@@ -41,7 +41,7 @@ export type Parameters = [
 
 /** List of parameters used by signal and default values */
 export const parameters = (): Parameters => [
-  new IntegerParameter("weekday", 1, 7, 1),
+  new IntegerParameter("weekday", 0, 6, 1),
   new Parameter("position_size", 0.005, 0.2, 0.07),
   new Parameter("stoploss", 0.05, 0.95, 0.85),
   new IntegerParameter("limit", 1, 15, 3),
@@ -54,7 +54,7 @@ export const makeParameters = (
   stoploss: number,
   limit: number,
 ): Parameters => [
-  new IntegerParameter("weekday", 1, 7, weekday),
+  new IntegerParameter("weekday", 0, 6, weekday),
   new Parameter("position_size", 0.005, 0.2, position_size),
   new Parameter("stoploss", 0.05, 0.95, stoploss),
   new IntegerParameter("limit", 1, 15, limit),

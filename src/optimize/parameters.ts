@@ -6,7 +6,7 @@ import {
 import {
   makeParameters as makeStrategyParameters,
   Parameters as StrategyParameters,
-} from "./strategy.ts";
+} from "../strategy/strategy.ts";
 
 export type ParameterData = Record<string, number>;
 

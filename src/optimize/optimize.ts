@@ -2,7 +2,7 @@ import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters, Status } from "@sauber/optimize";
 import { buildStrategy } from "📚/strategy/mod.ts";
 import { importParameters, makeParameters, ParameterValues, ParameterData } from "./parameters.ts";
-import { Rater, StrategyParameters } from "./strategy.ts";
+import { Rater, StrategyParameters } from "📚/strategy/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
 import { createTimer } from "📚/signal/mod.ts";
 

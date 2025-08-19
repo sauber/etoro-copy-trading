@@ -1,14 +1,14 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
 import { Optimize } from "./optimize.ts";
-import { Rater } from "./strategy.ts";
+import { Rater } from "../strategy/strategy.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { ParameterData } from "./parameters.ts";
 import { Community, Names, TestCommunity } from "../community/mod.ts";
 import { makeRepository } from "../repository/mod.ts";
 import { Config } from "../config/config.ts";
 
-
+// TODO: Move name to Strategy
 const modelAssetName = "trading";
 
 // Repo
@@ -42,8 +42,8 @@ const validation: Exchange = new Exchange(instruments, spread);
 const config = new Config(repo);
 const settings = await config.get(modelAssetName) as ParameterData;
 const loaded: boolean = settings !== null;
-let model: Optimize|null = null;
-if ( loaded ) {
+let model: Optimize | null = null;
+if (loaded) {
   try {
     model = Optimize.import(settings, ranker);
     console.log("Loaded settings:", settings);
@@ -51,7 +51,7 @@ if ( loaded ) {
     console.log(e);
   }
 }
-if ( ! model ) { 
+if (!model) {
   model = Optimize.generate(exchange, 150, ranker);
   console.log("Best random starting point:", model.export());
 }
@@ -80,6 +80,7 @@ const finalScore: number = model.predict(validation);
 console.log("Final score:", finalScore);
 
 // Save model only if score improved
+// TODO: Use Strategy save method
 if (finalScore > initialScore) {
   const exported: ParameterData = model.export();
   console.log("Saved settings: ", exported);
