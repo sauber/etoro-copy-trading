@@ -1,7 +1,6 @@
 import { WeekdayStrategy } from "./weekday-strategy.ts";
 import { loadTimer } from "📚/signal/mod.ts";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
-import { ParameterData } from "📚/trading/parameters.ts";
 import { Policy } from "./policy.ts";
 import { StopLossStrategy } from "./stoploss-strategy.ts";
 import { TrailingStrategy } from "./trailing-strategy.ts";
@@ -32,30 +31,41 @@ export type StrategyParameters = {
   weekday: number;
 };
 
-/**  Min/max values of parameters */
-const limits = [
-  new IntegerParameter("weekday", 1, 5),
-  new Parameter("position_size", 0.01, 0.07),
-  new Parameter("stoploss", 0.05, 0.95),
-  new IntegerParameter("limit", 1, 5),
+/** Required input to signal function */
+export type Parameters = [
+  IntegerParameter,
+  Parameter,
+  Parameter,
+  IntegerParameter,
+];
+
+/** List of parameters used by signal and default values */
+export const parameters = (): Parameters => [
+  new IntegerParameter("weekday", 1, 7, 1),
+  new Parameter("position_size", 0.005, 0.2, 0.07),
+  new Parameter("stoploss", 0.05, 0.95, 0.85),
+  new IntegerParameter("limit", 1, 15, 3),
+];
+
+/** Generate parameters from custom values */
+export const makeParameters = (
+  weekday: number,
+  position_size: number,
+  stoploss: number,
+  limit: number,
+): Parameters => [
+  new IntegerParameter("weekday", 1, 7, weekday),
+  new Parameter("position_size", 0.005, 0.2, position_size),
+  new Parameter("stoploss", 0.05, 0.95, stoploss),
+  new IntegerParameter("limit", 1, 15, limit),
 ];
 
 /** Assert that parameters are within limits */
 function validation(settings: StrategyParameters): boolean {
+  const limits = parameters();
   for (const limit of limits) {
-    const name: string = limit.name;
-    const value: number | undefined = (function () {
-      switch (name) {
-        case "weekday":
-          return settings.weekday;
-        case "position_size":
-          return settings.position_size;
-        case "stoploss":
-          return settings.stoploss;
-        case "limit":
-          return settings.limit;
-      }
-    })();
+    const name = limit.name as keyof StrategyParameters;
+    const value = settings[name];
 
     if (value === undefined) throw new Error(`Missing parameter ${name}`);
 
@@ -104,7 +114,7 @@ export function buildStrategy(
 /** Strategy with parameters and models loaded from repository */
 export async function loadStrategy(repo: Backend): Promise<Strategy> {
   const config = new Config(repo);
-  const settings: ParameterData = await config.get("trading") as ParameterData;
+  const settings = await config.get("trading") as StrategyParameters;
   const ranker: Rater = await loadRanker(repo);
   const timer: Rater = await loadTimer(repo);
 

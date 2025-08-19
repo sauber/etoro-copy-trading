@@ -1,9 +1,8 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters, Status } from "@sauber/optimize";
 import { buildStrategy } from "📚/strategy/mod.ts";
-import { makeParameters, ParameterValues } from "📚/trading/parameters.ts";
-import { Rater } from "./strategy.ts";
-import { ParameterData } from "📚/trading/mod.ts";
+import { importParameters, makeParameters, ParameterValues, ParameterData } from "./parameters.ts";
+import { Rater, StrategyParameters } from "./strategy.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
 import { createTimer } from "📚/signal/mod.ts";
 
@@ -23,17 +22,18 @@ export class Optimize {
 
   /** Generate model from saved parameters */
   public static import(data: ParameterData, ranker: Rater): Optimize {
-    const values: ParameterValues = [
-      data.window,
-      data.weekday,
-      data.smoothing,
-      data.buy,
-      data.sell,
-      data.position_size,
-      data.stoploss,
-      data.limit,
-    ];
-    const parameters: Parameters = makeParameters(values);
+    // TODO: Make no assumptions about names of parameters or sequence of names
+    // const values: ParameterValues = [
+    //   data.window,
+    //   data.weekday,
+    //   data.smoothing,
+    //   data.buy,
+    //   data.sell,
+    //   data.position_size,
+    //   data.stoploss,
+    //   data.limit,
+    // ];
+    const parameters: Parameters = importParameters(data);
     return new Optimize(parameters, ranker);
   }
 
@@ -122,7 +122,7 @@ export class Optimize {
   private strategy(parameter: Parameters): Strategy {
     const settings = Object.fromEntries(
       parameter.map((p) => [p.name, p.value]),
-    ) as ParameterData;
+    ) as StrategyParameters;
     const timer: Rater = createTimer(settings);
     return buildStrategy(settings, this.ranker, timer);
   }

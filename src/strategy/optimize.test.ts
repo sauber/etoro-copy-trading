@@ -7,8 +7,7 @@ import {
 import { Dashboard, Parameters, Output } from "@sauber/optimize";
 import { Bar, Exchange, Instrument, createTestInstrument } from "@sauber/backtest";
 import { Optimize } from "📚/strategy/optimize.ts";
-import { Rater } from "./strategy.ts";
-import { ParameterData } from "📚/trading/mod.ts";
+import { Rater, StrategyParameters } from "./strategy.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
@@ -34,8 +33,8 @@ Deno.test("Generate best model from random parameters", () => {
 });
 
 Deno.test("Export / Import", () => {
-  const optimizer = makeOptimizer();
-  const data: ParameterData = optimizer.export();
+  const optimizer: Optimize = makeOptimizer();
+  const data = optimizer.export() as StrategyParameters;
   const count = 8;
   assertEquals(Object.keys(data).length, count);
   const imported = Optimize.import(data, ranker);

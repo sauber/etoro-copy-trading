@@ -10,7 +10,7 @@ export type Parameters = [
   IntegerParameter,
 ];
 
-/** List of parameters used by signal */
+/** List of parameters used by signal and default values */
 export const parameters = (): Parameters => [
   new IntegerParameter("buy_window", 1, 50, 14),
   new IntegerParameter("buy_threshold", 1, 49, 3),
@@ -36,27 +36,11 @@ export function rsi(source: Series, values: Parameters): Series {
   const [buy_window, buy_threshold, sell_window, sell_threshold] = values.map((
     v,
   ) => v.value);
-  // assert(buy_window > 1, `buy_window out of range (1,): ${buy_window}`);
-  // assert(
-  //   buy_threshold > 0 && buy_threshold <= 50,
-  //   `buy_threshold out of range (1,50]: ${buy_window}`,
-  // );
-  // assert(sell_window > 1, `sell_window out of range (1,): ${buy_window}`);
-  // assert(
-  //   sell_threshold >= 50 && sell_threshold < 100,
-  //   `sell_threshold out of range [50,100): ${buy_window}`,
-  // );
 
   const buy_indicator = new RSI(buy_window);
   const buy_series: Series = source.map((v) => buy_indicator.nextValue(v));
-  // .filter(
-  //   (v) => v !== undefined && !isNaN(v),
-  // );
   const sell_indicator = new RSI(sell_window);
   const sell_series: Series = source.map((v) => sell_indicator.nextValue(v));
-  // .filter(
-  //   (v) => v !== undefined && !isNaN(v),
-  // );
 
   const signal: Series = buy_series.map((buy_value, index) => {
     if (buy_value < buy_threshold) {

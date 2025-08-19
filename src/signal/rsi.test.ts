@@ -10,12 +10,7 @@ Deno.test("Convert series", () => {
   const sell_threshold = 70;
   const signals = rsi(
     source,
-    makeParameters(
-      buy_window,
-      buy_threshold,
-      sell_window,
-      sell_threshold,
-    ),
+    makeParameters(buy_window, buy_threshold, sell_window, sell_threshold),
   );
-  assertEquals(signals, new Float32Array([-1, -1, -1]));
+  assertEquals(signals, new Float32Array([0, 0, -1, -1, -1]));
 });

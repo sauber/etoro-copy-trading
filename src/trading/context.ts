@@ -23,7 +23,7 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { sum } from "@sauber/statistics";
-import { ParameterData } from "./parameters.ts";
+// import { ParameterData } from "../strategy/parameters.ts";
 import { Config } from "../config/mod.ts";
 import { Account } from "../account/mod.ts";
 import { Diary, Investor } from "../investor/mod.ts";
@@ -33,6 +33,9 @@ import { Community, Names } from "../community/mod.ts";
 const NOW: DateFormat = today();
 type Mirrors = Array<Mirror>;
 type Journal = Diary<Mirrors>;
+
+type ParameterData = Record<string, number>;
+
 
 // Count of days investor data is behind trading date
 const EXTEND = 2;

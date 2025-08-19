@@ -24,6 +24,19 @@ export const parameters = (): Parameters => [
   new IntegerParameter("sell", 51, 99, 80),
 ];
 
+/** Generate parameters from custom values */
+export const makeParameters = (
+  window: number,
+  smoothing: number,
+  buy: number,
+  sell: number,
+): Parameters => [
+  new IntegerParameter("window", 2, 50, window),
+  new IntegerParameter("smoothing", 1, 49, smoothing),
+  new IntegerParameter("buy", 1, 49, buy),
+  new IntegerParameter("sell", 51, 99, sell),
+];
+
 /** Convert series of values to series of signals */
 export function stochastic(series: Series, values: Parameters): Series {
   // Confirm all parameters are incluced

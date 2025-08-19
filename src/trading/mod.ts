@@ -1,1 +1,1 @@
-export * from "📚/trading/parameters.ts";
+// export * from "../strategy/parameters.ts";
