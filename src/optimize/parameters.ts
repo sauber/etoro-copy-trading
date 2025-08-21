@@ -35,19 +35,21 @@ function convertParameters(
   );
 }
 
-export type ParameterValues = [
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-  number,
-];
+// export type ParameterValues = [
+//   number,
+//   number,
+//   number,
+//   number,
+//   number,
+//   number,
+//   number,
+//   number,
+// ];
+
+export type ParameterValues = Array<number>;
 
 function makeStrategyParameters(
-  values: [number, number, number, number],
+  values: ParameterValues,
 ): Parameters {
   const keys: string[] = Object.keys(strategyParameters);
   const settings: Record<string, number> = Object.fromEntries(
@@ -57,21 +59,25 @@ function makeStrategyParameters(
 }
 
 function makeSignalParameters(
-  values: [number, number, number, number],
+  values: ParameterValues,
 ): Parameters {
-    const keys: string[] = Object.keys(signalParameters);
-    const settings: Record<string, number> = Object.fromEntries(
-        keys.map((name, index) => [name, values[index]]),
-    );
-    return convertParameters(signalParameters, settings);
+  const keys: string[] = Object.keys(signalParameters);
+  const settings: Record<string, number> = Object.fromEntries(
+    keys.map((name, index) => [name, values[index]]),
+  );
+  return convertParameters(signalParameters, settings);
 }
 
 /** Generate list of parameters optionally with initial values */
-export function makeParameters(value: ParameterValues | [] = []): Parameters {
-  const strategyvalues = value.slice(0, 4) as [number, number, number, number];
-  const signalvalues = value.slice(4) as [number, number, number, number];
+export function makeParameters(value: ParameterValues = []): Parameters {
+  // How many of the first values are for strategy. Remaining are for signal.
+  const strategyParameterCount: number = Object.keys(strategyParameters).length;
+  const strategyvalues = value.slice(0, strategyParameterCount);
+  const signalvalues = value.slice(strategyParameterCount);
+
   const strategy: Parameters = makeStrategyParameters(strategyvalues);
   const signal: Parameters = makeSignalParameters(signalvalues);
+
   return [...strategy, ...signal];
 }
 

@@ -5,7 +5,7 @@ import { importParameters, makeParameters, ParameterValues, ParameterData } from
 import { Rater, StrategyParameters } from "📚/strategy/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
 import { createTimer } from "📚/signal/mod.ts";
-import { score as calculateScore } from "./score.ts";
+import { score as calculateScore } from "../simulation/mod.ts";
 
 // ANSI escape codes
 const ESC = "\u001B[";
