@@ -1,11 +1,13 @@
 import { assertEquals } from "@std/assert";
 import { CachedSignal } from "./signal-cache.ts";
 import { Bar, createTestInstrument, Instrument } from "@sauber/backtest";
-import { parameters } from "./stochastic.ts";
+import { inputParameters } from "./stochastic.ts";
 
 Deno.test("CachedSignal generates and caches instrument", () => {
-  const p = parameters();
-  const cachedSignal = new CachedSignal(p);
+  const defaultValues = Object.fromEntries(
+    Object.entries(inputParameters).map(([name, param]) => [name, param.default])
+  );
+  const cachedSignal = new CachedSignal(defaultValues as any);
   const instrument: Instrument = createTestInstrument(70);
 
   // First call should generate and cache

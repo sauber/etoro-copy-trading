@@ -1,6 +1,6 @@
-import { IntegerParameter } from "@sauber/optimize";
 import { Stochastic } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
+import { Limits } from "../optimize/parameters.ts";
 
 /** %K and %D return type from Indicator */
 type KD = {
@@ -8,39 +8,20 @@ type KD = {
   d: number;
 };
 
-/** Required input to signal function */
-export type Parameters = [
-  IntegerParameter,
-  IntegerParameter,
-  IntegerParameter,
-  IntegerParameter,
-];
+export const inputParameters: Limits = {
+    window: { min: 2, max: 50, default: 14, int: true },
+    smoothing: { min: 1, max: 49, default: 3, int: true },
+    buy: { min: 1, max: 49, default: 20, int: true },
+    sell: { min: 51, max: 99, default: 80, int: true },
+};
 
-/** List of parameters used by signal */
-export const parameters = (): Parameters => [
-  new IntegerParameter("window", 2, 50, 14),
-  new IntegerParameter("smoothing", 1, 49, 3),
-  new IntegerParameter("buy", 1, 49, 20),
-  new IntegerParameter("sell", 51, 99, 80),
-];
+type Input = Record<keyof typeof inputParameters, number>;
 
-/** Generate parameters from custom values */
-export const makeParameters = (
-  window: number,
-  smoothing: number,
-  buy: number,
-  sell: number,
-): Parameters => [
-  new IntegerParameter("window", 2, 50, window),
-  new IntegerParameter("smoothing", 1, 49, smoothing),
-  new IntegerParameter("buy", 1, 49, buy),
-  new IntegerParameter("sell", 51, 99, sell),
-];
 
 /** Convert series of values to series of signals */
-export function stochastic(series: Series, values: Parameters): Series {
+export function stochastic(series: Series, values: Input): Series {
   // Confirm all parameters are incluced
-  const [window, smoothing, buy, sell] = values.map((v) => v.value);
+  const { window, smoothing, buy, sell } = values;
 
   // Stochastic Oscillator calculation
   const indicator = new Stochastic(window, smoothing);

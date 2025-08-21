@@ -1,5 +1,5 @@
 import { IntegerParameter, Parameter, Parameters } from "@sauber/optimize";
-import { makeParameters as makeSignalParameters } from "../signal/mod.ts";
+import { inputParameters as signalParameters } from "../signal/mod.ts";
 import { inputParameters as strategyParameters } from "../strategy/strategy.ts";
 
 export type ParameterData = Record<string, number>;
@@ -56,12 +56,22 @@ function makeStrategyParameters(
   return convertParameters(strategyParameters, settings);
 }
 
+function makeSignalParameters(
+  values: [number, number, number, number],
+): Parameters {
+    const keys: string[] = Object.keys(signalParameters);
+    const settings: Record<string, number> = Object.fromEntries(
+        keys.map((name, index) => [name, values[index]]),
+    );
+    return convertParameters(signalParameters, settings);
+}
+
 /** Generate list of parameters optionally with initial values */
 export function makeParameters(value: ParameterValues | [] = []): Parameters {
   const strategyvalues = value.slice(0, 4) as [number, number, number, number];
   const signalvalues = value.slice(4) as [number, number, number, number];
-  const signal: Parameters = makeSignalParameters(...signalvalues);
   const strategy: Parameters = makeStrategyParameters(strategyvalues);
+  const signal: Parameters = makeSignalParameters(signalvalues);
   return [...strategy, ...signal];
 }
 

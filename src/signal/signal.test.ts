@@ -6,15 +6,17 @@ import {
   assertThrows,
 } from "@std/assert";
 import { Signal } from "./signal.ts";
-import { parameters } from "./stochastic.ts";
+import { inputParameters } from "./stochastic.ts";
 import { createTestInstrument, Instrument } from "@sauber/backtest";
 
 Deno.test("Export", () => {
-  const p = parameters();
-  const signal = new Signal(p);
+  const defaultValues = Object.fromEntries(
+    Object.entries(inputParameters).map(([name, param]) => [name, param.default])
+  );
+  const signal = new Signal(defaultValues);
   const exported = signal.export();
-  Object.entries(exported).forEach(([_key, value], index) => {
-    assertEquals(value, p[index].value);
+  Object.entries(exported).forEach(([key, value]) => {
+    assertEquals(value, inputParameters[key].default);
   });
 });
 
@@ -25,12 +27,6 @@ Deno.test("Import", () => {
     buy: 20,
     sell: 80,
   };
-  // const imp = {
-  //   buy_window: 14,
-  //   buy_threshold: 3,
-  //   sell_window: 20,
-  //   sell_threshold: 80,
-  // };
   const signal: Signal = Signal.import(imp);
   assertInstanceOf(signal, Signal);
 });
@@ -44,32 +40,32 @@ Deno.test("Import Missing", () => {
   assertThrows(
     () => Signal.import(imp),
     Error,
-    // "Missing parameter sell",
+    "Missing parameter sell",
   );
 });
 
 Deno.test("Default", () => {
-  const p = parameters();
   const signal: Signal = Signal.default();
   assertInstanceOf(signal, Signal);
-  Object.entries(signal.export()).forEach(([_key, value], index) => {
-    assertEquals(value, p[index].value);
+  Object.entries(signal.export()).forEach(([key, value]) => {
+    assertEquals(value, inputParameters[key].default);
   });
 });
 
 Deno.test("Random", () => {
-  const p = parameters();
   const signal: Signal = Signal.random();
   assertInstanceOf(signal, Signal);
-  Object.entries(signal.export()).forEach(([_key, value], index) => {
-    assertGreaterOrEqual(value, p[index].min);
-    assertLessOrEqual(value, p[index].max);
+  Object.entries(signal.export()).forEach(([key, value]) => {
+    assertGreaterOrEqual(value, inputParameters[key].min);
+    assertLessOrEqual(value, inputParameters[key].max);
   });
 });
 
 Deno.test("Generate", () => {
-  const p = parameters();
-  const signal = new Signal(p);
+  const defaultValues = Object.fromEntries(
+    Object.entries(inputParameters).map(([name, param]) => [name, param.default])
+  );
+  const signal = new Signal(defaultValues);
   const instrument: Instrument = createTestInstrument(70);
   const result: Instrument = signal.generate(instrument);
   assertInstanceOf(result, Instrument);
