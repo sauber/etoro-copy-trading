@@ -1,7 +1,12 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters, Status } from "@sauber/optimize";
 import { buildStrategy } from "📚/strategy/mod.ts";
-import { importParameters, makeParameters, ParameterValues, ParameterData } from "./parameters.ts";
+import {
+  importParameters,
+  makeParameters,
+  ParameterData,
+  ParameterValues,
+} from "./parameters.ts";
 import { Rater, StrategyParameters } from "📚/strategy/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
 import { createTimer } from "📚/signal/mod.ts";
@@ -33,11 +38,6 @@ export class Optimize {
       this.parameters.map((p) => [p.name, p.value]),
     ) as ParameterData;
   }
-
-  /** Create an optimer with random start values */
-  // private static random(ranker: Rater): Optimize {
-  //   return new Optimize(makeParameters(), ranker);
-  // }
 
   /** Create an optimer with random start values, run simulation and return simulation score */
   private static sample(exchange: Exchange, ranker: Rater): [Score, Optimize] {
@@ -93,13 +93,13 @@ export class Optimize {
     status: Status = () => undefined,
   ): number {
     // Callback from optimize to model
-    const reward = (input: ParameterValues): Score =>
+    const agent = (input: ParameterValues): Score =>
       this.simulation(exchange, makeParameters(input));
 
-    // Configure minimizer
+    // Configure maximizer
     const minimizer = new Maximize({
       parameters: this.parameters,
-      agent: reward as (inputs: Array<number>) => number,
+      agent,
       epochs,
       status,
       every: 1,
