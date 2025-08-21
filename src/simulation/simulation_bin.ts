@@ -10,6 +10,7 @@ import { loadStrategy } from "../strategy/mod.ts";
 import { Names, TestCommunity } from "../community/mod.ts";
 import { makeRepository } from "../repository/mod.ts";
 import { Backend } from "@sauber/journal";
+import { score } from "./score.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -20,7 +21,7 @@ const strategy: Strategy = await loadStrategy(repo);
 
 // Exchange of test investors
 const community = new TestCommunity(repo);
-const names: Names = await community.samples(40);
+const names: Names = await community.samples(1000);
 const instruments: Instruments = await community.load(names);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
@@ -41,6 +42,7 @@ const account: Account = simulation.account;
 const profit = account.profit;
 const years: number = (exchange.start - exchange.end) / 365;
 const annual_return: number = (1 + profit) ** (1 / years) - 1;
+const reward: number = score(simulation);
 
 console.log(
   "Start:",
@@ -57,4 +59,6 @@ console.log(
   pct(account.InvestedRatio),
   "Win Ratio:",
   pct(account.WinRatioTrades),
+  "Score",
+  pct(reward),
 );
