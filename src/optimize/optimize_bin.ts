@@ -3,7 +3,7 @@ import { Dashboard, Parameters, Status } from "@sauber/optimize";
 import { Optimize } from "./optimize.ts";
 import { Rater } from "../strategy/strategy.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
-import { loadParameters, ParameterData } from "./parameters.ts";
+import { loadParameters, ParameterData } from "./loader.ts";
 import { Community, Names, TestCommunity } from "../community/mod.ts";
 import { makeRepository } from "../repository/mod.ts";
 import {

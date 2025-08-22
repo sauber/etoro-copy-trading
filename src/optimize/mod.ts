@@ -1,1 +1,1 @@
-export { type Limits } from "./parameters.ts";
+export { type Limits } from "./loader.ts";

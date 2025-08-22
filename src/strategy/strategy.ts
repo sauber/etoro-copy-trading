@@ -2,7 +2,7 @@ import { Backend } from "@sauber/journal";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
 import { loadTimer } from "📚/signal/mod.ts";
 import { loadRanker } from "../ranking/mod.ts";
-import { Limits } from "../optimize/parameters.ts";
+import { Limits } from "../optimize/loader.ts";
 import { Config } from "../config/mod.ts";
 import { Policy } from "./policy.ts";
 import { StopLossStrategy } from "./stoploss-strategy.ts";

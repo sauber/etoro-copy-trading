@@ -6,7 +6,7 @@ import {
   makeParameters,
   ParameterData,
   ParameterValues,
-} from "./parameters.ts";
+} from "./loader.ts";
 import { Rater, StrategyParameters } from "📚/strategy/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
 import { createTimer } from "📚/signal/mod.ts";
