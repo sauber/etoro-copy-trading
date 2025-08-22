@@ -49,7 +49,7 @@ let initialScore: number = 0;
 try {
   const parameters = await loadParameters(repo);
   model = new Optimize(parameters, ranker);
-  console.log("Loaded parameters:", parameters);
+  // console.log("Loaded parameters:", parameters);
   initialScore = model.predict(validation);
   console.log("Initial score:", initialScore);
 } catch (e) {
@@ -99,7 +99,7 @@ if (finalScore > initialScore) {
     ) => [key, exported[key]]),
   );
 
-  console.log({signal, strategy});
+  // console.log({signal, strategy});
 
   await saveStrategy(repo, strategy);
   console.log("Saved settings: ", exported);

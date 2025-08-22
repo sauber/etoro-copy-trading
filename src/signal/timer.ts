@@ -54,9 +54,9 @@ export async function saveSettings(
   repo: Backend,
   settings: Exported,
 ): Promise<void> {
-  console.log("Saving settings:", assetName, settings);
+  // console.log("Saving settings:", assetName, settings);
   if (!validate(settings)) return;
-  console.log("Saving settings:", settings);
+  // console.log("Saving settings:", settings);
   const config = new Config(repo);
   await config.set(assetName, settings);
 }

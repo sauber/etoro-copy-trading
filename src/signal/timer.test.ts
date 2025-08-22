@@ -18,6 +18,12 @@ Deno.test("createTimer", () => {
   assertInstanceOf(timer, Function);
 });
 
+/** Confirm settings can be saved */
+Deno.test("save settings", async () => {
+  const result = await saveSettings(repo, defaults);
+  assertEquals(result, undefined);
+});
+
 /** Confirm that loadTimer() function successfully returns a Rater function */
 Deno.test("loadTimer", async () => {
   const timer: Rater = await loadTimer(repo);
@@ -28,10 +34,4 @@ Deno.test("loadTimer", async () => {
 Deno.test("load settings", async () => {
   const settings: Input = await loadSettings(repo);
   assertInstanceOf(settings, Object);
-});
-
-/** Confirm settings can be saved */
-Deno.test("save settings", async () => {
-  const result = await saveSettings(repo, defaults);
-  assertEquals(result, undefined);
 });
