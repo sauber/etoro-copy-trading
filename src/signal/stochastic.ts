@@ -1,6 +1,6 @@
 import { Stochastic } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
-import { Limits } from "../optimize/parameters.ts";
+import { Limits } from "../optimize/mod.ts";
 
 /** %K and %D return type from Indicator */
 type KD = {
@@ -9,17 +9,16 @@ type KD = {
 };
 
 export const inputParameters: Limits = {
-    window: { min: 2, max: 50, default: 14, int: true },
-    smoothing: { min: 1, max: 49, default: 3, int: true },
-    buy: { min: 1, max: 49, default: 20, int: true },
-    sell: { min: 51, max: 99, default: 80, int: true },
+  window: { min: 2, max: 50, default: 14, int: true },
+  smoothing: { min: 1, max: 49, default: 3, int: true },
+  buy: { min: 1, max: 49, default: 20, int: true },
+  sell: { min: 51, max: 99, default: 80, int: true },
 };
 
 type Input = Record<keyof typeof inputParameters, number>;
 
-
 /** Convert series of values to series of signals */
-export function stochastic(series: Series, values: Input): Series {
+function stochastic(series: Series, values: Input): Series {
   // Confirm all parameters are incluced
   const { window, smoothing, buy, sell } = values;
 
@@ -56,3 +55,5 @@ export function stochastic(series: Series, values: Input): Series {
 
   return new Float32Array(signals);
 }
+
+export { stochastic as signal };

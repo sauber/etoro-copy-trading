@@ -6,14 +6,15 @@ import {
   assertThrows,
 } from "@std/assert";
 import { Signal } from "./signal.ts";
-import { inputParameters } from "./stochastic.ts";
+import { inputParameters } from "./mod.ts";
 import { createTestInstrument, Instrument } from "@sauber/backtest";
 
+const settings = Object.fromEntries(
+  Object.entries(inputParameters).map(([name, param]) => [name, param.default]),
+);
+
 Deno.test("Export", () => {
-  const defaultValues = Object.fromEntries(
-    Object.entries(inputParameters).map(([name, param]) => [name, param.default])
-  );
-  const signal = new Signal(defaultValues);
+  const signal = new Signal(settings);
   const exported = signal.export();
   Object.entries(exported).forEach(([key, value]) => {
     assertEquals(value, inputParameters[key].default);
@@ -21,26 +22,16 @@ Deno.test("Export", () => {
 });
 
 Deno.test("Import", () => {
-  const imp = {
-    window: 14,
-    smoothing: 3,
-    buy: 20,
-    sell: 80,
-  };
-  const signal: Signal = Signal.import(imp);
+  const signal: Signal = Signal.import(settings);
   assertInstanceOf(signal, Signal);
 });
 
 Deno.test("Import Missing", () => {
-  const imp = {
-    window: 14,
-    smoothing: 3,
-    buy: 20,
-  };
+  const imp = {};
   assertThrows(
     () => Signal.import(imp),
     Error,
-    "Missing parameter sell",
+    "Missing parameter",
   );
 });
 
@@ -63,7 +54,9 @@ Deno.test("Random", () => {
 
 Deno.test("Generate", () => {
   const defaultValues = Object.fromEntries(
-    Object.entries(inputParameters).map(([name, param]) => [name, param.default])
+    Object.entries(inputParameters).map((
+      [name, param],
+    ) => [name, param.default]),
   );
   const signal = new Signal(defaultValues);
   const instrument: Instrument = createTestInstrument(70);

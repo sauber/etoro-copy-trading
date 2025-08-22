@@ -3,13 +3,18 @@ import { Dashboard, Parameters, Status } from "@sauber/optimize";
 import { Optimize } from "./optimize.ts";
 import { Rater } from "../strategy/strategy.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
-import { ParameterData } from "./parameters.ts";
+import { loadParameters, ParameterData } from "./parameters.ts";
 import { Community, Names, TestCommunity } from "../community/mod.ts";
 import { makeRepository } from "../repository/mod.ts";
-import { Config } from "../config/config.ts";
-
-// TODO: Move name to Strategy
-const modelAssetName = "trading";
+import {
+  Exported,
+  inputParameters as signalInputParameters,
+  saveSettings as saveTimer,
+} from "../signal/mod.ts";
+import {
+  inputParameters as strategyInputParameters,
+  saveSettings as saveStrategy,
+} from "../strategy/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -38,20 +43,18 @@ const validationInstruments: Instruments = await investors(validation_count);
 console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
 
-// Load Parameters into model
-const config = new Config(repo);
-const settings = await config.get(modelAssetName) as ParameterData;
-const loaded: boolean = settings !== null;
+// Attempt to load parameters
 let model: Optimize | null = null;
-if (loaded) {
-  try {
-    model = Optimize.import(settings, ranker);
-    console.log("Loaded settings:", settings);
-  } catch (e) {
-    console.log(e);
-  }
-}
-if (!model) {
+let initialScore: number = 0;
+try {
+  const parameters = await loadParameters(repo);
+  model = new Optimize(parameters, ranker);
+  console.log("Loaded parameters:", parameters);
+  initialScore = model.predict(validation);
+  console.log("Initial score:", initialScore);
+} catch (e) {
+  // Loading failed, so search for a good starting point
+  // TODO: Suspect repeat defaults are tested instead of random
   model = Optimize.generate(exchange, 150, ranker);
   console.log("Best random starting point:", model.export());
 }
@@ -67,10 +70,6 @@ const status: Status = (
   reward: number[],
 ) => console.log(dashboard.render(parameters, iterations, reward));
 
-// Confirm starting score
-const initialScore: number = model.predict(validation);
-console.log("Initial score:", initialScore);
-
 // Run optimizer and save results
 const epsilon = 0.01;
 const _iterations: number = model.optimize(exchange, epochs, epsilon, status);
@@ -83,6 +82,25 @@ console.log("Final score:", finalScore);
 // TODO: Use Strategy save method
 if (finalScore > initialScore) {
   const exported: ParameterData = model.export();
+  // await config.set(modelAssetName, exported);
+
+  // Pick out signal parameters and save
+  const signal: Exported = Object.fromEntries(
+    Object.entries(signalInputParameters).map((
+      [key, _limit],
+    ) => [key, exported[key]]),
+  );
+  await saveTimer(repo, signal);
+
+  // Pick out strategy parameters and save
+  const strategy: Exported = Object.fromEntries(
+    Object.entries(strategyInputParameters).map((
+      [key, _limit],
+    ) => [key, exported[key]]),
+  );
+
+  console.log({signal, strategy});
+
+  await saveStrategy(repo, strategy);
   console.log("Saved settings: ", exported);
-  await config.set(modelAssetName, exported);
 }

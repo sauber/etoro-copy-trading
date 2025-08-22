@@ -1,34 +1,37 @@
-import { assertInstanceOf } from "@std/assert";
-import { Rater } from "../strategy/mod.ts";
-import { createTimer, loadTimer, saveTimer } from "./timer.ts";
-import { makeTestRepository } from "../repository/mod.ts";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { HeapBackend } from "@sauber/journal";
+import { Rater } from "../strategy/mod.ts";
+import { createTimer, loadSettings, loadTimer, saveSettings } from "./timer.ts";
+import { type Input, inputParameters } from "./indicator.ts";
+
+// Default values for signal
+const defaults: Input = Object.fromEntries(
+  Object.entries(inputParameters).map(([name, param]) => [name, param.default]),
+);
+
+// Create repo
+const repo = new HeapBackend();
 
 /** Confirm that createTimer() function successfully returns a Rater function */
 Deno.test("createTimer", () => {
-  const timer: Rater = createTimer({
-    window: 14,
-    smoothing: 3,
-    buy: 20,
-    sell: 80,
-  });
+  const timer: Rater = createTimer(defaults);
   assertInstanceOf(timer, Function);
 });
 
 /** Confirm that loadTimer() function successfully returns a Rater function */
 Deno.test("loadTimer", async () => {
-  const timer: Rater = await loadTimer(makeTestRepository());
+  const timer: Rater = await loadTimer(repo);
   assertInstanceOf(timer, Function);
 });
 
-/** Confirm that signal parameters can be stored */
-Deno.test("storeTimer", async () => {
-  const settings = {
-    window: 14,
-    smoothing: 3,
-    buy: 20,
-    sell: 80,
-  };
-  const repo = new HeapBackend();
-  await saveTimer(repo, settings);
+/** Confirm settings can be loaded */
+Deno.test("load settings", async () => {
+  const settings: Input = await loadSettings(repo);
+  assertInstanceOf(settings, Object);
+});
+
+/** Confirm settings can be saved */
+Deno.test("save settings", async () => {
+  const result = await saveSettings(repo, defaults);
+  assertEquals(result, undefined);
 });

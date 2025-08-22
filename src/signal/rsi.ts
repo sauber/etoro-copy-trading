@@ -1,41 +1,20 @@
 import { RSI } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
-import { IntegerParameter } from "@sauber/optimize";
+import { Limits } from "../optimize/mod.ts";
 
-/** Required input to signal function */
-export type Parameters = [
-  IntegerParameter,
-  IntegerParameter,
-  IntegerParameter,
-  IntegerParameter,
-];
+// Range of parameters
+export const inputParameters: Limits = {
+  buy_window: { min: 1, max: 50, default: 14, int: true },
+  buy: { min: 1, max: 49, default: 3, int: true },
+  sell_window: { min: 1, max: 50, default: 20, int: true },
+  sell: { min: 51, max: 99, default: 80, int: true },
+};
 
-/** List of parameters used by signal and default values */
-export const parameters = (): Parameters => [
-  new IntegerParameter("buy_window", 1, 50, 14),
-  new IntegerParameter("buy_threshold", 1, 49, 3),
-  new IntegerParameter("sell_window", 1, 50, 20),
-  new IntegerParameter("sell_threshold", 51, 99, 80),
-];
-
-/** Generate parameters from custom values */
-export const makeParameters = (
-  buy_window: number,
-  buy_threshold: number,
-  sell_window: number,
-  sell_threshold: number,
-): Parameters => [
-  new IntegerParameter("buy_window", 1, 50, buy_window),
-  new IntegerParameter("buy_threshold", 1, 49, buy_threshold),
-  new IntegerParameter("sell_window", 1, 50, sell_window),
-  new IntegerParameter("sell_threshold", 51, 99, sell_threshold),
-];
+export type Input = Record<keyof typeof inputParameters, number>;
 
 /** Create a series of signals in range [-1,1] based on RSI indicator of value chart */
-export function rsi(source: Series, values: Parameters): Series {
-  const [buy_window, buy_threshold, sell_window, sell_threshold] = values.map((
-    v,
-  ) => v.value);
+function rsi(source: Series, values: Input): Series {
+  const { buy_window, buy, sell_window, sell } = values;
 
   const buy_indicator = new RSI(buy_window);
   const buy_series: Series = source.map((v) => buy_indicator.nextValue(v));
@@ -43,15 +22,15 @@ export function rsi(source: Series, values: Parameters): Series {
   const sell_series: Series = source.map((v) => sell_indicator.nextValue(v));
 
   const signal: Series = buy_series.map((buy_value, index) => {
-    if (buy_value < buy_threshold) {
-      return (buy_threshold - buy_value) / buy_threshold;
-    }
+    if (buy_value < buy) return -(buy - buy_value) / buy;
+
     const sell_value = sell_series[index];
-    if (sell_value > sell_threshold) {
-      return (sell_threshold - sell_value) / (100 - sell_threshold);
-    }
+    if (sell_value > sell) return -(sell - sell_value) / (100 - sell);
+
     return 0;
   });
 
   return signal;
 }
+
+export { rsi as signal };

@@ -1,6 +1,14 @@
 import { IntegerParameter, Parameter, Parameters } from "@sauber/optimize";
-import { inputParameters as signalParameters } from "../signal/mod.ts";
+import {
+  inputParameters as signalParameters,
+  loadSettings as loadTimerSettings,
+} from "../signal/mod.ts";
 import { inputParameters as strategyParameters } from "../strategy/strategy.ts";
+import { loadSettings as loadStrategySettings } from "../strategy/mod.ts";
+import { Backend } from "@sauber/journal";
+
+// TODO: Convert to class
+// TODO: Create test cases
 
 export type ParameterData = Record<string, number>;
 
@@ -34,17 +42,6 @@ function convertParameters(
       )
   );
 }
-
-// export type ParameterValues = [
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number,
-// ];
 
 export type ParameterValues = Array<number>;
 
@@ -91,5 +88,15 @@ export function importParameters(values: Record<string, number>): Parameters {
     }
     param.set(value);
   });
+  return p;
+}
+
+/** Load signal and strategy settings and combine to list of parameters */
+export async function loadParameters(repo: Backend): Promise<Parameters> {
+  const [signal, strategy] = await Promise.all([
+    loadTimerSettings(repo),
+    loadStrategySettings(repo),
+  ]);
+  const p = importParameters({ ...signal, ...strategy });
   return p;
 }

@@ -1,5 +1,5 @@
 import { createTestInstrument, Series } from "@sauber/backtest";
-import { inputParameters, stochastic } from "./stochastic.ts";
+import { inputParameters, signal as stochastic } from "./stochastic.ts";
 import { assert } from "@std/assert";
 
 Deno.test("Stochastic Oscillator Signal", () => {

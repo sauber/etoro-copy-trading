@@ -1,8 +1,5 @@
 import { Bar, Instrument, Series } from "@sauber/backtest";
-import {
-  inputParameters,
-  stochastic as indicator,
-} from "./stochastic.ts";
+import { inputParameters, signal } from "./indicator.ts";
 
 // TODO: Move to stochastic.ts and be specific about each key required
 export type Exported = Record<string, number>;
@@ -15,7 +12,9 @@ export class Signal {
   /** Default parameters for signal */
   public static default(): Signal {
     const defaultValues = Object.fromEntries(
-      Object.entries(inputParameters).map(([name, param]) => [name, param.default])
+      Object.entries(inputParameters).map((
+        [name, param],
+      ) => [name, param.default]),
     ) as Input;
     return new this(defaultValues);
   }
@@ -26,7 +25,7 @@ export class Signal {
       Object.entries(inputParameters).map(([name, param]) => {
         const value = Math.random() * (param.max - param.min) + param.min;
         return [name, param.int ? Math.round(value) : value];
-      })
+      }),
     ) as Input;
     return new this(randomValues);
   }
@@ -48,7 +47,7 @@ export class Signal {
 
   /** Generate signal from instrument */
   public generate(instrument: Instrument): Instrument {
-    const signals: Series = indicator(instrument.series, this.values);
+    const signals: Series = signal(instrument.series, this.values);
     const result = new Instrument(
       signals,
       instrument.end,
@@ -60,6 +59,7 @@ export class Signal {
 
   /** Signal value at bar */
   public predict(instrument: Instrument, bar: Bar): number {
-    const chart: Instrument = this.generate(instrument);    return chart.price(bar);
+    const chart: Instrument = this.generate(instrument);
+    return chart.price(bar);
   }
 }

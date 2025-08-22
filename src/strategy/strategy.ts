@@ -23,6 +23,8 @@ import { WeekdayStrategy } from "./weekday-strategy.ts";
  */
 export type Rater = (instrument: Instrument, bar: Bar) => number;
 
+const assetName = "trading";
+
 /** Parameters required by Strategy */
 export type StrategyParameters = {
   position_size: number;
@@ -87,12 +89,51 @@ export function buildStrategy(
   return strategy;
 }
 
+/** Load strategy parameter values from repository */
+export async function loadSettings(repo: Backend): Promise<Input> {
+  const config = new Config(repo);
+  const settings = await config.get(assetName) as Input;
+  if (!validation(settings)) return {};
+  return settings;
+}
+
+/** Save strategy parameter values to repository */
+export async function saveSettings(
+  repo: Backend,
+  settings: Input,
+): Promise<void> {
+  if (!validation(settings)) return;
+  const config = new Config(repo);
+  await config.set(assetName, settings);
+}
+
 /** Strategy with parameters and models loaded from repository */
 export async function loadStrategy(repo: Backend): Promise<Strategy> {
-  const config = new Config(repo);
-  const settings = await config.get("trading") as Input;
-  const ranker: Rater = await loadRanker(repo);
-  const timer: Rater = await loadTimer(repo);
+  // const config = new Config(repo);
+  // const settings = await config.get(assetName) as Input;
+  // const ranker: Rater = await loadRanker(repo);
+  // const timer: Rater = await loadTimer(repo);
+  const [ settings, ranker, timer ] = await Promise.all([
+    loadSettings(repo),
+    loadRanker(repo),
+    loadTimer(repo),
+  ]);
 
   return buildStrategy(settings, ranker, timer);
 }
+
+/** Save strategy parameters to repository */
+// export async function saveStrategy(
+//   repo: Backend,
+//   settings: Record<string, number>,
+// ): Promise<void> {
+//   // Save only settings as defined in Limits
+//   const limits = inputParameters;
+//   const keys = Object.keys(limits);
+//   const valid: Input = {};
+//   for (const key of keys) {
+//     valid[key] = settings[key];
+//   }
+//   const config = new Config(repo);
+//   await config.set(assetName, valid);
+// }

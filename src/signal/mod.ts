@@ -1,4 +1,4 @@
 export * from "./signal.ts";
 export * from "./signal-cache.ts";
 export * from "./timer.ts";
-export * from "./stochastic.ts";
+export * from "./indicator.ts";
