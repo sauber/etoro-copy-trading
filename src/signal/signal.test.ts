@@ -5,19 +5,19 @@ import {
   assertLessOrEqual,
   assertThrows,
 } from "@std/assert";
-import { Signal } from "./signal.ts";
-import { inputParameters } from "./mod.ts";
 import { createTestInstrument, Instrument } from "@sauber/backtest";
+import { Signal } from "./signal.ts";
+import { limits } from "./indicator.ts";
 
 const settings = Object.fromEntries(
-  Object.entries(inputParameters).map(([name, param]) => [name, param.default]),
+  Object.entries(limits).map(([name, param]) => [name, param.default]),
 );
 
 Deno.test("Export", () => {
   const signal = new Signal(settings);
   const exported = signal.export();
   Object.entries(exported).forEach(([key, value]) => {
-    assertEquals(value, inputParameters[key].default);
+    assertEquals(value, limits[key].default);
   });
 });
 
@@ -39,7 +39,7 @@ Deno.test("Default", () => {
   const signal: Signal = Signal.default();
   assertInstanceOf(signal, Signal);
   Object.entries(signal.export()).forEach(([key, value]) => {
-    assertEquals(value, inputParameters[key].default);
+    assertEquals(value, limits[key].default);
   });
 });
 
@@ -47,14 +47,14 @@ Deno.test("Random", () => {
   const signal: Signal = Signal.random();
   assertInstanceOf(signal, Signal);
   Object.entries(signal.export()).forEach(([key, value]) => {
-    assertGreaterOrEqual(value, inputParameters[key].min);
-    assertLessOrEqual(value, inputParameters[key].max);
+    assertGreaterOrEqual(value, limits[key].min);
+    assertLessOrEqual(value, limits[key].max);
   });
 });
 
 Deno.test("Generate", () => {
   const defaultValues = Object.fromEntries(
-    Object.entries(inputParameters).map((
+    Object.entries(limits).map((
       [name, param],
     ) => [name, param.default]),
   );

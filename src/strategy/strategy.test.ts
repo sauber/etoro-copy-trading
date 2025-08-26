@@ -9,7 +9,7 @@ import { Strategy } from "@sauber/backtest";
 import { assertInstanceOf, assertThrows } from "@std/assert";
 import { loadStrategy } from "./mod.ts";
 import { HeapBackend } from "@sauber/journal";
-import { saveSettings as saveTimer, inputParameters } from "../signal/mod.ts";
+import { Signal } from "../signal/mod.ts";
 
 const repo = new HeapBackend();
 const ranker: Rater = await loadRanker(repo);
@@ -48,10 +48,7 @@ Deno.test("Save parameters", async () => {
 
 Deno.test("Load Strategy", async () => {
   // Save some timer settings first
-  const settings = Object.fromEntries(
-    Object.entries(inputParameters).map(([name, param]) => [name, param.default]),
-  );
-  await saveTimer(repo, settings);
+  await Signal.default().save(repo);
 
   const strategy: Strategy = await loadStrategy(repo);
   assertInstanceOf(strategy, Object);

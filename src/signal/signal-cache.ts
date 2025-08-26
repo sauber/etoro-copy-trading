@@ -15,4 +15,9 @@ export class CachedSignal extends Signal {
     this.charts.set(instrument.symbol, chart);
     return chart.price(bar);
   }
+
+  /** Count of cached entries */
+  public get length(): number {
+    return this.charts.size;
+  }
 }

@@ -1,9 +1,9 @@
 import { Backend } from "@sauber/journal";
 import { Bar, Instrument, Strategy } from "@sauber/backtest";
-import { loadTimer } from "📚/signal/mod.ts";
 import { loadRanker } from "../ranking/mod.ts";
-import { Limits } from "../optimize/loader.ts";
+import { type Limits } from "../signal/mod.ts";
 import { Config } from "../config/mod.ts";
+import { loadTimer } from "./timer.ts";
 import { Policy } from "./policy.ts";
 import { StopLossStrategy } from "./stoploss-strategy.ts";
 import { TrailingStrategy } from "./trailing-strategy.ts";
@@ -113,7 +113,7 @@ export async function loadStrategy(repo: Backend): Promise<Strategy> {
   // const settings = await config.get(assetName) as Input;
   // const ranker: Rater = await loadRanker(repo);
   // const timer: Rater = await loadTimer(repo);
-  const [ settings, ranker, timer ] = await Promise.all([
+  const [settings, ranker, timer] = await Promise.all([
     loadSettings(repo),
     loadRanker(repo),
     loadTimer(repo),
@@ -121,19 +121,3 @@ export async function loadStrategy(repo: Backend): Promise<Strategy> {
 
   return buildStrategy(settings, ranker, timer);
 }
-
-/** Save strategy parameters to repository */
-// export async function saveStrategy(
-//   repo: Backend,
-//   settings: Record<string, number>,
-// ): Promise<void> {
-//   // Save only settings as defined in Limits
-//   const limits = inputParameters;
-//   const keys = Object.keys(limits);
-//   const valid: Input = {};
-//   for (const key of keys) {
-//     valid[key] = settings[key];
-//   }
-//   const config = new Config(repo);
-//   await config.set(assetName, valid);
-// }

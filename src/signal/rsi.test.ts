@@ -1,5 +1,5 @@
 import { Series } from "@sauber/backtest";
-import { assertEquals } from "@std/assert/equals";
+import { assertEquals } from "@std/assert";
 import { signal as rsi } from "./rsi.ts";
 
 Deno.test("Convert series", () => {

@@ -1,6 +1,6 @@
 import { Stochastic } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
-import { Limits } from "../optimize/mod.ts";
+import { Limits } from "./indicator.ts";
 
 /** %K and %D return type from Indicator */
 type KD = {

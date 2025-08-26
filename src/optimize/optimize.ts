@@ -7,10 +7,11 @@ import {
   ParameterData,
   ParameterValues,
 } from "./loader.ts";
-import { Rater, StrategyParameters } from "📚/strategy/mod.ts";
+import { Rater, StrategyParameters, createTimer } from "📚/strategy/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
-import { createTimer } from "📚/signal/mod.ts";
 import { score as calculateScore } from "../simulation/mod.ts";
+import { limits } from "../signal/rsi.ts";
+import { Settings } from "../signal/mod.ts";
 
 // ANSI escape codes
 const ESC = "\u001B[";
@@ -69,8 +70,14 @@ export class Optimize {
   private strategy(parameter: Parameters): Strategy {
     const settings = Object.fromEntries(
       parameter.map((p) => [p.name, p.value]),
-    ) as StrategyParameters;
-    const timer: Rater = createTimer(settings);
+    );
+
+    const timerKeys: string[] = Object.keys(limits);
+    const timerSettings: Settings = Object.fromEntries(
+      timerKeys.map((key) => [key, settings[key]]),
+    );
+
+    const timer: Rater = createTimer(timerSettings);
     return buildStrategy(settings, this.ranker, timer);
   }
 

@@ -1,16 +1,17 @@
 import { RSI } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
-import { Limits } from "../optimize/mod.ts";
+import { Limits } from "./indicator.ts";
 
 // Range of parameters
-export const inputParameters: Limits = {
+export const limits: Limits = {
   buy_window: { min: 1, max: 50, default: 14, int: true },
   buy: { min: 1, max: 49, default: 3, int: true },
   sell_window: { min: 1, max: 50, default: 20, int: true },
   sell: { min: 51, max: 99, default: 80, int: true },
 };
+Object.freeze(limits);
 
-export type Input = Record<keyof typeof inputParameters, number>;
+export type Input = Record<keyof typeof limits, number>;
 
 /** Create a series of signals in range [-1,1] based on RSI indicator of value chart */
 function rsi(source: Series, values: Input): Series {

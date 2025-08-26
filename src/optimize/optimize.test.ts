@@ -11,8 +11,8 @@ import {
   Exchange,
   Instrument,
 } from "@sauber/backtest";
-import { Optimize } from "./optimize.ts";
 import { Rater, StrategyParameters } from "../strategy/strategy.ts";
+import { Optimize } from "./optimize.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
