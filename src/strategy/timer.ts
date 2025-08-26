@@ -2,9 +2,7 @@ import { Bar, Instrument } from "@sauber/backtest";
 import { Backend } from "@sauber/journal";
 import { CachedSignal, Settings, Signal } from "../signal/mod.ts";
 import { Rater } from "./strategy.ts";
-
-// Number of bars delayed in timing
-const DELAY = 2;
+import { DELAY } from "./context.ts";
 
 /** Create a prediction wrapper */
 function createRater(signal: Signal): Rater {

@@ -35,9 +35,8 @@ type Journal = Diary<Mirrors>;
 
 type ParameterData = Record<string, number>;
 
-
 // Count of days investor data is behind trading date
-const EXTEND = 2;
+export const DELAY = 2;
 
 /** Typs of values storable in cache */
 type CacheValue =
@@ -84,18 +83,17 @@ export class Context {
 
   /** Trading strategy parameters */
   private readonly settings_lock = createMutex();
-  private _settings: ParameterData | null = null;
+  private _settings: ParameterData | undefined = undefined;
   public async settings(): Promise<ParameterData> {
-    if (this._settings !== null) return this._settings;
+    if (this._settings !== undefined) return this._settings;
     await this.settings_lock.acquire();
     try {
       // If settings already loaded, return them
-      if (this._settings !== null) return this._settings;
+      if (this._settings !== undefined) return this._settings;
       // Load while having lock aquired
       const config = new Config(this.repo);
       const settings: ParameterData =
         (await config.get("trading")) as ParameterData;
-
       this._settings = settings;
       return settings;
     } finally {
@@ -127,7 +125,7 @@ export class Context {
     await this.tradingDate_lock.acquire();
     try {
       if (this._tradingDate !== null) return this._tradingDate;
-      console.log("Loading TradingDate");
+      // console.log("Loading TradingDate");
       const repoEnd: DateFormat | null = await this.end();
       const weekday: number = (await this.settings()).weekday;
       const tradingDate: DateFormat = repoEnd
@@ -178,7 +176,6 @@ export class Context {
       const investor: Investor = await this.community.investor(
         username,
       );
-      console.log("Loaded Real Investor", username);
       this._investors.set(username, investor);
       return investor;
     } finally {
@@ -290,7 +287,7 @@ export class Context {
   }
 
   /** Convert investor to instrument */
-  public instrument(username: string): Promise<Instrument> {
+  private instrument(username: string): Promise<Instrument> {
     return this.cache<Instrument>(
       "instrument_" + username,
       async () => {
@@ -371,7 +368,7 @@ export class Context {
       const value: Amount = await this.value();
       const positions: Positions = await this.positions();
       const invested: Amount = sum(
-        positions.map((p: Position) => p.value(bar + EXTEND)),
+        positions.map((p: Position) => p.value(bar + DELAY)),
       );
       const amount: Amount = value - invested;
       this._amount = amount;
@@ -400,7 +397,7 @@ export class Context {
       "trading_instruments",
       async () => {
         const tradingDate: DateFormat = await this.tradingDate();
-        const activeDate: DateFormat = nextDate(tradingDate, -EXTEND);
+        const activeDate: DateFormat = nextDate(tradingDate, -DELAY);
         const names: Names = await this.community.active(activeDate);
         return this.instruments(names);
       },
