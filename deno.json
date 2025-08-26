@@ -15,6 +15,7 @@
   "nodeModulesDir": "auto",
   "imports": {
     "@117/mutex": "jsr:@117/mutex@^1.0.8",
+    "@cliffy/table": "jsr:@cliffy/table@^1.0.0-rc.8",
     "@debut/indicators": "npm:@debut/indicators@^1.3.22",
     "@hugoalh/shuffle-array": "jsr:@hugoalh/shuffle-array@^2.0.4",
     "@sauber/backtest": "jsr:@sauber/backtest@^2.2.0",

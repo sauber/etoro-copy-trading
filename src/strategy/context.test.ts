@@ -34,7 +34,7 @@ Deno.test("Username", async () => {
   assertEquals(name, "GainersQtr");
 });
 
-Deno.test("Instrument", async () => {
+Deno.test("Any Instrument", async () => {
   const context = new Context(repo);
   const instr: Instrument = await context.anyInstrument();
   assert("UserName" in instr);

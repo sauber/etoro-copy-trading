@@ -1,7 +1,9 @@
+import { Table } from "@cliffy/table";
+
 import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
-import { Rater, loadTimer, Classifier, Context } from "📚/strategy/mod.ts";
+import { Classifier, Context, loadTimer, ParameterData, Rater } from "📚/strategy/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
 
@@ -20,19 +22,32 @@ const timer: Rater = await loadTimer(repo);
 const situation: StrategyContext = await loader.strategyContext();
 
 // Settings
+const settings: ParameterData = await loader.settings();
 const tradingDate: DateFormat = await loader.tradingDate();
 const username: string = await loader.username();
-const positionSize: number = (await loader.settings()).position_size;
-const stoploss: number = (await loader.settings()).stoploss;
-const limit: number = (await loader.settings()).limit;
+const available: number = (await loader.tradingInstruments()).length;
 
 // Loading finished, free cache memory
 loader = null;
-const snap: number = performance.now();
-console.log("Data loading time (ms)", snap - start);
-console.log("Account:", username, "Trading Day:", tradingDate, "SL:", stoploss, "Limit:", limit, "Cash:", situation.amount.toFixed(2));
 
-const classifier = new Classifier(situation, ranker, timer, positionSize);
+// Print settings
+const snap: number = performance.now();
+const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const table: Table = new Table(
+  ["Loading", Math.round(snap - start) + " ms", "Investors", available],
+  ["Account", username, "Position Size", settings.position_size],
+  ["Trading Day", weekday[settings.weekday], "Trading Date", tradingDate],
+  ["Stoploss", settings.stoploss, "Limit", settings.limit],
+  ["Amount", situation.value.toFixed(2), "Cash", situation.amount.toFixed(2)],
+);
+table.render();
+
+const classifier = new Classifier(
+  situation,
+  ranker,
+  timer,
+  settings.position_size,
+);
 const records = classifier.records;
 // console.log(records);
 const df = DataFrame.fromRecords(records);

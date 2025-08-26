@@ -33,7 +33,7 @@ const NOW: DateFormat = today();
 type Mirrors = Array<Mirror>;
 type Journal = Diary<Mirrors>;
 
-type ParameterData = Record<string, number>;
+export type ParameterData = Record<string, number>;
 
 // Count of days investor data is behind trading date
 export const DELAY = 2;
@@ -151,8 +151,8 @@ export class Context {
   }
 
   /** A semaphore for each investor */
-  protected readonly investorSemaphores = new Map<string, Mutex>();
-  protected investor_semaphore(username: string): Mutex {
+  private readonly investorSemaphores = new Map<string, Mutex>();
+  private investor_semaphore(username: string): Mutex {
     const lock = this.investorSemaphores.get(username);
     if (lock) return lock;
     const created = createMutex();
@@ -161,8 +161,8 @@ export class Context {
   }
 
   /** Data for an investor */
-  protected readonly _investors = new Map<string, Investor>();
-  protected async investor(username: string): Promise<Investor> {
+  private readonly _investors = new Map<string, Investor>();
+  private async investor(username: string): Promise<Investor> {
     const prev = this._investors.get(username);
     if (prev) return prev;
 
