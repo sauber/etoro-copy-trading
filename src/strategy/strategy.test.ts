@@ -1,4 +1,3 @@
-import { loadRanker } from "../ranking/ranker.ts";
 import {
   buildStrategy,
   Rater,
@@ -7,9 +6,10 @@ import {
 } from "./strategy.ts";
 import { Strategy } from "@sauber/backtest";
 import { assertInstanceOf, assertThrows } from "@std/assert";
-import { loadStrategy } from "./mod.ts";
 import { HeapBackend } from "@sauber/journal";
+import { loadRanker } from "../ranking/ranker.ts";
 import { Signal } from "../signal/mod.ts";
+import { loadStrategy } from "./mod.ts";
 
 const repo = new HeapBackend();
 const ranker: Rater = await loadRanker(repo);

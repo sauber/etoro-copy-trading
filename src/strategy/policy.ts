@@ -5,7 +5,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { Classifier } from "../strategy/classifier.ts";
+import { Classifier } from "./classifier.ts";
 import { Rater } from "./strategy.ts";
 
 /** Classify all instruments from purchase orders and open positions only once at each bar */

@@ -1,8 +1,8 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Strategy, StrategyContext } from "@sauber/backtest";
-import { CascadeStrategy } from "📚/strategy/cascade-strategy.ts";
-import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
-import { NullStrategy } from "📚/strategy/null-strategy.ts";
+import { CascadeStrategy } from "./cascade-strategy.ts";
+import { PassThroughStrategy } from "./pass-through-strategy.ts";
+import { NullStrategy } from "./null-strategy.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new CascadeStrategy([]), CascadeStrategy);

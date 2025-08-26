@@ -9,7 +9,7 @@ import {
   Strategy,
   StrategyContext,
 } from "@sauber/backtest";
-import { TrailingStrategy } from "📚/strategy/trailing-strategy.ts";
+import { TrailingStrategy } from "./trailing-strategy.ts";
 
 // Generate a position
 function makePosition(amount: number): Position {

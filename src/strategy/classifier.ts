@@ -10,9 +10,6 @@ import { assert } from "@std/assert";
 import { Candidate, CandidateExport } from "./candidate.ts";
 import { Rater } from "./strategy.ts";
 
-type Rank = number;
-type Timing = number;
-
 /** Bundle purchaseorders and closeorders together by instrument */
 export class Classifier {
   /** List of candidates */

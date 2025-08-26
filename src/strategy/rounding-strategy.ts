@@ -1,5 +1,5 @@
 import { Amount, PurchaseOrders, StrategyContext } from "@sauber/backtest";
-import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
+import { PassThroughStrategy } from "./pass-through-strategy.ts";
 
 /** Round position amount */
 export class RoundingStrategy extends PassThroughStrategy {

@@ -1,6 +1,6 @@
 import { CloseOrders, PurchaseOrders, StrategyContext } from "@sauber/backtest";
-import { assert } from "@std/assert/assert";
-import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
+import { assert } from "@std/assert";
+import { PassThroughStrategy } from "./pass-through-strategy.ts";
 
 /** Limit count of orders */
 export class LimitStrategy extends PassThroughStrategy {

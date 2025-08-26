@@ -4,7 +4,7 @@ import {
   PurchaseOrders,
   StrategyContext,
 } from "@sauber/backtest";
-import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
+import { PassThroughStrategy } from "./pass-through-strategy.ts";
 
 /** Only open if there is sufficient number of bars available to have a chance to close again later */
 export class FutureStrategy extends PassThroughStrategy {

@@ -1,5 +1,5 @@
 import { CloseOrders, PurchaseOrders, StrategyContext } from "@sauber/backtest";
-import { PassThroughStrategy } from "📚/strategy/pass-through-strategy.ts";
+import { PassThroughStrategy } from "./pass-through-strategy.ts";
 
 /** Close positions when value is below stoploss threshold */
 export class StopLossStrategy extends PassThroughStrategy {

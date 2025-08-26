@@ -27,7 +27,13 @@ export class DebugStrategy implements Strategy {
       "close",
       context.closeorders.length,
       context.closeorders.map(
-        (co) => [co.position.instrument.symbol, co.position.value(context.bar).toFixed(2), co.position.id]
+        (
+          co,
+        ) => [
+          co.position.instrument.symbol,
+          co.position.value(context.bar).toFixed(2),
+          co.position.id,
+        ],
       ),
     );
     return context.closeorders;

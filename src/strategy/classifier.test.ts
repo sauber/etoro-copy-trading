@@ -8,7 +8,6 @@ import { DataFrame } from "@sauber/dataframe";
 import { Classifier } from "./classifier.ts";
 import { context } from "./testdata.ts";
 
-
 // Calculate a dummy ranking score based on length of username.
 const ranking = (instr: Instrument) => {
   const score: number = (instr.symbol.length - 11) * 0.2;
@@ -27,7 +26,7 @@ Deno.test("Instance", () => {
   assertInstanceOf(new Classifier(context, ranking, timing, 0.1), Classifier);
 });
 
-Deno.test("Records", {ignore: true}, () => {
+Deno.test("Records", { ignore: true }, () => {
   const classifier = new Classifier(context, ranking, timing, 0.1);
   const records = classifier.records;
   const df = DataFrame.fromRecords(records);

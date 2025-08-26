@@ -1,6 +1,6 @@
 import { Bar, Instrument } from "@sauber/backtest";
-import { CachedSignal, Settings, Signal } from "../signal/mod.ts";
 import { Backend } from "@sauber/journal";
+import { CachedSignal, Settings, Signal } from "../signal/mod.ts";
 import { Rater } from "./strategy.ts";
 
 // Number of bars delayed in timing
