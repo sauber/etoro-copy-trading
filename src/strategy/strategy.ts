@@ -23,6 +23,8 @@ import { WeekdayStrategy } from "./weekday-strategy.ts";
  */
 export type Rater = (instrument: Instrument, bar: Bar) => number;
 
+// TODO: Convert to class
+
 const assetName = "trading";
 
 /** Parameters required by Strategy */

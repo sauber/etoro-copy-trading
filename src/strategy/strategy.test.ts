@@ -7,13 +7,13 @@ import {
 import { Strategy } from "@sauber/backtest";
 import { assertInstanceOf, assertThrows } from "@std/assert";
 import { HeapBackend } from "@sauber/journal";
-import { loadRanker } from "../ranking/ranker.ts";
 import { Signal } from "../signal/mod.ts";
 import { loadStrategy } from "./mod.ts";
+import { test_ranking, test_timing } from "./testdata.ts";
 
 const repo = new HeapBackend();
-const ranker: Rater = await loadRanker(repo);
-const timer: Rater = await loadRanker(repo);
+const ranker: Rater = test_ranking;
+const timer: Rater = test_timing;
 
 Deno.test("Build Strategy", () => {
   const p: StrategyParameters = {
@@ -47,7 +47,7 @@ Deno.test("Save parameters", async () => {
 });
 
 Deno.test("Load Strategy", async () => {
-  // Save some timer settings first
+  // Save some timer settings before attemping to loading
   await Signal.default().save(repo);
 
   const strategy: Strategy = await loadStrategy(repo);

@@ -3,24 +3,14 @@ import {
   assertEquals,
   assertInstanceOf,
 } from "@std/assert";
-import { CloseOrders, Instrument, PurchaseOrders } from "@sauber/backtest";
+import { CloseOrders, PurchaseOrders } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { Classifier } from "./classifier.ts";
-import { context } from "./testdata.ts";
-
-// Calculate a dummy ranking score based on length of username.
-const ranking = (instr: Instrument) => {
-  const score: number = (instr.symbol.length - 11) * 0.2;
-  // console.log(instr.symbol, "ranking score is", score);
-  return score;
-};
-
-// Calculate a dummy timing score based on first letter
-const timing = (instr: Instrument) => {
-  const score: number = -(instr.symbol.toUpperCase().charCodeAt(0) - 78) / 13;
-  // console.log(instr.symbol, "timing score is", score);
-  return score;
-};
+import {
+  context,
+  test_ranking as ranking,
+  test_timing as timing,
+} from "./testdata.ts";
 
 Deno.test("Instance", () => {
   assertInstanceOf(new Classifier(context, ranking, timing, 0.1), Classifier);
@@ -51,7 +41,6 @@ Deno.test("Open New Positions", () => {
 Deno.test("Close Existing Positions", () => {
   const classifier = new Classifier(context, ranking, timing, 0.1);
   const cos: CloseOrders = classifier.close();
-  // console.log(cos.length);
   assertEquals(cos.length, 13);
   assertEquals(cos[0].position.instrument.symbol, "MilanIvann");
 });

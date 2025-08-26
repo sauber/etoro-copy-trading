@@ -9,8 +9,8 @@ const amount: Amount = 100;
 const target: Amount = 200;
 const units1 = first / amount;
 const pos1 = new Position(instrument, amount, first, units1, start, 1);
-const rank: number = test_ranking(instrument);
-const opportunity: number = test_timing(instrument);
+const rank: number = test_ranking(instrument, start);
+const opportunity: number = test_timing(instrument, start);
 
 // Generate Candidate Object
 function makeCandidate(): Candidate {
