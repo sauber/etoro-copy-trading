@@ -1,6 +1,6 @@
 import { Backend } from "@sauber/journal";
 import { Bar, Instrument } from "@sauber/backtest";
-import { Context } from "../trading/context.ts";
+import { Context } from "./context.ts";
 import { makeTestRepository } from "../repository/mod.ts";
 import { Rater } from "./mod.ts";
 

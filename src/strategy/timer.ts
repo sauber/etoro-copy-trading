@@ -10,8 +10,10 @@ const DELAY = 2;
 function createRater(signal: Signal): Rater {
   const timer = (instrument: Instrument, bar: Bar) => {
     const effective: Bar = bar + DELAY;
-    if (!instrument.has(effective)) return 0;
-    return signal.predict(instrument, effective);
+    const value = instrument.has(effective)
+      ? signal.predict(instrument, effective)
+      : 0;
+    return value;
   };
   return timer;
 }

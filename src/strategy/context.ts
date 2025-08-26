@@ -23,7 +23,6 @@ import {
   StrategyContext,
 } from "@sauber/backtest";
 import { sum } from "@sauber/statistics";
-// import { ParameterData } from "../strategy/parameters.ts";
 import { Config } from "../config/mod.ts";
 import { Account } from "../account/mod.ts";
 import { Diary, Investor } from "../investor/mod.ts";

@@ -1,12 +1,9 @@
 import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
-import { Classifier } from "📚/strategy/classifier.ts";
-import { loadTimer } from "📚/signal/mod.ts";
-import { Rater } from "📚/strategy/mod.ts";
-import { loadRanker } from "../ranking/mod.ts";
-import { Context } from "./context.ts";
-import { makeRepository } from "../repository/mod.ts";
+import { Rater, loadTimer, Classifier, Context } from "📚/strategy/mod.ts";
+import { loadRanker } from "📚/ranking/mod.ts";
+import { makeRepository } from "📚/repository/mod.ts";
 
 const start: number = performance.now();
 
