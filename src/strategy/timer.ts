@@ -1,6 +1,8 @@
 import { Bar, Instrument } from "@sauber/backtest";
 import { Backend } from "@sauber/journal";
-import { CachedSignal, Settings, Signal } from "../signal/mod.ts";
+
+import { CachedSignal, Settings, Signal } from "📚/signal/mod.ts";
+
 import { Rater } from "./strategy.ts";
 import { DELAY } from "./context.ts";
 

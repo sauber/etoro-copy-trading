@@ -11,8 +11,8 @@ import { Context } from "./context.ts";
 const repo: Backend = makeTestRepository();
 
 Deno.test("Instance", () => {
-  const repo = new HeapBackend();
-  const context = new Context(repo);
+  const heap = new HeapBackend();
+  const context = new Context(heap);
   assertInstanceOf(context, Context);
 });
 

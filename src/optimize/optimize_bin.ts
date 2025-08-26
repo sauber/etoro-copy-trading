@@ -1,20 +1,23 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import { Dashboard, Parameters, Status } from "@sauber/optimize";
-import { Optimize } from "./optimize.ts";
-import { Rater } from "../strategy/strategy.ts";
+
 import { loadRanker } from "📚/ranking/mod.ts";
-import { loadParameters, ParameterData } from "./loader.ts";
-import { Community, Names, TestCommunity } from "../community/mod.ts";
-import { makeRepository } from "../repository/mod.ts";
+import { Community, Names, TestCommunity } from "📚/community/mod.ts";
+import { makeRepository } from "📚/repository/mod.ts";
 import {
-  Exported,
-  inputParameters as signalInputParameters,
-  saveSettings as saveTimer,
-} from "../signal/mod.ts";
+  limits as signalInputParameters,
+  Settings,
+  Settings as Exported,
+} from "📚/signal/mod.ts";
 import {
   inputParameters as strategyInputParameters,
+  Rater,
   saveSettings as saveStrategy,
-} from "../strategy/mod.ts";
+} from "📚/strategy/mod.ts";
+
+import { loadParameters, ParameterData } from "./loader.ts";
+import { Optimize } from "./optimize.ts";
+import { Signal } from "../signal/signal.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -52,7 +55,7 @@ try {
   // console.log("Loaded parameters:", parameters);
   initialScore = model.predict(validation);
   console.log("Initial score:", initialScore);
-} catch (e) {
+} catch (_e) {
   // Loading failed, so search for a good starting point
   // TODO: Suspect repeat defaults are tested instead of random
   model = Optimize.generate(exchange, 150, ranker);
@@ -85,12 +88,13 @@ if (finalScore > initialScore) {
   // await config.set(modelAssetName, exported);
 
   // Pick out signal parameters and save
-  const signal: Exported = Object.fromEntries(
+  const settings: Settings = Object.fromEntries(
     Object.entries(signalInputParameters).map((
       [key, _limit],
     ) => [key, exported[key]]),
   );
-  await saveTimer(repo, signal);
+  const signal: Signal = Signal.import(settings);
+  await signal.save(repo);
 
   // Pick out strategy parameters and save
   const strategy: Exported = Object.fromEntries(
