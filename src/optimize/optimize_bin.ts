@@ -8,6 +8,7 @@ import {
   limits as signalInputParameters,
   Settings,
   Settings as Exported,
+  Signal,
 } from "📚/signal/mod.ts";
 import {
   inputParameters as strategyInputParameters,
@@ -17,12 +18,14 @@ import {
 
 import { loadParameters, ParameterData } from "./loader.ts";
 import { Optimize } from "./optimize.ts";
-import { Signal } from "../signal/signal.ts";
 
 // Repo
 const path: string = Deno.args[0];
 const repo = makeRepository(path);
 const community: Community = new TestCommunity(repo);
+
+// Console width
+const console_width = 88;
 
 // Load a sample of random investors
 async function investors(count: number): Promise<Instruments> {
@@ -46,36 +49,48 @@ const validationInstruments: Instruments = await investors(validation_count);
 console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
 
+// Generate dashboard and callback
+function dashboard(max: number): Status {
+  const dashboard: Dashboard = new Dashboard(max, console_width);
+
+  const callback: Status = (
+    iterations: number,
+    _momentum: number,
+    parameters: Parameters,
+    reward: number[],
+  ) => console.log(dashboard.render(parameters, iterations, reward));
+
+  return callback;
+}
+
 // Attempt to load parameters
 let model: Optimize | null = null;
 let initialScore: number = 0;
 try {
   const parameters = await loadParameters(repo);
   model = new Optimize(parameters, ranker);
-  // console.log("Loaded parameters:", parameters);
   initialScore = model.predict(validation);
   console.log("Initial score:", initialScore);
 } catch (_e) {
   // Loading failed, so search for a good starting point
-  // TODO: Suspect repeat defaults are tested instead of random
-  model = Optimize.generate(exchange, 150, ranker);
-  console.log("Best random starting point:", model.export());
+  const epochs = 400;
+  console.log(
+    `Searching for best starting point from ${epochs} random samples:`,
+  );
+  model = Optimize.generate(exchange, epochs, ranker, dashboard(epochs));
+  console.log("");
 }
 
-// Dashboard
-const epochs = 100;
-const console_width = 88;
-const dashboard: Dashboard = new Dashboard(epochs, console_width);
-const status: Status = (
-  iterations: number,
-  _momentum: number,
-  parameters: Parameters,
-  reward: number[],
-) => console.log(dashboard.render(parameters, iterations, reward));
-
 // Run optimizer and save results
+const epochs = 100;
+console.log("Optimizing from starting point:");
 const epsilon = 0.01;
-const _iterations: number = model.optimize(exchange, epochs, epsilon, status);
+const _iterations: number = model.optimize(
+  exchange,
+  epochs,
+  epsilon,
+  dashboard(epochs),
+);
 
 // Confirm final score
 const finalScore: number = model.predict(validation);
@@ -85,7 +100,6 @@ console.log("Final score:", finalScore);
 // TODO: Use Strategy save method
 if (finalScore > initialScore) {
   const exported: ParameterData = model.export();
-  // await config.set(modelAssetName, exported);
 
   // Pick out signal parameters and save
   const settings: Settings = Object.fromEntries(
@@ -102,8 +116,6 @@ if (finalScore > initialScore) {
       [key, _limit],
     ) => [key, exported[key]]),
   );
-
-  // console.log({signal, strategy});
 
   await saveStrategy(repo, strategy);
   console.log("Saved settings: ", exported);

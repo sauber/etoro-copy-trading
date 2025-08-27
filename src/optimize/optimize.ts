@@ -1,6 +1,10 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
 import { Maximize, Parameters, Status } from "@sauber/optimize";
-import { buildStrategy } from "📚/strategy/mod.ts";
+
+import { buildStrategy, createTimer, Rater } from "📚/strategy/mod.ts";
+import { score as calculateScore } from "📚/simulation/mod.ts";
+import { limits, Settings } from "📚/signal/mod.ts";
+
 import {
   importParameters,
   makeParameters,
@@ -8,17 +12,7 @@ import {
   ParameterData,
   ParameterValues,
 } from "./loader.ts";
-import { Rater, createTimer } from "📚/strategy/mod.ts";
-import { Iteration } from "@sauber/ml-cli-dashboard";
-import { score as calculateScore } from "../simulation/mod.ts";
-import { limits } from "../signal/rsi.ts";
-import { Settings } from "../signal/mod.ts";
 
-// ANSI escape codes
-const ESC = "\u001B[";
-const LINEUP = "F";
-
-type Samples = Array<{ input: Parameters; output: number }>;
 type Score = number;
 
 /** Generate and train parameters for strategy by running simulation */
@@ -54,16 +48,17 @@ export class Optimize {
     exchange: Exchange,
     count: number,
     ranker: Rater,
+    status: Status = () => undefined,
   ): Optimize {
-    console.log(`Searching for best starting point from ${count} samples...`);
-    console.log("");
-    // TODO: Move the dashboard out, and let it be optional
-    const progress: Iteration = new Iteration(count, 78);
+    const history: number[] = [];
+
     let best: [Score, Optimize] = Optimize.sample(exchange, ranker);
+    history.push(best[0]);
     for (let i = 1; i < count; i++) {
       const result: [Score, Optimize] = Optimize.sample(exchange, ranker);
       if (result[0] > best[0]) best = result;
-      console.log(ESC + LINEUP + progress.render(i + 1));
+      history.push(best[0]);
+      status(i + 1, 0, best[1].parameters, history);
     }
     return best[1];
   }
