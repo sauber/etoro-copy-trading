@@ -1,13 +1,13 @@
 import { IntegerParameter, Parameter, Parameters } from "@sauber/optimize";
 import {
   type Limits,
+  type Range,
   limits as signalParameters,
   Signal,
 } from "../signal/mod.ts";
 import { inputParameters as strategyParameters } from "../strategy/strategy.ts";
 import { loadSettings as loadStrategySettings } from "../strategy/mod.ts";
 import { Backend } from "@sauber/journal";
-import { Range } from "../signal/indicator.ts";
 
 // TODO: Convert to class
 // TODO: Create test cases

@@ -24,9 +24,6 @@ const path: string = Deno.args[0];
 const repo = makeRepository(path);
 const community: Community = new TestCommunity(repo);
 
-// Console width
-const console_width = 88;
-
 // Load a sample of random investors
 async function investors(count: number): Promise<Instruments> {
   const names: Names = await community.samples(count);
@@ -48,6 +45,9 @@ const validation_count: number = 80;
 const validationInstruments: Instruments = await investors(validation_count);
 console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
+
+// Console width
+const console_width = 88;
 
 // Generate dashboard and callback
 function dashboard(max: number): Status {
