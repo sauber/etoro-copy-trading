@@ -1,14 +1,18 @@
 import { IntegerParameter, Parameter, Parameters } from "@sauber/optimize";
-import { limits as signalParameters, type Limits, Signal } from "../signal/mod.ts";
+import {
+  type Limits,
+  limits as signalParameters,
+  Signal,
+} from "../signal/mod.ts";
 import { inputParameters as strategyParameters } from "../strategy/strategy.ts";
 import { loadSettings as loadStrategySettings } from "../strategy/mod.ts";
 import { Backend } from "@sauber/journal";
+import { Range } from "../signal/indicator.ts";
 
 // TODO: Convert to class
 // TODO: Create test cases
 
 export type ParameterData = Record<string, number>;
-
 
 /** Convert a dict of Ranges into Optimizable Parameters */
 function convertParameters(
@@ -54,8 +58,8 @@ function makeSignalParameters(
   return convertParameters(signalParameters, settings);
 }
 
-/** Generate list of parameters optionally with initial values */
-export function makeParameters(value: ParameterValues = []): Parameters {
+/** Generate list of parameters with initial values */
+export function makeParameters(value: ParameterValues): Parameters {
   // How many of the first values are for strategy. Remaining are for signal.
   const strategyParameterCount: number = Object.keys(strategyParameters).length;
   const strategyvalues = value.slice(0, strategyParameterCount);
@@ -67,9 +71,41 @@ export function makeParameters(value: ParameterValues = []): Parameters {
   return [...strategy, ...signal];
 }
 
+/** Generate list of parameters without initial values */
+export function makeBlankParameters(): Parameters {
+  // How many of the first values are for strategy. Remaining are for signal.
+  // const strategyParameterCount: number = Object.keys(strategyParameters).length;
+  // const strategyvalues = value.slice(0, strategyParameterCount);
+  // const signalvalues = value.slice(strategyParameterCount);
+
+  const strategy: Parameters = makeStrategyParameters([]);
+  const signal: Parameters = makeSignalParameters([]);
+
+  return [...strategy, ...signal];
+}
+
+function randomNumberInRange(range: Range): number {
+  return (range.int)
+    ? Math.floor(Math.random() * (range.max - range.min + 1)) + range.min
+    : Math.random() * (range.max - range.min) + range.min;
+}
+
+/** Generate list of parameters with random values within limits */
+export function makeRandomParameters(): Parameters {
+  const strategyValues = Object.entries(strategyParameters).map(
+    ([_name, limit]) => randomNumberInRange(limit),
+  );
+
+  const signalValues = Object.entries(signalParameters).map(
+    ([_name, limit]) => randomNumberInRange(limit),
+  );
+
+  return makeParameters([...strategyValues, ...signalValues]);
+}
+
 /** Generate list of parameters from dict of initial values */
 export function importParameters(values: Record<string, number>): Parameters {
-  const p = makeParameters();
+  const p = makeBlankParameters();
   p.forEach((param) => {
     const value = values[param.name];
     if (value === undefined) {

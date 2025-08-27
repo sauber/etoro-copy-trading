@@ -4,10 +4,11 @@ import { buildStrategy } from "📚/strategy/mod.ts";
 import {
   importParameters,
   makeParameters,
+  makeRandomParameters,
   ParameterData,
   ParameterValues,
 } from "./loader.ts";
-import { Rater, StrategyParameters, createTimer } from "📚/strategy/mod.ts";
+import { Rater, createTimer } from "📚/strategy/mod.ts";
 import { Iteration } from "@sauber/ml-cli-dashboard";
 import { score as calculateScore } from "../simulation/mod.ts";
 import { limits } from "../signal/rsi.ts";
@@ -42,7 +43,7 @@ export class Optimize {
 
   /** Create an optimer with random start values, run simulation and return simulation score */
   private static sample(exchange: Exchange, ranker: Rater): [Score, Optimize] {
-    const input: Parameters = makeParameters();
+    const input: Parameters = makeRandomParameters();
     const optimizer = new Optimize(input, ranker);
     const score: Score = optimizer.simulation(exchange, input);
     return [score, optimizer];
@@ -56,6 +57,7 @@ export class Optimize {
   ): Optimize {
     console.log(`Searching for best starting point from ${count} samples...`);
     console.log("");
+    // TODO: Move the dashboard out, and let it be optional
     const progress: Iteration = new Iteration(count, 78);
     let best: [Score, Optimize] = Optimize.sample(exchange, ranker);
     for (let i = 1; i < count; i++) {
