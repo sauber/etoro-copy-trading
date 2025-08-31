@@ -3,6 +3,8 @@ import { Limits } from "./mod.ts";
 
 /** Key names and current values */
 type Settings = Record<string, number>;
+export type ParameterValues = Array<number>;
+
 
 /** Handle a group of parameters */
 export class Parameters {
@@ -19,7 +21,7 @@ export class Parameters {
   }
 
   /** Get a parameter by name */
-  public get(name: string): Parameter {
+  private get(name: string): Parameter {
     const parameter = this.parameters.find((p) => p.name === name);
     if (!parameter) {
       throw new Error(`Parameter ${name} not found`);
@@ -33,18 +35,19 @@ export class Parameters {
   }
 
   /** Get the values of all parameters */
-  public values(): Array<number> {
-    return this.parameters.map((p) => p.value);
-  }
+  // public values(): Array<number> {
+  //   return this.parameters.map((p) => p.value);
+  // }
 
   /** Set the values of all parameters */
-  public set(values: Array<number>): void {
+  public set(values: Array<number>): this {
     if (values.length !== this.parameters.length) {
       throw new Error(
         `Expected ${this.parameters.length} values, got ${values.length}`,
       );
     }
     this.parameters.forEach((p, i) => p.set(values[i]));
+    return this;
   }
 
   /** Get the names of all parameters */
@@ -53,9 +56,9 @@ export class Parameters {
   }
 
   /** Get the number of parameters */
-  public count(): number {
-    return this.parameters.length;
-  }
+  // public count(): number {
+  //   return this.parameters.length;
+  // }
 
   /** Keys and values */
   public settings(): Settings {
@@ -69,8 +72,9 @@ export class Parameters {
     return this.settings();
   }
 
-  /** Import keys and values */
+  /** Import values */
   public import(settings: Settings): void {
+    this.validate(settings);
     Object.entries(settings).forEach(([name, value]) => {
       const parameter = this.get(name);
       parameter.set(value);
@@ -79,16 +83,22 @@ export class Parameters {
 
   /** Validate settings fit parameters */
   public validate(settings: Settings): boolean {
+    const names = this.names();
     for (const key of Object.keys(settings)) {
-      if (!(key in this.parameters)) {
+      if (!names.includes(key)) {
         throw new Error(`Unknown parameter ${key}`);
       }
     }
-    for (const key of Object.keys(this.parameters)) {
+    for (const key of names) {
       if (!(key in settings)) {
         throw new Error(`Missing parameter ${key}`);
       }
     }
     return true;
+  }
+
+  /** Create a set of clone parameters with random values */
+  public random(): Parameters {
+    return new Parameters(this.parameters.map((p) => p.clone(p.random)));
   }
 }
