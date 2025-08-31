@@ -19,8 +19,8 @@ import {
 import { inputParameters, Rater } from "📚/strategy/mod.ts";
 import { limits } from "📚/signal/mod.ts";
 
-import { Optimize } from "./optimize.ts";
-import { Parameters } from "./parameters.ts";
+import { Optimize, Settings } from "./optimize.ts";
+// import { Parameters } from "./parameters.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
@@ -29,25 +29,29 @@ function makeExchange(count: number = 3): Exchange {
   );
 }
 
-const strategy = Parameters.fromLimits(inputParameters);
-const signal = Parameters.fromLimits(limits);
-const allParameters = new Parameters([...strategy.all(), ...signal.all()]);
+// const strategy = Parameters.fromLimits(inputParameters);
+// const signal = Parameters.fromLimits(limits);
+// const allParameters = new Parameters([...strategy.all(), ...signal.all()]);
 
 // Random ranker
 const ranker: Rater = (_instrument: Instrument, _bar: Bar) =>
   2 * Math.random() - 1;
 
-/** Generate an optimizer with best starting point */
+/** Generate an optimizer */
 function makeOptimizer(): Optimize {
   const exchange = makeExchange();
-  const o = new Optimize(allParameters, ranker);
-  const optimizer = o.generate(exchange, 3, ranker);
-  return optimizer;
+  return new Optimize(exchange, ranker);
 }
 
-Deno.test("Generate best model from random parameters", () => {
-  const optimizer = makeOptimizer();
+Deno.test("Optimizer instance", () => {
+  const optimizer = new Optimize(makeExchange(), ranker);
   assertInstanceOf(optimizer, Optimize);
+})
+
+Deno.test("Generate starting point", () => {
+  const optimizer = makeOptimizer();
+  const settings: Settings = optimizer.reset(2);
+  assertInstanceOf(settings, Object);
 });
 
 // Deno.test("Export / Import", () => {
@@ -59,22 +63,21 @@ Deno.test("Generate best model from random parameters", () => {
 //   assertInstanceOf(imported, Optimize);
 // });
 
-Deno.test("Predict", () => {
-  const exchange = makeExchange();
-  const o = new Optimize(allParameters, ranker);
-  const optimizer = o.generate(exchange, 3, ranker);
-  const score: number = optimizer.predict(exchange);
+Deno.test("Predict from default values", () => {
+  const exchange = makeExchange(3);
+  const o = new Optimize(exchange, ranker);
+  // const optimizer = o.generate(3);
+  const score: number = o.predict();
   // console.log({ score });
   assertEquals(isNaN(score), false);
 });
 
 Deno.test("Optimize", () => {
   const exchange = makeExchange();
-  const o = new Optimize(allParameters, ranker);
-  const optimizer = o.generate(exchange, 3, ranker);
-  const epochs = 10;
+  const o = new Optimize(exchange,  ranker);
+  const epochs = 5;
   const epsilon = 0.01;
-  const iterations = optimizer.optimize(exchange, epochs, epsilon);
+  const iterations = o.optimize(epochs, epsilon);
   assertGreaterOrEqual(iterations, 1);
   assertLessOrEqual(iterations, epochs);
 });
@@ -94,10 +97,9 @@ Deno.test("Visualized training", { ignore: true }, () => {
   }
 
   const exchange = makeExchange(10);
-  const o = new Optimize(allParameters, ranker);
-  const optimizer = o.generate(exchange, 10, ranker);
+  const o = new Optimize(exchange, ranker);
   const epsilon = 0.01;
-  const iterations = optimizer.optimize(exchange, epochs, epsilon, status);
+  const iterations = o.optimize(epochs, epsilon, status);
   console.log("Iterations:", iterations);
   assertGreaterOrEqual(iterations, 1);
   assertLessOrEqual(iterations, epochs);

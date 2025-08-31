@@ -1,112 +1,170 @@
 import { Exchange, Simulation, Strategy } from "@sauber/backtest";
-import { Maximize, Status } from "@sauber/optimize";
+import {
+  IntegerParameter,
+  Maximize,
+  Parameter,
+  Status,
+} from "@sauber/optimize";
 
-import { buildStrategy, createTimer, Rater } from "📚/strategy/mod.ts";
+import {
+  buildStrategy,
+  createTimer,
+  inputParameters,
+  Rater,
+} from "📚/strategy/mod.ts";
 import { score as calculateScore } from "📚/simulation/mod.ts";
-import { limits, Settings } from "📚/signal/mod.ts";
+import { limits } from "📚/signal/mod.ts";
 
-import { Parameters, type ParameterValues } from "./parameters.ts";
+import { Limits } from "./mod.ts";
 
-// import {
-//   importParameters,
-//   makeParameters,
-//   makeRandomParameters,
-//   ParameterData,
-//   ParameterValues,
-// } from "./loader.ts";
-
+// Numerical result of simulation
 type Score = number;
 
-/** Generate and train parameters for strategy by running simulation */
+// Key/value dict for parameters
+export type Settings = Record<string, number>;
+
+// Score of input Settings
+type Result = [Score, Settings];
+
+// A list of parameters
+type Parameters = Array<Parameter>;
+
+// Values of parameters as an array
+type ParameterValues = Array<number>;
+
+/** Convert array of keys and array of values into dict */
+const zip = (keys: string[], values: number[]): Settings =>
+  Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+
+/** Convert limits to list of Parameters, initialized with default values */
+const makeParameters = (limits: Limits): Parameters =>
+  Object.entries(limits).map(([name, limit]) =>
+    (limit.int)
+      ? new IntegerParameter(name, limit.min, limit.max, limit.default)
+      : new Parameter(name, limit.min, limit.max, limit.default)
+  );
+
+/** Create strategy from settings and calculate score of simulation */
 export class Optimize {
+  // Limits from strategy and timing
+  private readonly strategyLimits: Limits = inputParameters;
+  private readonly timerLimits: Limits = limits;
+
+  // Keys of strategy and timing parameters
+  private readonly strategyKeys: string[] = Object.keys(this.strategyLimits);
+  private readonly timerKeys: string[] = Object.keys(this.timerLimits);
+  private readonly parameterKeys: string[] = [
+    ...this.strategyKeys,
+    ...this.timerKeys,
+  ];
+
+  // Create list of parameters
+  private readonly parameters: Parameters = makeParameters({
+    ...this.strategyLimits,
+    ...this.timerLimits,
+  });
+
   constructor(
-    public readonly parameters: Parameters,
+    private readonly exchange: Exchange,
     private readonly ranker: Rater,
   ) {}
 
-  /** Generate model from saved parameters */
-  // public static import(data: ParameterData, ranker: Rater): Optimize {
-  //   const parameters: Parameters = importParameters(data);
-  //   return new Optimize(parameters, ranker);
-  // }
-
-  /** Export parameters of model */
-  // public export(): ParameterData {
-  //   return Object.fromEntries(
-  //     this.parameters.map((p) => [p.name, p.value]),
-  //   ) as ParameterData;
-  // }
+  /** Random values from parameters */
+  private random(): Settings {
+    return Object.fromEntries(this.parameters.map((p) => [p.name, p.random]));
+  }
 
   /** Create an optimer with random start values, run simulation and return simulation score */
-  private sample(exchange: Exchange, ranker: Rater): [Score, Parameters] {
-    const input = this.parameters.random();
-    const optimizer = new Optimize(input, ranker);
-    const score: Score = optimizer.simulation(exchange, input);
+  private sample(): Result {
+    const input: Settings = this.random();
+    // const optimizer = new Optimize(this.exchange, input, this.ranker);
+    const score: Score = this.simulation(input);
     return [score, input];
   }
 
-  /** Run a number of simulations and pick highest scoring */
-  public generate(
-    exchange: Exchange,
+  /** Run a number of simulations from random settings and pick highest scoring */
+  public reset(
     count: number,
-    ranker: Rater,
     status: Status = () => undefined,
-  ): Optimize {
+  ): Settings {
     const history: number[] = [];
 
-    let best: [Score, Parameters] = this.sample(exchange, ranker);
+    let best: Result = this.sample();
     history.push(best[0]);
     for (let i = 1; i < count; i++) {
-      const result: [Score, Parameters] = this.sample(exchange, ranker);
+      const result: Result = this.sample();
       if (result[0] > best[0]) best = result;
       history.push(best[0]);
-      status(i + 1, 0, best[1].all(), history);
+      status(i + 1, 0, this.setParameterValues(best[1]), history);
     }
-    return new Optimize(best[1], ranker);
+    return best[1];
   }
 
   /** Create a strategy based on parameters */
-  private strategy(parameter: Parameters): Strategy {
-    const settings = Object.fromEntries(
-      this.parameters.all().map((p) => [p.name, p.value]),
-    );
-
-    const timerKeys: string[] = Object.keys(limits);
+  private strategy(settings: Settings): Strategy {
     const timerSettings: Settings = Object.fromEntries(
-      timerKeys.map((key) => [key, settings[key]]),
+      this.timerKeys.map((key) => [key, settings[key]]),
+    );
+    const strategySettings: Settings = Object.fromEntries(
+      this.strategyKeys.map((key) => [key, settings[key]]),
     );
 
     const timer: Rater = createTimer(timerSettings);
-    return buildStrategy(settings, this.ranker, timer);
+    return buildStrategy(strategySettings, this.ranker, timer);
   }
 
   /** Run simulation from input parameters and return score */
   private simulation(
-    exchange: Exchange,
-    parameter: Parameters,
+    settings: Settings,
   ): Score {
-    const strategy: Strategy = this.strategy(parameter);
-    const simulation = new Simulation(exchange, strategy);
+    const strategy: Strategy = this.strategy(settings);
+    const simulation = new Simulation(this.exchange, strategy);
     simulation.run();
     return calculateScore(simulation);
   }
 
-  /** Train model */
+  /** Get timing parameter values */
+  public getStrategySettings(): Settings {
+    return Object.fromEntries(
+      this.parameters.filter((p) => this.strategyKeys.includes(p.name)).map((
+        p,
+      ) => [p.name, p.value]),
+    );
+  }
+
+  /** Get timing parameter values */
+  public getTimerSettings(): Settings {
+    return Object.fromEntries(
+      this.parameters.filter((p) => this.timerKeys.includes(p.name)).map((
+        p,
+      ) => [p.name, p.value]),
+    );
+  }
+
+  /** Get values from parameters */
+  public getParameterValues(): Settings {
+    return Object.fromEntries(this.parameters.map((p) => [p.name, p.value]));
+  }
+
+  /** Set values of parameters */
+  public setParameterValues(settings: Settings): Parameters {
+    this.parameters.forEach((p) => p.set(settings[p.name]));
+    return this.parameters;
+  }
+
+  /** Attemp to improve parameter values for better score */
   public optimize(
-    exchange: Exchange,
     epochs: number = 500,
     epsilon: number = 0.01,
     status: Status = () => undefined,
   ): number {
     // Callback from optimize to model
     const agent = (input: ParameterValues): Score =>
-      // this.simulation(exchange, makeParameters(input));
-    this.simulation(exchange, this.parameters.random().set(input));
-
+      this.simulation(zip(this.parameterKeys, input));
 
     // Configure maximizer
     const minimizer = new Maximize({
-      parameters: this.parameters.all(),
+      parameters: this.parameters,
       agent,
       epochs,
       status,
@@ -120,7 +178,7 @@ export class Optimize {
   }
 
   /** Predict score based on current parameters */
-  public predict(exchange: Exchange): Score {
-    return this.simulation(exchange, this.parameters);
+  public predict(): Score {
+    return this.simulation(this.getParameterValues());
   }
 }

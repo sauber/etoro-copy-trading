@@ -8,16 +8,14 @@ import {
 import { loadRanker } from "📚/ranking/mod.ts";
 import { Community, Names, TestCommunity } from "📚/community/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
-import { limits, Settings, Signal } from "📚/signal/mod.ts";
+import { Settings, Signal } from "📚/signal/mod.ts";
 import {
-  inputParameters as strategyInputParameters,
   loadSettings as loadStrategySettings,
   Rater,
   saveSettings as saveStrategy,
 } from "📚/strategy/mod.ts";
 
 import { Optimize } from "./optimize.ts";
-import { Parameters } from "./parameters.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -63,25 +61,21 @@ function dashboard(max: number): Status {
   return callback;
 }
 
-// Load strategy and signal parameters
-const strategyParameters = Parameters.fromLimits(strategyInputParameters);
-const signalParameters = Parameters.fromLimits(limits);
-const [strategy, signal] = await Promise.all([
-  loadStrategySettings(repo),
-  (await Signal.load(repo)).export(),
-]);
-// console.log("Loaded strategy settings: ", strategy);
-// console.log("Loaded signal settings: ", signal);
-strategyParameters.import(strategy);
-signalParameters.import(signal);
-const allParameters = new Parameters([...strategyParameters.all(), ...signalParameters.all()]);
-
 // Attempt to load parameters
 let model: Optimize | null = null;
 let initialScore: number = 0;
 try {
-  model = new Optimize(allParameters, ranker);
-  initialScore = model.predict(validation);
+  const [strategy, signal] = await Promise.all([
+    loadStrategySettings(repo),
+    (await Signal.load(repo)).export(),
+  ]);
+
+  model = new Optimize(validation, ranker);
+  model.setParameterValues({
+    ...strategy,
+    ...signal,
+  });
+  initialScore = model.predict();
   console.log("Initial score:", initialScore);
 } catch (_e) {
   // Loading failed, so search for a good starting point
@@ -89,7 +83,11 @@ try {
   console.log(
     `Searching for best starting point from ${epochs} random samples:`,
   );
-  model = new Optimize(allParameters, ranker).generate(exchange, epochs, ranker, dashboard(epochs));
+  model = new Optimize(exchange, ranker);
+  model.reset(
+    epochs,
+    dashboard(epochs),
+  );
   console.log("");
 }
 
@@ -98,23 +96,25 @@ const epochs = 2;
 console.log("Optimizing from starting point:");
 const epsilon = 0.01;
 const _iterations: number = model.optimize(
-  exchange,
   epochs,
   epsilon,
   dashboard(epochs),
 );
+const result = model.getParameterValues();
 
 // Confirm final score
-const finalScore: number = model.predict(validation);
+const validationModel = new Optimize(validation, ranker);
+validationModel.setParameterValues(result);
+const finalScore: number = validationModel.predict();
 console.log("Final score:", finalScore);
 
 // Save model only if score improved
 if (finalScore > initialScore) {
-  const strategy = strategyParameters.export();
+  const strategy: Settings = model.getStrategySettings();
   console.log("Saved strategy settings: ", strategy);
   await saveStrategy(repo, strategy);
 
-  const settings: Settings = signalParameters.export();
+  const settings: Settings = model.getTimerSettings();
   console.log("Saved signal settings: ", settings);
   const signal: Signal = Signal.import(settings);
   await signal.save(repo);
