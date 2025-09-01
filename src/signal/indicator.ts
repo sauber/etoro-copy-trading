@@ -1,4 +1,4 @@
-export { type Input, limits, signal } from "./demark.ts";
+export { type Input, limits, signal } from "./stochastic.ts";
 
 /** Minimum, maximum, default value and type of parameter */
 export type Range = {
