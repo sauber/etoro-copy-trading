@@ -9,8 +9,6 @@ Define which script to run in deno.json. Then run profiling and analyse results.
 ```
 deno task profile
 node --prof-process isolate-*-v8.log | less
-more profile.txt
-rm profile.txt
 rm isolate-*-v8.log
 ```
 
