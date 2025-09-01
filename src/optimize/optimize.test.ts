@@ -16,8 +16,7 @@ import {
   Instrument,
 } from "@sauber/backtest";
 
-import { inputParameters, Rater } from "📚/strategy/mod.ts";
-import { limits } from "📚/signal/mod.ts";
+import { Rater } from "📚/strategy/mod.ts";
 
 import { Optimize, Settings } from "./optimize.ts";
 // import { Parameters } from "./parameters.ts";
