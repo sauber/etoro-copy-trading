@@ -1,4 +1,5 @@
 import { Simulation } from "@sauber/backtest";
+import { avg } from "@sauber/statistics";
 
 /** Calculate score of simulation */
 export function score(simulation: Simulation): number {
@@ -21,11 +22,11 @@ export function score(simulation: Simulation): number {
   // Favor normal closes
   const abrupt = 1 - simulation.account.closeRatio;
 
-  // Scale each cost to profit
-  const scale: number = Math.abs(profit);
-  const costs = scale * (trades_cost + lose_cost + frag + abrupt) / 4;
+  // Scale average of penalties to profit
+  const cost = Math.abs(profit) * avg([trades_cost, lose_cost, frag, abrupt]);
+;
   // Subtract cost from profit;
-  const result = profit - costs;
+  const result = profit - cost;
   if (!isFinite(result)) {
     console.log({
       trades,
@@ -35,8 +36,7 @@ export function score(simulation: Simulation): number {
       abrupt,
       trades_cost,
       lose_cost,
-      scale,
-      costs,
+      cost,
       score: result,
     });
     throw new Error("Score is invalid");
