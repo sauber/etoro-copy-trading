@@ -1,5 +1,14 @@
 import { EMA } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
+import { Limits } from "./indicator.ts";
+
+export const limits: Limits = {
+  window: { min: 2, max: 50, default: 14, int: true },
+  buy_threshold: { min: 1, max: 49, default: 20, int: true },
+  sell_threshold: { min: 51, max: 99, default: 80, int: true },
+};
+
+export type Input = Record<keyof typeof limits, number>;
 
 /**
  * Create a series of signals in range [-1,1] based on demark style indicator.
@@ -11,15 +20,12 @@ import { Series } from "@sauber/backtest";
  */
 export function demark_signal(
   source: Series,
-  window: number,
-  buy_threshold: number,
-  sell_threshold: number,
+  values: Input,
 ): Series {
+  const { window, buy_threshold, sell_threshold } = values;
+
   const ema = new EMA(window);
-  const ema_series: Series = source.map((v) => ema.nextValue(v))
-    .filter(
-      (v) => v !== undefined && !isNaN(v),
-    );
+  const ema_series: Series = source.map((v) => ema.nextValue(v));
 
   // When there is a continuous streak of higher highs or lower lows,
   // what is the accumulated change of value?
@@ -103,3 +109,5 @@ export function demark_signal(
 
   return signal;
 }
+
+export { demark_signal as signal };
