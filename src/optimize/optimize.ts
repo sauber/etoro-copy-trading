@@ -13,9 +13,7 @@ import {
   Rater,
 } from "📚/strategy/mod.ts";
 import { score as calculateScore } from "📚/simulation/mod.ts";
-import { limits } from "📚/signal/mod.ts";
-
-import { Limits } from "./mod.ts";
+import { limits, type Limits } from "📚/signal/mod.ts";
 
 // Numerical result of simulation
 type Score = number;
@@ -59,10 +57,14 @@ export class Optimize {
   ];
 
   // Create list of parameters
-  private readonly parameters: Parameters = makeParameters({
-    ...this.strategyLimits,
-    ...this.timerLimits,
-  });
+  private readonly strategyParameters: Parameters = makeParameters(
+    this.strategyLimits,
+  );
+  private readonly timerParameters: Parameters = makeParameters(this.timerLimits);
+  private readonly parameters: Parameters = [
+    ...this.strategyParameters,
+    ...this.timerParameters,
+  ];
 
   constructor(
     private readonly exchange: Exchange,
@@ -77,7 +79,6 @@ export class Optimize {
   /** Create an optimer with random start values, run simulation and return simulation score */
   private sample(): Result {
     const input: Settings = this.random();
-    // const optimizer = new Optimize(this.exchange, input, this.ranker);
     const score: Score = this.simulation(input);
     return [score, input];
   }
@@ -102,11 +103,12 @@ export class Optimize {
 
   /** Create a strategy based on parameters */
   private strategy(settings: Settings): Strategy {
-    const timerSettings: Settings = Object.fromEntries(
-      this.timerKeys.map((key) => [key, settings[key]]),
-    );
+    // Split settings into Strategy and Timer settings
     const strategySettings: Settings = Object.fromEntries(
       this.strategyKeys.map((key) => [key, settings[key]]),
+    );
+    const timerSettings: Settings = Object.fromEntries(
+      this.timerKeys.map((key) => [key, settings[key]]),
     );
 
     const timer: Rater = createTimer(timerSettings);
@@ -126,18 +128,14 @@ export class Optimize {
   /** Get timing parameter values */
   public getStrategySettings(): Settings {
     return Object.fromEntries(
-      this.parameters.filter((p) => this.strategyKeys.includes(p.name)).map((
-        p,
-      ) => [p.name, p.value]),
+      this.strategyParameters.map((p) => [p.name, p.value]),
     );
   }
 
   /** Get timing parameter values */
   public getTimerSettings(): Settings {
     return Object.fromEntries(
-      this.parameters.filter((p) => this.timerKeys.includes(p.name)).map((
-        p,
-      ) => [p.name, p.value]),
+      this.timerParameters.map((p) => [p.name, p.value]),
     );
   }
 
