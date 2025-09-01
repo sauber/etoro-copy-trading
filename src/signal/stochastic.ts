@@ -8,14 +8,14 @@ type KD = {
   d: number;
 };
 
-export const inputParameters: Limits = {
+export const limits: Limits = {
   window: { min: 2, max: 50, default: 14, int: true },
   smoothing: { min: 1, max: 49, default: 3, int: true },
   buy: { min: 1, max: 49, default: 20, int: true },
   sell: { min: 51, max: 99, default: 80, int: true },
 };
 
-type Input = Record<keyof typeof inputParameters, number>;
+export type Input = Record<keyof typeof limits, number>;
 
 /** Convert series of values to series of signals */
 function stochastic(series: Series, values: Input): Series {
