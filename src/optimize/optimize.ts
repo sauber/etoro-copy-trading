@@ -13,7 +13,7 @@ import {
   Rater,
 } from "📚/strategy/mod.ts";
 import { score as calculateScore } from "📚/simulation/mod.ts";
-import { limits, type Limits } from "📚/signal/mod.ts";
+import { type Limits, limits } from "📚/signal/mod.ts";
 
 // Numerical result of simulation
 type Score = number;
@@ -60,7 +60,9 @@ export class Optimize {
   private readonly strategyParameters: Parameters = makeParameters(
     this.strategyLimits,
   );
-  private readonly timerParameters: Parameters = makeParameters(this.timerLimits);
+  private readonly timerParameters: Parameters = makeParameters(
+    this.timerLimits,
+  );
   private readonly parameters: Parameters = [
     ...this.strategyParameters,
     ...this.timerParameters,
@@ -144,8 +146,14 @@ export class Optimize {
     return Object.fromEntries(this.parameters.map((p) => [p.name, p.value]));
   }
 
+  /** Confirm all parameters are present */
+  private validateParameters(settings: Settings): boolean {
+    return this.parameters.every((p) => p.name in settings);
+  }
+
   /** Set values of parameters */
   public setParameterValues(settings: Settings): Parameters {
+    if (!(this.validateParameters(settings))) throw new Error("Invalid settings");
     this.parameters.forEach((p) => p.set(settings[p.name]));
     return this.parameters;
   }

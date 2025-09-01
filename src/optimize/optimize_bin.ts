@@ -37,12 +37,14 @@ const instruments: Instruments = await investors(training_count);
 console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
+const trainingModel = new Optimize(exchange, ranker);
 
 // Load Validation data
 const validation_count: number = 80;
 const validationInstruments: Instruments = await investors(validation_count);
 console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
+const validationModel = new Optimize(validation, ranker);
 
 // Console width
 const console_width = 88;
@@ -62,29 +64,24 @@ function dashboard(max: number): Status {
 }
 
 // Attempt to load parameters
-let model: Optimize | null = null;
 let initialScore: number = 0;
 try {
-  const [strategy, signal] = await Promise.all([
-    loadStrategySettings(repo),
-    (await Signal.load(repo)).export(),
-  ]);
-
-  model = new Optimize(validation, ranker);
-  model.setParameterValues({
+  const strategy: Settings = await loadStrategySettings(repo);
+  const signal: Settings = (await Signal.load(repo)).export();
+  validationModel.setParameterValues({
     ...strategy,
     ...signal,
   });
-  initialScore = model.predict();
+
+  initialScore = validationModel.predict();
   console.log("Initial score:", initialScore);
 } catch (_e) {
   // Loading failed, so search for a good starting point
-  const epochs = 400;
+  const epochs = 400; // 400
   console.log(
     `Searching for best starting point from ${epochs} random samples:`,
   );
-  model = new Optimize(exchange, ranker);
-  model.reset(
+  trainingModel.reset(
     epochs,
     dashboard(epochs),
   );
@@ -92,29 +89,28 @@ try {
 }
 
 // Run optimizer and save results
-const epochs = 2;
+const epochs = 100; // 100
 console.log("Optimizing from starting point:");
 const epsilon = 0.01;
-const _iterations: number = model.optimize(
+const _iterations: number = trainingModel.optimize(
   epochs,
   epsilon,
   dashboard(epochs),
 );
-const result = model.getParameterValues();
+const result = trainingModel.getParameterValues();
 
 // Confirm final score
-const validationModel = new Optimize(validation, ranker);
 validationModel.setParameterValues(result);
 const finalScore: number = validationModel.predict();
 console.log("Final score:", finalScore);
 
 // Save model only if score improved
 if (finalScore > initialScore) {
-  const strategy: Settings = model.getStrategySettings();
+  const strategy: Settings = trainingModel.getStrategySettings();
   console.log("Saved strategy settings: ", strategy);
   await saveStrategy(repo, strategy);
 
-  const settings: Settings = model.getTimerSettings();
+  const settings: Settings = trainingModel.getTimerSettings();
   console.log("Saved signal settings: ", settings);
   const signal: Signal = Signal.import(settings);
   await signal.save(repo);

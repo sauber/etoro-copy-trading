@@ -3,12 +3,9 @@ import {
   assertGreaterOrEqual,
   assertInstanceOf,
   assertLessOrEqual,
+  assertThrows,
 } from "@std/assert";
-import {
-  Dashboard,
-  Output,
-  Parameters as OptimizerParameters,
-} from "@sauber/optimize";
+import { Dashboard, Output, Parameters } from "@sauber/optimize";
 import {
   Bar,
   createTestInstrument,
@@ -19,7 +16,6 @@ import {
 import { Rater } from "📚/strategy/mod.ts";
 
 import { Optimize, Settings } from "./optimize.ts";
-// import { Parameters } from "./parameters.ts";
 
 // Random instruments on an exchange
 function makeExchange(count: number = 3): Exchange {
@@ -28,24 +24,20 @@ function makeExchange(count: number = 3): Exchange {
   );
 }
 
-// const strategy = Parameters.fromLimits(inputParameters);
-// const signal = Parameters.fromLimits(limits);
-// const allParameters = new Parameters([...strategy.all(), ...signal.all()]);
-
 // Random ranker
 const ranker: Rater = (_instrument: Instrument, _bar: Bar) =>
   2 * Math.random() - 1;
 
 /** Generate an optimizer */
-function makeOptimizer(): Optimize {
-  const exchange = makeExchange();
+function makeOptimizer(investorCount: number = 3): Optimize {
+  const exchange = makeExchange(investorCount);
   return new Optimize(exchange, ranker);
 }
 
 Deno.test("Optimizer instance", () => {
   const optimizer = new Optimize(makeExchange(), ranker);
   assertInstanceOf(optimizer, Optimize);
-})
+});
 
 Deno.test("Generate starting point", () => {
   const optimizer = makeOptimizer();
@@ -53,30 +45,17 @@ Deno.test("Generate starting point", () => {
   assertInstanceOf(settings, Object);
 });
 
-// Deno.test("Export / Import", () => {
-//   const optimizer: Optimize = makeOptimizer();
-//   const data = optimizer.export() as StrategyParameters;
-//   const count = 8;
-//   assertEquals(Object.keys(data).length, count);
-//   const imported = Optimize.import(data, ranker);
-//   assertInstanceOf(imported, Optimize);
-// });
-
 Deno.test("Predict from default values", () => {
-  const exchange = makeExchange(3);
-  const o = new Optimize(exchange, ranker);
-  // const optimizer = o.generate(3);
-  const score: number = o.predict();
-  // console.log({ score });
+  const optimizer = makeOptimizer();
+  const score: number = optimizer.predict();
   assertEquals(isNaN(score), false);
 });
 
 Deno.test("Optimize", () => {
-  const exchange = makeExchange();
-  const o = new Optimize(exchange,  ranker);
+  const optimizer = makeOptimizer();
   const epochs = 5;
   const epsilon = 0.01;
-  const iterations = o.optimize(epochs, epsilon);
+  const iterations = optimizer.optimize(epochs, epsilon);
   assertGreaterOrEqual(iterations, 1);
   assertLessOrEqual(iterations, epochs);
 });
@@ -89,17 +68,33 @@ Deno.test("Visualized training", { ignore: true }, () => {
   function status(
     iterations: number,
     _momentum: number,
-    parameters: OptimizerParameters,
+    parameters: Parameters,
     reward: Output[],
   ): void {
     console.log(dashboard.render(parameters, iterations, reward));
   }
 
-  const exchange = makeExchange(10);
-  const o = new Optimize(exchange, ranker);
+  const optimizer = makeOptimizer(10);
   const epsilon = 0.01;
-  const iterations = o.optimize(epochs, epsilon, status);
+  const iterations = optimizer.optimize(epochs, epsilon, status);
   console.log("Iterations:", iterations);
   assertGreaterOrEqual(iterations, 1);
   assertLessOrEqual(iterations, epochs);
+});
+
+Deno.test("Get parameter values", () => {
+  const optimizer = makeOptimizer();
+  const allSettings: Settings = optimizer.getParameterValues();
+  assertInstanceOf(allSettings, Object);
+
+  const strategySettings: Settings = optimizer.getStrategySettings();
+  assertInstanceOf(strategySettings, Object);
+
+  const timerSettings: Settings = optimizer.getTimerSettings();
+  assertInstanceOf(timerSettings, Object);
+});
+
+Deno.test("Set parameter values", () => {
+  const optimizer = makeOptimizer();
+  assertThrows(() => optimizer.setParameterValues({ "weekday": 420 }));
 });
