@@ -1,7 +1,6 @@
 import { Bar, Instrument, Series } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
-import { loadTimer } from "../timing/mod.ts";
-import { Rater } from "📚/trading/raters.ts";
+import { loadTimer, Rater } from "../strategy/mod.ts";
 import { Community } from "../community/mod.ts";
 import { makeRepository } from "../repository/mod.ts";
 
