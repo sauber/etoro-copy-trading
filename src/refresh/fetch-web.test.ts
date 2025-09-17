@@ -10,7 +10,7 @@ Deno.test("Initialization", () => {
   assertInstanceOf(f, FetchWebBackend);
 });
 
-Deno.test.ignore("Fetching", async (t) => {
+Deno.test("Fetching", async (t) => {
   const f = new FetchWebBackend(rate);
 
   await t.step("discover", async () => {
