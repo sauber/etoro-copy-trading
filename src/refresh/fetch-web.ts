@@ -1,14 +1,15 @@
-import { FetchURL } from "./fetch-url.ts";
 import { RateLimit } from "@sauber/ratelimit";
-import { fetchjson } from "./fetch-json.ts";
+// import { stats } from "@sauber/etoro-investors";
 
 import type { DiscoverData } from "📚/repository/discover.ts";
 import type { ChartData } from "📚/repository/chart.ts";
 import type { PortfolioData } from "📚/repository/portfolio.ts";
 import type { StatsData } from "📚/repository/stats.ts";
-
 import { DiscoverFilter, FetchBackend } from "📚/repository/types.ts";
 import type { InvestorId } from "📚/repository/types.ts";
+
+import { FetchURL } from "./fetch-url.ts";
+import { fetchjson } from "./fetch-json.ts";
 
 /** Fetch objects from eToro API */
 export class FetchWebBackend implements FetchBackend {
@@ -38,5 +39,6 @@ export class FetchWebBackend implements FetchBackend {
 
   public stats(investor: InvestorId): Promise<StatsData> {
     return this.fetch<StatsData>(this.url.stats(investor));
+    // return stats(investor.UserName);
   }
 }
