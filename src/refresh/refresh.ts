@@ -1,19 +1,19 @@
 import { Backend, JournaledAsset } from "@sauber/journal";
 
-import { Discover } from "./discover.ts";
-import type { DiscoverData } from "./discover.ts";
+import { Discover } from "📚/repository/discover.ts";
+import type { DiscoverData } from "📚/repository/discover.ts";
 
-import { Chart } from "./chart.ts";
-import type { ChartData } from "./chart.ts";
+import { Chart } from "📚/repository/chart.ts";
+import type { ChartData } from "📚/repository/chart.ts";
 
-import { Portfolio } from "./portfolio.ts";
-import type { PortfolioData } from "./portfolio.ts";
+import { Portfolio } from "📚/repository/portfolio.ts";
+import type { PortfolioData } from "📚/repository/portfolio.ts";
 
-import { Stats } from "./stats.ts";
-import type { StatsData } from "./stats.ts";
+import { Stats } from "📚/repository/stats.ts";
+import type { StatsData } from "📚/repository/stats.ts";
 
-import { FetchBackend } from "./types.ts";
-import type { DiscoverFilter, InvestorId } from "./types.ts";
+import { FetchBackend } from "📚/repository/types.ts";
+import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
 
 type Range = {
   min: number;

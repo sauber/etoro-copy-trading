@@ -6,7 +6,7 @@ import {
   discoverFilter,
   investorId,
   testAssets,
-} from "./testdata.ts";
+} from "../repository/testdata.ts";
 import { HeapBackend } from "@sauber/journal";
 
 Deno.test("Initialize", () => {

@@ -1,6 +1,6 @@
 import { DiskBackend } from "@sauber/journal";
-import { FetchWebBackend } from "📚/repository/fetch-web.ts";
-import { Refresh } from "📚/repository/refresh.ts";
+import { FetchWebBackend } from "📚/refresh/fetch-web.ts";
+import { Refresh } from "📚/refresh/refresh.ts";
 import { Config } from "📚/config/config.ts";
 import type { Mirror, DiscoverFilter } from "📚/repository/mod.ts";
 

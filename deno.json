@@ -7,7 +7,7 @@
     "optimize": "deno run --allow-read=../etoro-data/data src/optimize/optimize_bin.ts ../etoro-data/data",
     "profile": "deno run --allow-read=testdata --v8-flags=--prof src/optimize/optimize_bin.ts testdata",
     "simulation": "deno run --allow-read=../etoro-data/data src/simulation/simulation_bin.ts ../etoro-data/data",
-    "scrape": "deno run --allow-read=../etoro-data/data --allow-write=/workspaces/etoro-data/data --allow-net=www.etoro.com src/repository/refresh_bin.ts ../etoro-data/data",
+    "scrape": "deno run --allow-read=../etoro-data/data --allow-write=/workspaces/etoro-data/data --allow-net=www.etoro.com src/refresh/refresh_bin.ts ../etoro-data/data",
     "test": "deno test --allow-write=tmp,testdata --allow-read=tmp,testdata,src/neural --allow-net=www.etoro.com,jsonplaceholder.typicode.com,github.com,objects.githubusercontent.com,deno.com",
     "trade": "deno run --allow-read=../etoro-data/data src/trading/trade_bin.ts ../etoro-data/data",
     "train": "deno run --allow-read=../etoro-data/data --allow-write=testdata,../etoro-data/data src/ranking/train_bin.ts ../etoro-data/data"

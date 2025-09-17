@@ -1,20 +1,17 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { FetchWebBackend } from "./fetch-web.ts";
-import { discoverFilter } from "./testdata.ts";
-import { investorId } from "./testdata.ts";
-
-const rate = 5000;
+import { FetchHeapBackend } from "./fetch-heap.ts";
+import { testAssets, investorId } from "../repository/testdata.ts";
 
 Deno.test("Initialization", () => {
-  const f = new FetchWebBackend(rate);
-  assertInstanceOf(f, FetchWebBackend);
+  const f: FetchHeapBackend = new FetchHeapBackend(testAssets);
+  assertInstanceOf(f, FetchHeapBackend);
 });
 
-Deno.test.ignore("Fetching", async (t) => {
-  const f = new FetchWebBackend(rate);
+Deno.test("Fetching", { ignore: false }, async (t) => {
+  const f: FetchHeapBackend = new FetchHeapBackend(testAssets);
 
   await t.step("discover", async () => {
-    const data = await f.discover(discoverFilter);
+    const data = await f.discover({ risk: 1, daily: 1, weekly: 1 });
     assertEquals(data.Status, "OK");
   });
 
