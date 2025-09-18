@@ -13,7 +13,8 @@ import { Stats } from "📚/repository/stats.ts";
 import type { StatsData } from "📚/repository/stats.ts";
 
 import { FetchBackend } from "📚/repository/types.ts";
-import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
+import type { InvestorId } from "📚/repository/types.ts";
+import { DiscoverParameters } from "@sauber/etoro-investors";
 
 type Range = {
   min: number;
@@ -62,7 +63,7 @@ export class Refresh {
     private readonly repo: Backend,
     private readonly fetcher: FetchBackend,
     private readonly investor: InvestorId,
-    private readonly filter: DiscoverFilter, // TODO: Expire // TODO: Discover Range
+    private readonly filter: DiscoverParameters, // TODO: Expire // TODO: Discover Range
     private readonly blacklist: Blacklist,
   ) {}
 
