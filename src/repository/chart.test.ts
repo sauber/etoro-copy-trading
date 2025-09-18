@@ -1,10 +1,10 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Chart } from "./chart.ts";
-import type { ChartData } from "./chart.ts";
+import type { ChartResults } from "@sauber/etoro-investors";
 import { testAssets } from "./testdata.ts";
 import { type DateFormat, diffDate, today } from "@sauber/dates";
 
-const chartData: ChartData = testAssets.chart;
+const chartData: ChartResults = testAssets.chart;
 const end: DateFormat = "2023-10-13";
 
 Deno.test("Initialization", () => {

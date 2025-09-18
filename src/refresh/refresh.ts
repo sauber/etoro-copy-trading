@@ -2,16 +2,16 @@ import { Backend, JournaledAsset } from "@sauber/journal";
 import { DiscoverParameters } from "@sauber/etoro-investors";
 
 import { Discover } from "📚/repository/discover.ts";
-import type { DiscoverData } from "📚/repository/discover.ts";
+import type { DiscoverResults } from "@sauber/etoro-investors";
 
 import { Chart } from "📚/repository/chart.ts";
-import type { ChartData } from "📚/repository/chart.ts";
+import type { ChartResults } from "@sauber/etoro-investors";
 
 import { Portfolio } from "📚/repository/portfolio.ts";
-import type { PortfolioData } from "📚/repository/portfolio.ts";
+import type { PortfolioResults } from "@sauber/etoro-investors";
 
 import { Stats } from "📚/repository/stats.ts";
-import type { StatsData } from "📚/repository/stats.ts";
+import type { StatsResults } from "@sauber/etoro-investors";
 
 import { FetchBackend } from "./fetch-backend.ts";
 import type { InvestorId } from "📚/repository/types.ts";
@@ -95,7 +95,7 @@ export class Refresh {
     // Store downloaded data
     
     if (assetname.match(/.chart$/)) {
-      const obj = new Chart(data as ChartData);
+      const obj = new Chart(data as ChartResults);
       const date = obj.end;
       await asset.store(data, date);
     } else await asset.store(data);
@@ -108,7 +108,7 @@ export class Refresh {
   /** Load list of investor ID's from discovery */
   private async discover(): Promise<InvestorId[]> {
     const range: Range = this.discover_count;
-    const validate = function (loaded: DiscoverData) {
+    const validate = function (loaded: DiscoverResults) {
       const discover: Discover = new Discover(loaded);
       const count: number = discover.count;
       if (count < range.min || count > range.max) {
@@ -121,15 +121,15 @@ export class Refresh {
     };
 
     const expire: Expire = this.expire;
-    const available: boolean = await this.recent<DiscoverData>(
+    const available: boolean = await this.recent<DiscoverResults>(
       "discover",
       expire.discover,
       () => this.fetcher.discover(this.filter),
       validate,
     );
     if (available) {
-      const asset = new JournaledAsset<DiscoverData>("discover", this.repo);
-      const data: DiscoverData = await asset.last();
+      const asset = new JournaledAsset<DiscoverResults>("discover", this.repo);
+      const data: DiscoverResults = await asset.last();
       const discover: Discover = new Discover(data);
       return discover.investors;
     } else {
@@ -140,7 +140,7 @@ export class Refresh {
   /** Load chart for an investor */
   private chart(investor: InvestorId): Promise<boolean> {
     const maxAge: number = this.maxDelay;
-    const validate = function (loaded: ChartData) {
+    const validate = function (loaded: ChartResults) {
       const chart: Chart = new Chart(loaded, { maxAge });
       if (!chart.validate()) {
         return false;
@@ -148,7 +148,7 @@ export class Refresh {
       return true;
     };
 
-    return this.recent<ChartData>(
+    return this.recent<ChartResults>(
       investor.UserName + ".chart",
       this.expire.chart,
       () => this.fetcher.chart(investor),
@@ -158,21 +158,21 @@ export class Refresh {
 
   /** Load portfolio for an investor */
   private portfolio(investor: InvestorId, expire: number): Promise<boolean> {
-    return this.recent<PortfolioData>(
+    return this.recent<PortfolioResults>(
       investor.UserName + ".portfolio",
       expire,
       () => this.fetcher.portfolio(investor),
-      (loaded: PortfolioData) => new Portfolio(loaded).validate(),
+      (loaded: PortfolioResults) => new Portfolio(loaded).validate(),
     );
   }
 
   /** Load stats for an investor */
   private stats(investor: InvestorId): Promise<boolean> {
-    return this.recent<StatsData>(
+    return this.recent<StatsResults>(
       investor.UserName + ".stats",
       this.expire.stats,
       () => this.fetcher.stats(investor),
-      (loaded: StatsData) => new Stats(loaded).validate(),
+      (loaded: StatsResults) => new Stats(loaded).validate(),
     );
   }
 
@@ -193,12 +193,12 @@ export class Refresh {
     await this.loadInvestor(this.investor, this.expire.mirror);
 
     // Load data from repo
-    const asset = new JournaledAsset<PortfolioData>(
+    const asset = new JournaledAsset<PortfolioResults>(
       this.investor.UserName + ".portfolio",
       this.repo,
     );
     if (await asset.exists()) {
-      const data: PortfolioData = await asset.last();
+      const data: PortfolioResults = await asset.last();
       const portfolio: Portfolio = new Portfolio(data);
       return portfolio.mirrors;
     } else return [];

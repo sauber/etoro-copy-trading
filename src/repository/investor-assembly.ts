@@ -1,18 +1,18 @@
 import { type DateFormat, diffDate, today } from "@sauber/dates";
 import { Backend, JournaledAsset } from "@sauber/journal";
+import type { ChartResults, PortfolioResults, StatsResults } from "@sauber/etoro-investors";
 import { Trimmer } from "📚/repository/trimmer.ts";
 import { Bar, Instrument } from "@sauber/backtest";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
-import { Chart, type ChartData } from "📚/repository/chart.ts";
+import { Chart } from "📚/repository/chart.ts";
 import {
   type Mirror,
   Portfolio,
-  type PortfolioData,
+  
 } from "📚/repository/portfolio.ts";
 import {
   Stats,
-  type StatsData,
   type StatsExport,
 } from "📚/repository/stats.ts";
 import { detrendExponential } from "./detrend.ts";
@@ -64,21 +64,21 @@ function cover(dates: Dates, start: DateFormat, end: DateFormat): Dates {
 
 /** Extract scraped data and compile an investor object */
 export class InvestorAssembly {
-  private readonly chartAsset: JournaledAsset<ChartData>;
-  private readonly portfolioAsset: JournaledAsset<PortfolioData>;
-  private readonly statsAsset: JournaledAsset<StatsData>;
+  private readonly chartAsset: JournaledAsset<ChartResults>;
+  private readonly portfolioAsset: JournaledAsset<PortfolioResults>;
+  private readonly statsAsset: JournaledAsset<StatsResults>;
   private readonly compiledAsset: JournaledAsset<InvestorExport>;
 
   constructor(public readonly UserName: string, readonly repo: Backend) {
-    this.chartAsset = new JournaledAsset<ChartData>(
+    this.chartAsset = new JournaledAsset<ChartResults>(
       this.UserName + ".chart",
       repo,
     );
-    this.portfolioAsset = new JournaledAsset<PortfolioData>(
+    this.portfolioAsset = new JournaledAsset<PortfolioResults>(
       this.UserName + ".portfolio",
       repo,
     );
-    this.statsAsset = new JournaledAsset<StatsData>(
+    this.statsAsset = new JournaledAsset<StatsResults>(
       this.UserName + ".stats",
       repo,
     );
@@ -90,14 +90,14 @@ export class InvestorAssembly {
 
   /** Customer ID */
   private async CustomerId(): Promise<number> {
-    const stats: StatsData = await this.statsAsset.last();
+    const stats: StatsResults = await this.statsAsset.last();
     const id: number = stats.Data.CustomerId;
     return id;
   }
 
   /** Customer ID */
   private async FullName(): Promise<string | undefined> {
-    const stats: StatsData = await this.statsAsset.last();
+    const stats: StatsResults = await this.statsAsset.last();
     return stats.Data.FullName;
   }
 
@@ -124,7 +124,7 @@ export class InvestorAssembly {
 
     // Load latest chart
     let end: DateFormat = dates[dates.length - 1];
-    const lastData: ChartData = await this.chartAsset.retrieve(end);
+    const lastData: ChartResults = await this.chartAsset.retrieve(end);
     const lastChart = new Chart(lastData);
     const compiled = new Trimmer(lastChart.values, end).trim;
     const values: number[] = compiled.values;
@@ -181,7 +181,7 @@ export class InvestorAssembly {
 
   /** Extract essential data from stats on date */
   private async statsValues(date: DateFormat): Promise<StatsExport> {
-    const loaded: StatsData = await this.statsAsset.retrieve(date);
+    const loaded: StatsResults = await this.statsAsset.retrieve(date);
     const stats = new Stats(loaded);
     return stats.value;
   }
@@ -207,7 +207,7 @@ export class InvestorAssembly {
 
   /** Extract list of investors from portfolio */
   private async portfolioValues(date: DateFormat): Promise<Mirror[]> {
-    const loaded: PortfolioData = await this.portfolioAsset.retrieve(date);
+    const loaded: PortfolioResults = await this.portfolioAsset.retrieve(date);
     const portfolio = new Portfolio(loaded);
     return portfolio.mirrors;
   }

@@ -1,3 +1,5 @@
+import { StatsResults } from "@sauber/etoro-investors";
+
 /** Type of exported fields */
 export type StatsExport = {
   CustomerId: number;
@@ -81,7 +83,7 @@ export type StatsData = {
 
 /** Stats data scraped from eToro */
 export class Stats {
-  constructor(private readonly raw: StatsData) {}
+  constructor(private readonly raw: StatsResults) {}
 
   /** Confirm stats include CustomerId */
   public validate(): boolean {
@@ -92,7 +94,7 @@ export class Stats {
   /** Export subset of data */
   public get value(): StatsExport {
     const output = Object.fromEntries(
-      props.map(key => [key, this.raw.Data[key]])
+      props.map((key) => [key, this.raw.Data[key]]),
     ) as StatsExport;
     return output;
   }

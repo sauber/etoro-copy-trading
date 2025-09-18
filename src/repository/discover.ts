@@ -1,14 +1,9 @@
 import { assert } from "@std/assert";
+import { DiscoverResults } from "@sauber/etoro-investors";
 import type { InvestorId } from "📚/repository/types.ts";
 
-export type DiscoverData = {
-  Status: string;
-  TotalRows: number;
-  Items: InvestorId[];
-};
-
 export class Discover {
-  constructor(private readonly raw: DiscoverData) {}
+  constructor(private readonly raw: DiscoverResults) {}
 
   public validate(): boolean {
     assert(this.raw.TotalRows >= 1, `TotalRows ${this.raw.TotalRows} < 1`);

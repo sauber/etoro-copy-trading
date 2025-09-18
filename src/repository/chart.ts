@@ -1,17 +1,5 @@
 import { type DateFormat, nextDate, today } from "@sauber/dates";
-
-type ChartEntry = {
-  timestamp: string;
-  equity: number;
-};
-
-export type ChartData = {
-  simulation: {
-    oneYearAgo: {
-      chart: ChartEntry[];
-    };
-  };
-};
+import type { ChartItem, ChartResults } from "@sauber/etoro-investors";
 
 /** Convert scraped timestamps to DateFormat */
 function date(timestamp: string): DateFormat {
@@ -23,23 +11,23 @@ export class Chart {
   // Max delay in number of days in chart
   public readonly maxAge: number = 2;
 
-  constructor(private readonly raw: ChartData, data?: Partial<Chart>) {
+  constructor(private readonly raw: ChartResults, data?: Partial<Chart>) {
     Object.assign(this, data);
   }
 
-  private get list(): ChartEntry[] {
+  private get list(): ChartItem[] {
     return this.raw.simulation.oneYearAgo?.chart || [];
   }
 
   /** First date in chart */
   public get start(): DateFormat {
-    const list: ChartEntry[] = this.list;
+    const list: ChartItem[] = this.list;
     return date(list[0].timestamp);
   }
 
   /** Last date in chart */
   public get end(): DateFormat {
-    const list: ChartEntry[] = this.list;
+    const list: ChartItem[] = this.list;
     return date(list[list.length - 1].timestamp);
   }
 
@@ -48,14 +36,8 @@ export class Chart {
   }
 
   public validate(): boolean {
-    // const maxAge = 3;
     const todayDate: DateFormat = today();
     const expectedDate: DateFormat = nextDate(todayDate, -this.maxAge);
-    // const active = (12 - 1) * 7 - 1; // 12-1 weeks
-    // if (this.count < active) {
-    //   console.error(`Error: Too few dates in chart: ${this.count}`);
-    //   return false;
-    // }
     if (this.end > todayDate) {
       console.error(`Error: Last date ${this.end} is in the future`);
       return false;
@@ -71,7 +53,7 @@ export class Chart {
 
   /** Equity series */
   public get values(): number[] {
-    const list: ChartEntry[] = this.list;
-    return list.map((entry: ChartEntry) => entry.equity);
+    const list: ChartItem[] = this.list;
+    return list.map((entry: ChartItem) => entry.equity);
   }
 }

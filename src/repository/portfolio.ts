@@ -1,54 +1,13 @@
+import { PortfolioResults } from "@sauber/etoro-investors";
+
 export type Mirror = {
   CustomerId: number;
   UserName: string;
   Value: number;
 };
 
-type Position = {
-  InstrumentID: number;
-  Direction: "Buy" | "Sell";
-  Invested: number;
-  NetProfit: number;
-  Value: number;
-};
-
-type InstrumentType = {
-  IndustryTypeID: number;
-  Direction: "Buy" | "Sell";
-  Invested: number;
-  NetProfit: number;
-  Value: number;
-};
-
-type StockIndustry = {
-  StockIndustryID: number;
-  Direction: "Buy" | "Sell";
-  Invested: number;
-  NetProfit: number;
-  Value: number;
-};
-
-type MirrorData = {
-  MirrorID: number;
-  ParentCID: number;
-  ParentUsername: string;
-  Invested: number;
-  NetProfit: number;
-  Value: number;
-  PendingForClosure: boolean;
-};
-
-export type PortfolioData = {
-  CreditByRealizedEquity: number;
-  CreditByUnrealizedEquity: number;
-  AggregatedMirrors: MirrorData[];
-  AggregatedPositions: Position[];
-  AggregatedPositionsByInstrumentTypeID: InstrumentType[];
-  AggregatedPositionsByStockIndustryID: StockIndustry[];
-};
-
 export class Portfolio {
-  constructor(private readonly raw: PortfolioData) {}
+  constructor(private readonly raw: PortfolioResults) {}
 
   public validate(): boolean {
     if (!("CreditByRealizedEquity" in this.raw)) {

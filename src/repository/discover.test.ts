@@ -5,11 +5,11 @@ import {
   assertThrows,
 } from "@std/assert";
 import { Discover } from "./discover.ts";
-import type { DiscoverData } from "./discover.ts";
+import type { DiscoverResults } from "@sauber/etoro-investors";
 import { testAssets } from "./testdata.ts";
 import type { InvestorId } from "./mod.ts";
 
-const data: DiscoverData = testAssets.discover;
+const data: DiscoverResults = testAssets.discover;
 
 Deno.test("Discover", () => {
   const discover: Discover = new Discover({
@@ -39,6 +39,6 @@ Deno.test("Discover invalid", () => {
       assert(discover.validate());
     },
     Error,
-    "TotalRows 0 < 1"
+    "TotalRows 0 < 1",
   );
 });
