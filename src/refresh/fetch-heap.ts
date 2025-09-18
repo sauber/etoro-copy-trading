@@ -1,35 +1,39 @@
-import type { ChartData } from "📚/repository/chart.ts";
-import type { DiscoverData } from "📚/repository/discover.ts";
-import type { PortfolioData } from "📚/repository/portfolio.ts";
-import type { StatsData } from "📚/repository/stats.ts";
+import {
+  ChartResults,
+  DiscoverParameters,
+  DiscoverResults,
+  PortfolioResults,
+  StatsResults,
+} from "@sauber/etoro-investors";
 
-import { FetchBackend } from "📚/repository/types.ts";
-import type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
+import type { InvestorId } from "📚/repository/mod.ts";
+
+import { FetchBackend } from "./fetch-backend.ts";
 
 type Assets = {
-  discover: DiscoverData;
-  chart: ChartData;
-  portfolio: PortfolioData;
-  stats: StatsData;
+  discover: DiscoverResults;
+  chart: ChartResults;
+  portfolio: PortfolioResults;
+  stats: StatsResults;
 };
 
 /** Test class to fetch from variables instead of website */
 export class FetchHeapBackend implements FetchBackend {
   constructor(private readonly assets: Assets) {}
 
-  public discover(_filter: DiscoverFilter): Promise<DiscoverData> {
+  public discover(_filter: Partial<DiscoverParameters>): Promise<DiscoverResults> {
     return Promise.resolve(this.assets.discover);
   }
 
-  public chart(_investor: InvestorId): Promise<ChartData> {
+  public chart(_investor: InvestorId): Promise<ChartResults> {
     return Promise.resolve(this.assets.chart);
   }
 
-  public portfolio(_investor: InvestorId): Promise<PortfolioData> {
+  public portfolio(_investor: InvestorId): Promise<PortfolioResults> {
     return Promise.resolve(this.assets.portfolio);
   }
 
-  public stats(_investor: InvestorId): Promise<StatsData> {
+  public stats(_investor: InvestorId): Promise<StatsResults> {
     return Promise.resolve(this.assets.stats);
   }
 }

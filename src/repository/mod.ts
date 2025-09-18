@@ -1,6 +1,6 @@
 export type { StatsExport } from "📚/repository/stats.ts";
-export type { DiscoverFilter, InvestorId } from "📚/repository/types.ts";
-export { type Mirror } from "📚/repository/portfolio.ts";
+export type { InvestorId } from "📚/repository/types.ts";
+export type { Mirror } from "📚/repository/portfolio.ts";
 
 import { Backend, CachingBackend, DiskBackend } from "@sauber/journal";
 

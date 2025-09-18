@@ -1,13 +1,13 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
+import { DiscoverParameters } from "@sauber/etoro-investors";
+import { HeapBackend } from "@sauber/journal";
+
+import { blacklist, investorId, testAssets } from "📚/repository/testdata.ts";
+
 import { FetchHeapBackend } from "./fetch-heap.ts";
 import { Refresh } from "./refresh.ts";
-import {
-  blacklist,
-  discoverFilter,
-  investorId,
-  testAssets,
-} from "../repository/testdata.ts";
-import { HeapBackend } from "@sauber/journal";
+
+const discoverFilter: Partial<DiscoverParameters> = {};
 
 Deno.test("Initialize", () => {
   const repo: HeapBackend = new HeapBackend();

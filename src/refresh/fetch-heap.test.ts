@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { FetchHeapBackend } from "./fetch-heap.ts";
-import { testAssets, investorId } from "../repository/testdata.ts";
+import { testAssets, investorId } from "📚/repository/testdata.ts";
 
 Deno.test("Initialization", () => {
   const f: FetchHeapBackend = new FetchHeapBackend(testAssets);
@@ -8,25 +8,25 @@ Deno.test("Initialization", () => {
 });
 
 Deno.test("Fetching", { ignore: false }, async (t) => {
-  const f: FetchHeapBackend = new FetchHeapBackend(testAssets);
+  const fetch: FetchHeapBackend = new FetchHeapBackend(testAssets);
 
   await t.step("discover", async () => {
-    const data = await f.discover({ risk: 1, daily: 1, weekly: 1 });
+    const data = await fetch.discover({});
     assertEquals(data.Status, "OK");
   });
 
   await t.step("chart", async () => {
-    const data = await f.chart(investorId);
+    const data = await fetch.chart(investorId);
     assertInstanceOf(data.simulation, Object);
   });
 
   await t.step("portfolio", async () => {
-    const data = await f.portfolio(investorId);
+    const data = await fetch.portfolio(investorId);
     assertInstanceOf(data.AggregatedPositions, Object);
   });
 
   await t.step("stats", async () => {
-    const data = await f.stats(investorId);
+    const data = await fetch.stats(investorId);
     assertInstanceOf(data.Data, Object);
   });
 });
