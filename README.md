@@ -1,6 +1,6 @@
-# Etoro-Fresh
+# eToro Copy Trading
 
-Download and analyze profiles of investors
+Download and analyze profiles of investors on eToro. Create strategies and run simulation.
 
 ## Profiling
 
