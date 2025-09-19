@@ -106,6 +106,8 @@ export class Refresh {
   /** Load list of investor ID's from discovery */
   private async discover(): Promise<InvestorId[]> {
     const range: Range = this.discover_count;
+
+    // Validation of discovery
     const validate = function (loaded: DiscoverResults) {
       const discover: Discover = new Discover(loaded);
       const count: number = discover.count;
@@ -117,6 +119,9 @@ export class Refresh {
       console.log(`Count of discovered investors is ${count}`);
       return true;
     };
+
+    // Print filter
+    console.log("Discover filter:", this.filter);
 
     const expire: Expire = this.expire;
     const available: boolean = await this.recent<DiscoverResults>(
