@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Trimmer } from "📚/repository/trimmer.ts";
+import { Trimmer } from "./trimmer.ts";
 
 Deno.test("Blank Initialization", () => {
   const chart = new Trimmer([], "2022-10-10");

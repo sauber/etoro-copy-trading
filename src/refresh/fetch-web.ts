@@ -2,20 +2,19 @@ import { RateLimit } from "@sauber/ratelimit";
 import { StorableObject } from "@sauber/journal";
 import {
   chart,
+  ChartResults,
   discover,
   DiscoverParameters,
-  portfolio,
-  stats,
   DiscoverResults,
-  ChartResults,
+  portfolio,
   PortfolioResults,
+  stats,
   StatsResults,
 } from "@sauber/etoro-investors";
 
-import type { InvestorId } from "📚/repository/types.ts";
+import type { InvestorId } from "📚/repository/mod.ts";
 
 import { FetchBackend } from "./fetch-backend.ts";
-
 
 /** Fetch objects from eToro API using rate limit */
 export class FetchWebBackend implements FetchBackend {
@@ -31,7 +30,9 @@ export class FetchWebBackend implements FetchBackend {
     return await this.ratelimit.limit(fn);
   }
 
-  public discover(filter: Partial<DiscoverParameters>): Promise<DiscoverResults> {
+  public discover(
+    filter: Partial<DiscoverParameters>,
+  ): Promise<DiscoverResults> {
     return this._fetch(() => discover(filter));
   }
 

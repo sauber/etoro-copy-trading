@@ -1,5 +1,8 @@
-export type { StatsExport } from "📚/repository/stats.ts";
-export type { InvestorId } from "📚/repository/types.ts";
+export * from "📚/repository/chart.ts";
+export * from "📚/repository/portfolio.ts";
+export * from "📚/repository/stats.ts";
+export * from "📚/repository/discover.ts";
+export * from "📚/repository/types.ts";
 export type { Mirror } from "📚/repository/portfolio.ts";
 
 import { Backend, CachingBackend, DiskBackend } from "@sauber/journal";

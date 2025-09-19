@@ -1,4 +1,5 @@
-import { Investor } from "📚/investor/mod.ts";
+import type { Instrument, Series } from "@sauber/backtest";
+import { JournaledAsset } from "@sauber/journal";
 import {
   assert,
   assertAlmostEquals,
@@ -6,16 +7,12 @@ import {
   assertInstanceOf,
   assertNotEquals,
 } from "@std/assert";
-import {
-  InvestorAssembly,
-  type InvestorExport,
-} from "📚/repository/investor-assembly.ts";
 
-// import { InvestorId } from "📚/repository/mod.ts";
-import { repo } from "📚/repository/testdata.ts";
-import type { InvestorId } from "📚/repository/types.ts";
-import type { Series, Instrument } from "@sauber/backtest";
-import { JournaledAsset } from "@sauber/journal";
+import { Investor } from "📚/investor/mod.ts";
+
+import { InvestorAssembly, type InvestorExport } from "./investor-assembly.ts";
+import { repo } from "./testdata.ts";
+import type { InvestorId } from "./types.ts";
 
 // Test Data
 const username = "Schnaub123";

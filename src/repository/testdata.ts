@@ -1,12 +1,12 @@
 import { CachingBackend, DiskBackend, JournaledAsset } from "@sauber/journal";
-import type { InvestorId } from "📚/repository/types.ts";
-import { Community } from "📚/community/community.ts";
 import {
   ChartResults,
   DiscoverResults,
   PortfolioResults,
   StatsResults,
 } from "@sauber/etoro-investors";
+import { Community } from "📚/community/community.ts";
+import type { InvestorId } from "./types.ts";
 
 const path = "testdata";
 export const repo = new CachingBackend(new DiskBackend(path));

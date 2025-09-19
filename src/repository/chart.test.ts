@@ -1,8 +1,8 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Chart } from "./chart.ts";
 import type { ChartResults } from "@sauber/etoro-investors";
-import { testAssets } from "./testdata.ts";
 import { type DateFormat, diffDate, today } from "@sauber/dates";
+import { Chart } from "./chart.ts";
+import { testAssets } from "./testdata.ts";
 
 const chartData: ChartResults = testAssets.chart;
 const end: DateFormat = "2023-10-13";

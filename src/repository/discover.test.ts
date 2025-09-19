@@ -4,8 +4,8 @@ import {
   assertInstanceOf,
   assertThrows,
 } from "@std/assert";
-import { Discover } from "./discover.ts";
 import type { DiscoverResults } from "@sauber/etoro-investors";
+import { Discover } from "./discover.ts";
 import { testAssets } from "./testdata.ts";
 import type { InvestorId } from "./mod.ts";
 

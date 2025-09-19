@@ -1,6 +1,6 @@
 import { assert } from "@std/assert";
 import { DiscoverResults } from "@sauber/etoro-investors";
-import type { InvestorId } from "📚/repository/types.ts";
+import type { InvestorId } from "./types.ts";
 
 export class Discover {
   constructor(private readonly raw: DiscoverResults) {}

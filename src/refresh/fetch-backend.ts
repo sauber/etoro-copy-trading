@@ -5,7 +5,7 @@ import {
   PortfolioResults,
   StatsResults,
 } from "@sauber/etoro-investors";
-import type { InvestorId } from "../repository/mod.ts";
+import type { InvestorId } from "📚/repository/mod.ts";
 
 export interface FetchBackend {
   /** Search for investors matching criteria */

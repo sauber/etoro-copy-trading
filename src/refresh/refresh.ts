@@ -1,20 +1,20 @@
 import { Backend, JournaledAsset } from "@sauber/journal";
-import { DiscoverParameters } from "@sauber/etoro-investors";
-
-import { Discover } from "📚/repository/discover.ts";
-import type { DiscoverResults } from "@sauber/etoro-investors";
-
-import { Chart } from "📚/repository/chart.ts";
-import type { ChartResults } from "@sauber/etoro-investors";
-
-import { Portfolio } from "📚/repository/portfolio.ts";
-import type { PortfolioResults } from "@sauber/etoro-investors";
-
-import { Stats } from "📚/repository/stats.ts";
-import type { StatsResults } from "@sauber/etoro-investors";
-
+import type {
+  ChartResults,
+  DiscoverParameters,
+  DiscoverResults,
+  PortfolioResults,
+  StatsResults,
+  UserName,
+} from "@sauber/etoro-investors";
+import {
+  Chart,
+  Discover,
+  type InvestorId,
+  Portfolio,
+  Stats,
+} from "📚/repository/mod.ts";
 import { FetchBackend } from "./fetch-backend.ts";
-import type { InvestorId } from "📚/repository/types.ts";
 
 type Range = {
   min: number;
@@ -29,7 +29,6 @@ type Expire = {
   stats: number;
 };
 
-type UserName = string;
 type BlacklistProperties = Record<string, unknown>;
 export type Blacklist = Record<UserName, BlacklistProperties>;
 
@@ -93,7 +92,7 @@ export class Refresh {
     }
 
     // Store downloaded data
-    
+
     if (assetname.match(/.chart$/)) {
       const obj = new Chart(data as ChartResults);
       const date = obj.end;
@@ -101,7 +100,6 @@ export class Refresh {
     } else await asset.store(data);
     console.log(`Store asset ${assetname}`);
 
-    
     return true;
   }
 

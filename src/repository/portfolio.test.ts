@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { Portfolio } from "./portfolio.ts";
 import { testAssets } from "./testdata.ts";
-import { InvestorId } from "./mod.ts";
+import { InvestorId } from "./types.ts";
 
 const portfolioData = testAssets.portfolio;
 

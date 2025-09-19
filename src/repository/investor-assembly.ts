@@ -1,20 +1,18 @@
 import { type DateFormat, diffDate, today } from "@sauber/dates";
 import { Backend, JournaledAsset } from "@sauber/journal";
-import type { ChartResults, PortfolioResults, StatsResults } from "@sauber/etoro-investors";
-import { Trimmer } from "📚/repository/trimmer.ts";
+import type {
+  ChartResults,
+  PortfolioResults,
+  StatsResults,
+} from "@sauber/etoro-investors";
 import { Bar, Instrument } from "@sauber/backtest";
+
 import { Diary, Investor } from "📚/investor/mod.ts";
 
-import { Chart } from "📚/repository/chart.ts";
-import {
-  type Mirror,
-  Portfolio,
-  
-} from "📚/repository/portfolio.ts";
-import {
-  Stats,
-  type StatsExport,
-} from "📚/repository/stats.ts";
+import { Trimmer } from "./trimmer.ts";
+import { Chart } from "./chart.ts";
+import { type Mirror, Portfolio } from "./portfolio.ts";
+import { Stats, type StatsExport } from "./stats.ts";
 import { detrendExponential } from "./detrend.ts";
 
 type MirrorsByDate = Record<DateFormat, Mirror[]>;
