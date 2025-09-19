@@ -2,6 +2,7 @@ import { Exchange, Instruments } from "@sauber/backtest";
 import {
   Dashboard,
   Parameters as OptimizerParameters,
+  Parameters,
   Status,
 } from "@sauber/optimize";
 
@@ -50,15 +51,15 @@ const validationModel = new Optimize(validation, ranker);
 const console_width = 88;
 
 // Generate dashboard and callback
-function dashboard(max: number): Status {
-  const dashboard: Dashboard = new Dashboard(max, console_width);
+function dashboard(max: number, parameters: OptimizerParameters): Status {
+  const dashboard: Dashboard = new Dashboard(parameters, max, console_width);
 
   const callback: Status = (
     iterations: number,
     _momentum: number,
-    parameters: OptimizerParameters,
+    _parameters: OptimizerParameters,
     reward: number[],
-  ) => console.log(dashboard.render(parameters, iterations, reward));
+  ) => console.log(dashboard.render(iterations, reward));
 
   return callback;
 }
@@ -83,7 +84,7 @@ try {
   );
   trainingModel.reset(
     epochs,
-    dashboard(epochs),
+    dashboard(epochs, trainingModel.parameters),
   );
   console.log("");
 }
@@ -95,7 +96,7 @@ const epsilon = 0.01;
 const _iterations: number = trainingModel.optimize(
   epochs,
   epsilon,
-  dashboard(epochs),
+  dashboard(epochs, trainingModel.parameters),
 );
 const result = trainingModel.getParameterValues();
 

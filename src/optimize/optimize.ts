@@ -63,7 +63,7 @@ export class Optimize {
   private readonly timerParameters: Parameters = makeParameters(
     this.timerLimits,
   );
-  private readonly parameters: Parameters = [
+  public readonly parameters: Parameters = [
     ...this.strategyParameters,
     ...this.timerParameters,
   ];
@@ -153,7 +153,9 @@ export class Optimize {
 
   /** Set values of parameters */
   public setParameterValues(settings: Settings): Parameters {
-    if (!(this.validateParameters(settings))) throw new Error("Invalid settings");
+    if (!(this.validateParameters(settings))) {
+      throw new Error("Invalid settings");
+    }
     this.parameters.forEach((p) => p.set(settings[p.name]));
     return this.parameters;
   }

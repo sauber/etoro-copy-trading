@@ -61,21 +61,22 @@ Deno.test("Optimize", () => {
 });
 
 Deno.test("Visualized training", { ignore: true }, () => {
+  const optimizer = makeOptimizer(10);
+  const epsilon = 0.01;
+
   // Dashboard
   const epochs = 50;
   const console_width = 84;
-  const dashboard: Dashboard = new Dashboard(epochs, console_width);
+  const dashboard: Dashboard = new Dashboard(optimizer.parameters, epochs, console_width);
   function status(
     iterations: number,
     _momentum: number,
-    parameters: Parameters,
+    _parameters: Parameters,
     reward: Output[],
   ): void {
-    console.log(dashboard.render(parameters, iterations, reward));
+    console.log(dashboard.render(iterations, reward));
   }
 
-  const optimizer = makeOptimizer(10);
-  const epsilon = 0.01;
   const iterations = optimizer.optimize(epochs, epsilon, status);
   console.log("Iterations:", iterations);
   assertGreaterOrEqual(iterations, 1);
