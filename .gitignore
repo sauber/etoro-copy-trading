@@ -21,3 +21,6 @@ tmp/
 
 # VSCode spaces
 *.code-workspace
+
+# Workbook training file
+training_data.csv
