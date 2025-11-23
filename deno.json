@@ -18,7 +18,7 @@
     "@cliffy/table": "jsr:@cliffy/table@^1.0.0-rc.8",
     "@debut/indicators": "npm:@debut/indicators@^1.3.22",
     "@hugoalh/shuffle-array": "jsr:@hugoalh/shuffle-array@^2.1.1",
-    "@sauber/backtest": "jsr:@sauber/backtest@^2.2.0",
+    "@sauber/backtest": "jsr:@sauber/backtest@^2.3.0",
     "@sauber/dataframe": "jsr:@sauber/dataframe@^0.6.1",
     "@sauber/dates": "jsr:@sauber/dates@^0.1.2",
     "@sauber/etoro-investors": "jsr:@sauber/etoro-investors@^2.5.2",

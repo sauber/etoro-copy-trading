@@ -1,4 +1,4 @@
-import { Bar, Instrument } from "@sauber/backtest";
+import { Bar, Instrument, Series } from "@sauber/backtest";
 import { Network, NetworkData } from "@sauber/neurons";
 import { Asset, Backend } from "@sauber/journal";
 
@@ -44,10 +44,13 @@ export class Model {
   }
 
   /** Signal value at bar */
-  // public predict(instrument: Instrument, bar: Bar): number {
-  //   const chart: Series = instrument.series;
-  //   // const start_index
-  //   // const chart: Instrument = this.model.generate(instrument);
-  //   return chart.price(bar);
-  // }
+  public predict(instrument: Instrument, bar: Bar): number {
+    const start_bar = bar + Model.input_bars + Model.gap_bars - 1;
+    const end_bar = bar + Model.gap_bars;
+    const past: Instrument = instrument.slice(start_bar, end_bar);
+    const input: Series = past.series;
+    // TODO: Convert absolute prices to %change
+    const output: number = this.network.predict(Array.from(input))[0];
+    return output;
+  }
 }
