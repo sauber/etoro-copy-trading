@@ -58,6 +58,8 @@ export class Features {
     );
 
     // Calculate score
+    // TODO: Externalize to other module
+    // TODO: Instead find max peak minus max drawdown until peak
     const sr: Output = sharpe_ratio(future, 0.05);
 
     // Valid result or try again?
