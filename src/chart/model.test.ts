@@ -1,8 +1,9 @@
 import { Network } from "@sauber/neurons";
 import { Model } from "./model.ts";
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
-import { temprepo } from "./testdata.ts";
+import { investors, temprepo } from "./testdata.ts";
 import { Instrument, Series } from "@sauber/backtest";
+import { linechart } from "@sauber/widgets";
 
 Deno.test("Instance", () => {
   const network = new Network(1);
@@ -33,9 +34,17 @@ Deno.test("Save/load", async () => {
 Deno.test("Predict", () => {
   const model = Model.generate();
   const series: Series = new Float32Array(
-    Array(16).keys().map((_) => Math.random() - 0.5),
+    Array(17).keys().map((_) => Math.random() - 0.5),
   );
   const instr: Instrument = new Instrument(series, 0);
   const output: number = model.predict(instr, 0);
   assert(isFinite(output));
+});
+
+Deno.test("Train", () => {
+  const model = Model.generate();
+  const losses: number[] = model.train(investors, 10000, 32);
+  console.log("Loss:", losses[0], "...", losses[losses.length - 1]);
+  // assert(isFinite(loss));
+  console.log(linechart(losses, 15, 78));
 });

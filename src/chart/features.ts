@@ -1,7 +1,5 @@
-import { Series } from "@sauber/backtest";
-import { Investors } from "../community/mod.ts";
-import { Investor } from "../investor/mod.ts";
-import { sharpe_ratio } from "../ranking/sharperatio.ts";
+import { Instrument, Instruments, Series } from "@sauber/backtest";
+import { score } from "./score.ts";
 
 export type Input = Series;
 export type Output = number;
@@ -14,11 +12,11 @@ export class Features {
   private readonly required_bars: number;
 
   // Investors having sufficient data
-  private readonly investors: Investors;
+  private readonly instruments: Instruments;
 
   constructor(
     // Pool of investors
-    investors: Investors,
+    instruments: Instruments,
     // Count of bars for input
     private readonly past_bars: number,
     // Count of bars of calculating output score
@@ -28,17 +26,37 @@ export class Features {
   ) {
     // Select investors having sufficent chart bars available
     this.required_bars = past_bars + future_bars + gap_bars;
-    this.investors = investors.filter((i: Investor) =>
+    this.instruments = instruments.filter((i: Instrument) =>
       i.length >= this.required_bars
     );
+  }
+
+  /** Cache of extreme scores seens */
+  private min_score: number = Infinity;
+  private max_score: number = -Infinity;
+
+  private score(series: Series): number {
+    const points = score(series);
+    if (isFinite(points) && points < this.min_score) {
+      this.min_score = points;
+      console.log(series);
+      console.log("New minimum score:", points);
+    }
+    if (isFinite(points) && points > this.max_score) {
+      this.max_score = points;
+      console.log(series);
+      console.log("New maximum score:", points);
+    }
+
+    return points;
   }
 
   /** From one random investor pick a random period and generate input and output training data */
   private sample(): Sample {
     // Choose random investor
-    const index = Math.floor(Math.random() * this.investors.length);
-    const investor: Investor = this.investors[index];
-    const series: Series = investor.series;
+    const index = Math.floor(Math.random() * this.instruments.length);
+    const instrument: Instrument = this.instruments[index];
+    const series: Series = instrument.series;
     const available_bars: number = series.length;
 
     // Pick a random point in chart for training data
@@ -58,9 +76,8 @@ export class Features {
     );
 
     // Calculate score
-    // TODO: Externalize to other module
-    // TODO: Instead find max peak minus max drawdown until peak
-    const sr: Output = sharpe_ratio(future, 0.05);
+    const sr: Output = this.score(future);
+    // console.log({ future, sr });
 
     // Valid result or try again?
     if (isFinite(sr)) return [input, sr];
