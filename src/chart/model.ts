@@ -2,6 +2,8 @@ import { Bar, Instrument, Series } from "@sauber/backtest";
 import { Network, NetworkData, Train } from "@sauber/neurons";
 import { Asset, Backend } from "@sauber/journal";
 import { Features, Samples } from "./features.ts";
+import { Investor } from "../investor/mod.ts";
+import { Investors } from "../community/mod.ts";
 
 export class Model {
   /** Repository file name */
@@ -67,14 +69,41 @@ export class Model {
     return output;
   }
 
+  /** Only use suitable candidates for testing */
+  private candidates(investors: Investors): Investors {
+    // Trim charts
+    const trimmed = investors.map((i: Investor) => i.trimmed());
+
+    // Debug length of charts before and after trimming
+    // investors.forEach((i: Investor, index: number) => {
+    //   console.log(i.UserName, i.series.length, trimmed[index].series.length);
+    // });
+
+    // Confirm that no series have two consecutive 10000 values
+    // const invalid = trimmed.filter((i: Investor) => {
+    //   const series: Series = i.series;
+    //   for (let j = 0; j < series.length - 1; j++) {
+    //     if (series[j] == 10000 && series[j + 1] == 10000) return true;
+    //   }
+    //   return false;
+    // });
+    // console.log({ invalid });
+
+    return trimmed;
+  }
+
+  /** Improve model by training from set of investors */
   public train(
-    investors: Instrument[],
+    investors: Investors,
     epochs: number = 1000,
     batchsize: number = 32,
   ): number[] {
+    // Use only suitable investors
+    const candidates = this.candidates(investors);
+
     // Feature factory
     const f = new Features(
-      investors,
+      candidates,
       Model.input_bars + 1, // Need extra bar to calculate change from previous bar
       Model.output_bars,
       Model.gap_bars,

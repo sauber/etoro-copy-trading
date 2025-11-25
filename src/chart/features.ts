@@ -1,5 +1,5 @@
 import { Instrument, Instruments, Series } from "@sauber/backtest";
-import { score } from "./score.ts";
+import { score } from "./minmax.ts";
 
 export type Input = Series;
 export type Output = number;
@@ -39,12 +39,12 @@ export class Features {
     const points = score(series);
     if (isFinite(points) && points < this.min_score) {
       this.min_score = points;
-      console.log(series);
+      // console.log(series);
       console.log("New minimum score:", points);
     }
     if (isFinite(points) && points > this.max_score) {
       this.max_score = points;
-      console.log(series);
+      // console.log(series);
       console.log("New maximum score:", points);
     }
 

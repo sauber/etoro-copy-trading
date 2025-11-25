@@ -1,4 +1,4 @@
-import { Bar, Instrument } from "@sauber/backtest";
+import { Bar, Instrument, Series } from "@sauber/backtest";
 import { Diary } from "📚/investor/diary.ts";
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
 
@@ -29,5 +29,39 @@ export class Investor extends Instrument {
   public get isPopularInvestor(): boolean {
     if (this.stats.dates.length < 1) return false;
     return this.stats.last.PopularInvestor;
+  }
+
+  /** Copy properties to new object */
+  private derived(chart: Instrument): Investor {
+    return new Investor(
+      this.UserName,
+      this.CustomerID,
+      this.FullName,
+      chart,
+      this.mirrors,
+      this.stats,
+    );
+  }
+
+  /** Generate a derived Investor with trimmed chart */
+  public trimmed(): Investor {
+    const source: Series = this.series;
+
+    // Search from beginning until two adjacent values are no longer equal
+    let start = 0;
+    while (source[start] == source[start + 1]) start++;
+
+    // Search from end until two adjacent values are no longer 6000
+    let end = source.length;
+    while (source[end - 2] == 6000) end--;
+
+    // No trimming required
+    if (start == 0 && end == source.length) return this;
+
+    // Slice series
+    const target = source.slice(start, end);
+    const endBar: Bar = this.end + source.length - end;
+
+    return this.derived(new Instrument(target, endBar));
   }
 }

@@ -25,3 +25,17 @@ Deno.test("Properties", () => {
   assertEquals(investor.isFund, false);
   assertEquals(investor.isPopularInvestor, false);
 });
+
+Deno.test("Trim Chart", () => {
+  const chart = new Instrument(
+    new Float32Array([10000, 10000, 10000, 15000, 6000, 6000, 6000]),
+    end,
+  );
+  const investor = new Investor(username, id, fullname, chart, mirrors, stats);
+  const trimmed = investor.trimmed();
+  assertEquals(trimmed.series, new Float32Array([10000, 15000, 6000]));
+  assertEquals(trimmed.end, 2);
+  assertEquals(trimmed.UserName, username);
+  assertEquals(trimmed.CustomerID, id);
+  assertEquals(trimmed.FullName, fullname);
+});
