@@ -1,22 +1,22 @@
 import { Bar, Instrument, Series } from "@sauber/backtest";
 import { Network, NetworkData, Train } from "@sauber/neurons";
 import { Asset, Backend } from "@sauber/journal";
-import { Features, Samples } from "./features.ts";
-import { Investor } from "../investor/mod.ts";
+import { Samples } from "./samples.ts";
 import { Investors } from "../community/mod.ts";
+import { Features } from "./features.ts";
 
 export class Model {
   /** Repository file name */
   public static readonly assetName = "chart.network";
 
   /** Number of bars required for prediction */
-  private static input_bars: number = 14;
+  public static input_bars: number = 100;
 
   /** Number of bars required for training */
-  private static output_bars: number = 100;
+  public static output_bars: number = 100;
 
   /** Number of bars between input data and prediction bar */
-  private static gap_bars: number = 2;
+  public static gap_bars: number = 2;
 
   constructor(private readonly network: Network) {}
 
@@ -24,8 +24,8 @@ export class Model {
   static generate(): Model {
     const inputs: number = Model.input_bars;
     const network = new Network(inputs)
-      // .dense(inputs * 2).lrelu
       // .dense(inputs).lrelu
+      .dense(inputs).lrelu
       .dense(3).lrelu
       .dense(1);
     return new Model(network);
@@ -59,37 +59,15 @@ export class Model {
 
   /** Signal value at bar */
   public predict(instrument: Instrument, bar: Bar): number {
-    const start_bar = bar + Model.input_bars + Model.gap_bars;
-    const end_bar = bar + Model.gap_bars;
-    const past: Instrument = instrument.slice(start_bar, end_bar);
-    const input: Series = past.series;
-    // TODO: Convert absolute prices to %change
-    const changes: Series = Model.change(input);
-    const output: number = this.network.predict(Array.from(changes))[0];
-    return output;
-  }
-
-  /** Only use suitable candidates for testing */
-  private candidates(investors: Investors): Investors {
-    // Trim charts
-    const trimmed = investors.map((i: Investor) => i.trimmed());
-
-    // Debug length of charts before and after trimming
-    // investors.forEach((i: Investor, index: number) => {
-    //   console.log(i.UserName, i.series.length, trimmed[index].series.length);
-    // });
-
-    // Confirm that no series have two consecutive 10000 values
-    // const invalid = trimmed.filter((i: Investor) => {
-    //   const series: Series = i.series;
-    //   for (let j = 0; j < series.length - 1; j++) {
-    //     if (series[j] == 10000 && series[j + 1] == 10000) return true;
-    //   }
-    //   return false;
-    // });
-    // console.log({ invalid });
-
-    return trimmed;
+    return this.network.predict(
+      new Features(
+        instrument,
+        Model.input_bars,
+        Model.gap_bars,
+        0,
+        bar,
+      ).input,
+    )[0];
   }
 
   /** Improve model by training from set of investors */
@@ -98,13 +76,10 @@ export class Model {
     epochs: number = 1000,
     batchsize: number = 32,
   ): number[] {
-    // Use only suitable investors
-    const candidates = this.candidates(investors);
-
     // Feature factory
-    const f = new Features(
-      candidates,
-      Model.input_bars + 1, // Need extra bar to calculate change from previous bar
+    const f = new Samples(
+      investors,
+      Model.input_bars, // Need extra bar to calculate change from previous bar
       Model.output_bars,
       Model.gap_bars,
     );
@@ -115,17 +90,41 @@ export class Model {
     // Train one new natch at a time
     for (let i = 0; i < epochs; i++) {
       // New samples at every training step
-      const samples: Samples = f.samples(batchsize);
-      // console.log(samples);
-      // Deno.exit(143);
-      const xs = samples.map((s) => Array.from(Model.change(s[0])));
-      const ys = samples.map((s) => [s[1]]);
+      const samples: Features[] = f.samples(batchsize);
+      const xs = samples.map((s) => s.input);
+      const ys = samples.map((s) => s.output);
       const train = new Train(this.network, xs, ys);
-      train.run(1, 0.001);
+      train.run(1, 0.01);
       const loss = train.loss;
       losses.push(loss);
-      // console.log(`Iteration ${i} Loss: ${loss}`);
     }
     return losses;
+  }
+
+  /** Comparison of predicted and actual outpus */
+  public validation(investors: Investors, count: number): void {
+    // Feature factory
+    // TODO: Global object property
+    const f = new Samples(
+      investors,
+      Model.input_bars, // Need extra bar to calculate change from previous bar
+      Model.output_bars,
+      Model.gap_bars,
+    );
+
+    const samples: Features[] = f.samples(count);
+    samples.forEach((s: Features) => {
+      const [input, prediction, actual] = [
+        s.input,
+        Number(this.predict(s.instrument, s.end).toPrecision(3)),
+        Number(s.output[0].toPrecision(3)),
+      ];
+      console.log({
+        // input,
+        actual,
+        prediction,
+        error: (Math.abs(prediction - actual)).toPrecision(3),
+      });
+    });
   }
 }

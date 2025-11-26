@@ -4,8 +4,6 @@ import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { investors, temprepo } from "./testdata.ts";
 import { Instrument, Series } from "@sauber/backtest";
 import { linechart } from "@sauber/widgets";
-import { Features, Sample, Samples } from "./features.ts";
-import { Investor } from "../investor/mod.ts";
 
 Deno.test("Instance", () => {
   const network = new Network(1);
@@ -35,36 +33,25 @@ Deno.test("Save/load", async () => {
 
 Deno.test("Predict", () => {
   const model = Model.generate();
+  const model_length = Model.input_bars + Model.gap_bars;
   const series: Series = new Float32Array(
-    Array(17).keys().map((_) => Math.random() - 0.5),
+    Array(model_length + 1).keys().map((_) => Math.random() - 0.5),
   );
   const instr: Instrument = new Instrument(series, 0);
   const output: number = model.predict(instr, 0);
   assert(isFinite(output));
 });
 
-Deno.test("Train", () => {
+Deno.test("Training", () => {
   const model = Model.generate();
-  const losses: number[] = model.train(investors, 10000, 32);
+  const losses: number[] = model.train(investors, 10, 132);
   console.log("Loss:", losses[0], "...", losses[losses.length - 1]);
   // assert(isFinite(loss));
-  console.log(linechart(losses, 15, 78));
+  console.log(linechart(losses, 11, 78));
+});
 
-  // Validation
-  const features = new Features(investors, 14, 100, 2);
-  const samples: Samples = features.samples(5);
-  const xs = samples.map((s: Sample) => Array.from(s[0]));
-  const ys = samples.map((s: Sample) => s[1]);
-  samples.forEach((s: Sample, i: number) => {
-    const series: Series = new Float32Array(xs[i]);
-    const prediction: number = model.predict(new Instrument(series, 0), 0);
-    const actual: number = ys[i];
-    const error: number = Math.abs(prediction - actual);
-    console.log({
-      series,
-      prediction,
-      actual,
-      error,
-    });
-  });
+Deno.test("Validation", () => {
+  const model = Model.generate();
+  const losses: number[] = model.train(investors, 10, 132);
+  model.validation(investors, 5);
 });
