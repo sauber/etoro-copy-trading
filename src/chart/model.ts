@@ -24,7 +24,7 @@ export class Model {
   static generate(): Model {
     const inputs: number = Model.input_bars;
     const network = new Network(inputs)
-      // .dense(inputs).lrelu
+      .dense(inputs).lrelu
       .dense(inputs).lrelu
       .dense(3).lrelu
       .dense(1);
@@ -75,6 +75,7 @@ export class Model {
     investors: Investors,
     epochs: number = 1000,
     batchsize: number = 32,
+    callback: (iteration: number, loss: number[]) => void = () => {},
   ): number[] {
     // Feature factory
     const f = new Samples(
@@ -94,9 +95,11 @@ export class Model {
       const xs = samples.map((s) => s.input);
       const ys = samples.map((s) => s.output);
       const train = new Train(this.network, xs, ys);
+      // train.callback = callback;
       train.run(1, 0.01);
       const loss = train.loss;
       losses.push(loss);
+      callback(i + 1, losses);
     }
     return losses;
   }
@@ -123,7 +126,7 @@ export class Model {
         // input,
         actual,
         prediction,
-        error: (Math.abs(prediction - actual)).toPrecision(3),
+        error: Number((Math.abs(prediction - actual)).toPrecision(3)),
       });
     });
   }

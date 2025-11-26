@@ -3,7 +3,7 @@ import { Model } from "./model.ts";
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { investors, temprepo } from "./testdata.ts";
 import { Instrument, Series } from "@sauber/backtest";
-import { linechart } from "@sauber/widgets";
+import { Frame, LineChart, linechart, Progress, Stack } from "@sauber/widgets";
 
 Deno.test("Instance", () => {
   const network = new Network(1);
@@ -43,15 +43,36 @@ Deno.test("Predict", () => {
 });
 
 Deno.test("Training", () => {
+  // Create a dashboard
+  const epochs = 100;
+  const chart = new LineChart([], 11);
+  const eta = new Progress("Epoch", 100, 72);
+  const dashboard = new Frame(new Stack([chart, eta]), "Network Loss");
+  console.log(dashboard.toString());
+
+  // Callback for updating dashboard while training
+  const update = (iteration: number, loss: number[]) => {
+    chart.update(loss);
+    eta.update(iteration);
+    const cursorUp = `\u001b[${dashboard.height}A`; // Move cursor up
+    console.log(cursorUp + dashboard.toString());
+  };
+
   const model = Model.generate();
-  const losses: number[] = model.train(investors, 10, 132);
-  console.log("Loss:", losses[0], "...", losses[losses.length - 1]);
-  // assert(isFinite(loss));
-  console.log(linechart(losses, 11, 78));
+  const losses: number[] = model.train(investors, epochs, 132, update);
+  console.log(
+    "Loss improvements from",
+    Number(losses[0].toPrecision(3)),
+    "to",
+    Number(losses[losses.length - 1].toPrecision(3)),
+  );
+  assert(isFinite(losses[losses.length - 1]));
 });
 
 Deno.test("Validation", () => {
+  const epochs = 100;
+  const batchsize = 132;
   const model = Model.generate();
-  const losses: number[] = model.train(investors, 10, 132);
+  const _losses: number[] = model.train(investors, epochs, batchsize);
   model.validation(investors, 5);
 });
