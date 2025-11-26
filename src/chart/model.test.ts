@@ -4,6 +4,8 @@ import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { investors, temprepo } from "./testdata.ts";
 import { Instrument, Series } from "@sauber/backtest";
 import { linechart } from "@sauber/widgets";
+import { Features, Sample, Samples } from "./features.ts";
+import { Investor } from "../investor/mod.ts";
 
 Deno.test("Instance", () => {
   const network = new Network(1);
@@ -47,4 +49,22 @@ Deno.test("Train", () => {
   console.log("Loss:", losses[0], "...", losses[losses.length - 1]);
   // assert(isFinite(loss));
   console.log(linechart(losses, 15, 78));
+
+  // Validation
+  const features = new Features(investors, 14, 100, 2);
+  const samples: Samples = features.samples(5);
+  const xs = samples.map((s: Sample) => Array.from(s[0]));
+  const ys = samples.map((s: Sample) => s[1]);
+  samples.forEach((s: Sample, i: number) => {
+    const series: Series = new Float32Array(xs[i]);
+    const prediction: number = model.predict(new Instrument(series, 0), 0);
+    const actual: number = ys[i];
+    const error: number = Math.abs(prediction - actual);
+    console.log({
+      series,
+      prediction,
+      actual,
+      error,
+    });
+  });
 });
