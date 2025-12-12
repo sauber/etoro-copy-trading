@@ -3,7 +3,13 @@ import { Table } from "@cliffy/table";
 import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
 import { type DateFormat } from "@sauber/dates";
-import { Classifier, Context, loadTimer, ParameterData, Rater } from "📚/strategy/mod.ts";
+import {
+  Classifier,
+  Context,
+  loadTimer,
+  ParameterData,
+  Rater,
+} from "📚/strategy/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
 
@@ -32,7 +38,15 @@ loader = null;
 
 // Print settings
 const snap: number = performance.now();
-const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const weekday = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 const table: Table = new Table(
   ["Loading", Math.round(snap - start) + " ms", "Investors", available],
   ["Account", username, "Position Size", settings.position_size],
@@ -58,5 +72,6 @@ df
   .sort("Value")
   .sort("Sell")
   .sort("Buy", false)
+  .scale("Gain", 100).rename({ "Gain": "Gain%" })
   .digits(2)
   .print("Candidates");
