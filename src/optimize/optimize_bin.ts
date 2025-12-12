@@ -1,8 +1,8 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import {
   Dashboard,
-  Parameters as OptimizerParameters,
   Parameters,
+  Parameters as OptimizerParameters,
   Status,
 } from "@sauber/optimize";
 
@@ -115,4 +115,4 @@ if (finalScore > initialScore) {
   console.log("Saved signal settings: ", settings);
   const signal: Signal = Signal.import(settings);
   await signal.save(repo);
-}
+} else console.log("Reduced score, settings not saved.");
