@@ -70,9 +70,11 @@ Deno.test("Training", () => {
 });
 
 Deno.test("Validation", () => {
-  const epochs = 100;
-  const batchsize = 132;
+  const epochs = 10;
+  const batchsize = 32;
   const model = Model.generate();
+  console.log("Training...");
   const _losses: number[] = model.train(investors, epochs, batchsize);
-  model.validation(investors, 5);
+  console.log("Validating...");
+  model.validation(investors, 300);
 });

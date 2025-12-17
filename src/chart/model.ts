@@ -4,6 +4,8 @@ import { Asset, Backend } from "@sauber/journal";
 import { Samples } from "./samples.ts";
 import { Investors } from "../community/mod.ts";
 import { Features } from "./features.ts";
+import { Frame, Heatmap, type Points } from "@sauber/widgets";
+import { correlation } from "@sauber/statistics";
 
 export class Model {
   /** Repository file name */
@@ -116,18 +118,33 @@ export class Model {
     );
 
     const samples: Features[] = f.samples(count);
+    const results: Points = [];
     samples.forEach((s: Features) => {
       const [input, prediction, actual] = [
         s.input,
         Number(this.predict(s.instrument, s.end).toPrecision(3)),
         Number(s.output[0].toPrecision(3)),
       ];
-      console.log({
-        // input,
-        actual,
-        prediction,
-        error: Number((Math.abs(prediction - actual)).toPrecision(3)),
-      });
+      const error = Number((Math.abs(prediction - actual)).toPrecision(3));
+      // console.log({
+      //   // input,
+      //   actual,
+      //   prediction,
+      //   error,
+      // });
+      results.push([actual, prediction, 1]);
     });
+
+    // Display a heatmap of actual and predicted values
+    const scatter = new Heatmap(results, 60, 12);
+    const frame = new Frame(scatter, "Actual vs predicted");
+    console.log(frame.toString());
+
+    // Calculate the correlation score
+    const r: number = correlation(
+      results.map((r) => r[0]),
+      results.map((r) => r[1]),
+    );
+    console.log("Correlation: " + r.toPrecision(3));
   }
 }
