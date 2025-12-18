@@ -3,7 +3,7 @@ import { Model } from "./model.ts";
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { investors, temprepo } from "./testdata.ts";
 import { Instrument, Series } from "@sauber/backtest";
-import { Frame, LineChart, linechart, Progress, Stack } from "@sauber/widgets";
+import { Frame, LineChart, Progress, Stack } from "@sauber/widgets";
 
 Deno.test("Instance", () => {
   const network = new Network(1);
@@ -70,11 +70,21 @@ Deno.test("Training", () => {
 });
 
 Deno.test("Validation", () => {
-  const epochs = 10;
-  const batchsize = 32;
-  const model = Model.generate();
   console.log("Training...");
-  const _losses: number[] = model.train(investors, epochs, batchsize);
+  const epochs = 1000;
+  const dashboard = new Progress("Epoch", epochs, 72);
+  console.log(dashboard.toString());
+
+  // Callback for updating dashboard while training
+  const update = (iteration: number, _loss: number[]) => {
+    dashboard.update(iteration);
+    const cursorUp = `\u001b[${dashboard.height}A`; // Move cursor up
+    console.log(cursorUp + dashboard.toString());
+  };
+
+  const batchsize = 132;
+  const model = Model.generate();
+  const _losses: number[] = model.train(investors, epochs, batchsize, update);
   console.log("Validating...");
   model.validation(investors, 300);
 });

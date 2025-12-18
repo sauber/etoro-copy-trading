@@ -27,8 +27,11 @@ export class Model {
     const inputs: number = Model.input_bars;
     const network = new Network(inputs)
       .dense(inputs).lrelu
-      .dense(inputs).lrelu
-      .dense(3).lrelu
+      // .dense(inputs).lrelu
+      // .dense(20).lrelu
+      // .dense(20).lrelu
+      .dense(20).lrelu
+      // .dense(3).lrelu
       .dense(1);
     return new Model(network);
   }
@@ -137,7 +140,7 @@ export class Model {
 
     // Display a heatmap of actual and predicted values
     const scatter = new Heatmap(results, 60, 12);
-    const frame = new Frame(scatter, "Actual vs predicted");
+    const frame = new Frame(scatter, "x=Actual, b=Prediction");
     console.log(frame.toString());
 
     // Calculate the correlation score
