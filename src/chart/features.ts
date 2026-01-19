@@ -29,7 +29,7 @@ export class Features {
   public get input(): Input {
     if (!this.input_cache) {
       this.input_cache = [...Array(this.past).keys()].reverse().map((index) => {
-        const bar = this.end + this.gap + index;
+        const bar = this.end + this.gap + index - 1;
         const value = this.instrument.price(bar);
         const prev = this.instrument.price(bar + 1);
         return (value - prev) / prev;

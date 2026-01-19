@@ -46,7 +46,7 @@ Deno.test("Training", () => {
   // Create a dashboard
   const epochs = 100;
   const chart = new LineChart([], 11);
-  const eta = new Progress("Epoch", 100, 72);
+  const eta = new Progress("Epoch", epochs, 72);
   const dashboard = new Frame(new Stack([chart, eta]), "Network Loss");
   console.log(dashboard.toString());
 

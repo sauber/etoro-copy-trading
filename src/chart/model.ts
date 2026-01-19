@@ -140,7 +140,7 @@ export class Model {
 
     // Display a heatmap of actual and predicted values
     const scatter = new Heatmap(results, 60, 12);
-    const frame = new Frame(scatter, "x=Actual, b=Prediction");
+    const frame = new Frame(scatter, "x=Actual, y=Prediction");
     console.log(frame.toString());
 
     // Calculate the correlation score
