@@ -52,6 +52,7 @@ export class Model {
 
     this.network.adapt(xs);
     const train = new Train(this.network, xs, ys);
+    train.regularization = 0.98;
     if (callback) train.callback = callback;
     train.batchSize = batch_size;
     train.callbackFrequency = 10;

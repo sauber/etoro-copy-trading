@@ -24,7 +24,7 @@
     "@sauber/etoro-investors": "jsr:@sauber/etoro-investors@^2.5.2",
     "@sauber/journal": "jsr:@sauber/journal@^1.0.1",
     "@sauber/ml-cli-dashboard": "jsr:@sauber/ml-cli-dashboard@^0.6.1",
-    "@sauber/neurons": "jsr:@sauber/neurons@^1.2.6",
+    "@sauber/neurons": "jsr:@sauber/neurons@^1.3.0",
     "@sauber/optimize": "jsr:@sauber/optimize@^0.6.2",
     "@sauber/ratelimit": "jsr:@sauber/ratelimit@^0.1.1",
     "@sauber/statistics": "jsr:@sauber/statistics@^0.5.0",
