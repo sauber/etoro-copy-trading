@@ -17,12 +17,12 @@ export const limits: Limits = {
 
 export type Input = Record<keyof typeof limits, number>;
 
-/** Convert series of values to series of signals */
-function stochastic(series: Series, values: Input): Series {
-  // Confirm all parameters are incluced
-  const { window, smoothing, buy, sell } = values;
-
-  // Stochastic Oscillator calculation
+/** Calculate Stochastic Oscillator K,D value pairs */
+function indicator(
+  series: Series,
+  window: number,
+  smoothing: number,
+): Array<KD> {
   const indicator = new Stochastic(window, smoothing);
   let prev: number;
   const momentum: Array<KD> = Array.from<number>(series).map(
@@ -33,6 +33,15 @@ function stochastic(series: Series, values: Input): Series {
       return indicator.nextValue(high, low, close);
     },
   );
+  return momentum;
+}
+
+/** Convert series of values to series of signals */
+function stochastic(series: Series, values: Input): Series {
+  // Confirm all parameters are incluced
+  const { window, smoothing, buy, sell } = values;
+
+  const momentum: Array<KD> = indicator(series, window, smoothing);
 
   // Overbought and oversold levels
   const overbought = sell;

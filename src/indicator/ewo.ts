@@ -1,12 +1,12 @@
-import { SMA } from "./sma.ts";
+import { EMA } from "@debut/indicators";
 
 /** Elliot Wave Oscillator */
 /**
  * Calculates the Elliott Wave Oscillator (EWO).
- * The EWO is the difference between a fast and a slow Simple Moving Average (SMA).
+ * The EWO is the difference between a fast and a slow Exponential Moving Average (EMA).
  * @param {number[]} data - The array of numbers to calculate the EWO for.
- * @param {number} fastPeriod - The period for the fast SMA. Default is 5.
- * @param {number} slowPeriod - The period for the slow SMA. Default is 35.
+ * @param {number} fastPeriod - The period for the fast EMA. Default is 5.
+ * @param {number} slowPeriod - The period for the slow EMA. Default is 35.
  * @returns {number[]} The array of EWO values.
  */
 export function EWO(data: number[], fastPeriod = 5, slowPeriod = 35): number[] {
@@ -21,13 +21,16 @@ export function EWO(data: number[], fastPeriod = 5, slowPeriod = 35): number[] {
     );
   }
 
-  const smaFast = SMA(data, fastPeriod);
-  const smaSlow = SMA(data, slowPeriod);
+  const emaFastIndicator = new EMA(fastPeriod);
+  const emaSlowIndicator = new EMA(slowPeriod);
+  const emaFast = data.map((price) => emaFastIndicator.nextValue(price));
+  const emaSlow = data.map((price) => emaSlowIndicator.nextValue(price));
 
   const ewo = [];
-  const fastOffset = slowPeriod - fastPeriod;
-  for (let i = 0; i < smaSlow.length; i++) {
-    ewo.push(smaFast[i + fastOffset] - smaSlow[i]);
+  // const fastOffset = slowPeriod - fastPeriod;
+  for (let i = 0; i < emaSlow.length; i++) {
+    ewo.push(emaFast[i] - emaSlow[i]);
   }
+
   return ewo;
 }
