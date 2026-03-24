@@ -8,19 +8,25 @@ entry and exit points, and it is heavily parameterized for optimization
 
 ## Core Indicators Used:
 
-Exponential Moving Averages (EMA):
+### Exponential Moving Averages (EMA)
 
 ma_buy (default period: 12): Used to establish a dynamic support level for
 entries. ma_sell (default period: 22): Used to establish dynamic resistance
-levels for entries and exits. Hull Moving Average (HMA):
+levels for entries and exits.
+
+### Hull Moving Average (HMA)
 
 hma (default period: 50): A faster, smoother moving average used primarily in
-the exit logic to detect trend changes quickly. Elliot Wave Oscillator (EWO):
+the exit logic to detect trend changes quickly.
+
+### Elliot Wave Oscillator (EWO)
 
 This is a custom momentum indicator calculated as the difference between a fast
 EMA (period 50) and a slow EMA (period 200), normalized by price. High positive
 values suggest strong upward momentum. Very low negative values suggest a deeply
-oversold condition. Relative Strength Index (RSI):
+oversold condition.
+
+### Relative Strength Index (RSI):
 
 The strategy uses three different RSI calculations: rsi_fast (period 4), rsi
 (period 14), and rsi_slow (period 20). These are used to measure momentum and
