@@ -1,10 +1,12 @@
 import { createTestInstrument, Series } from "@sauber/backtest";
 import { limits, signal as v8ichi } from "./v8ichi.ts";
 import { assert } from "@std/assert";
+import { linechart } from "@sauber/widgets";
 
 Deno.test("V8 Ichi Signal", () => {
   // Test chart
-  const chart = createTestInstrument(300);
+  const chart = createTestInstrument(600);
+  console.log(linechart(Array.from(chart.series), 15, 72));
 
   // Generate signals from chart
   const values = {
@@ -16,6 +18,8 @@ Deno.test("V8 Ichi Signal", () => {
   };
 
   const signals: Series = v8ichi(chart.series, values);
+
+  console.log(linechart(Array.from(signals), 15, 72));
 
   // Confirm signal values are in range [-1, 1]
   signals.forEach((value, index) =>

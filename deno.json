@@ -28,7 +28,7 @@
     "@sauber/optimize": "jsr:@sauber/optimize@^0.6.2",
     "@sauber/ratelimit": "jsr:@sauber/ratelimit@^0.1.1",
     "@sauber/statistics": "jsr:@sauber/statistics@^0.5.0",
-    "@sauber/widgets": "jsr:@sauber/widgets@^0.5.0",
+    "@sauber/widgets": "jsr:@sauber/widgets@^0.5.1",
     "@std/assert": "jsr:@std/assert@^1.0.14",
     "@std/fmt": "jsr:@std/fmt@^1.0.8",
     "asciiplot": "npm:asciiplot@^1.0.0",
