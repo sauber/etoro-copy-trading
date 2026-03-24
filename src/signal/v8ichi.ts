@@ -5,7 +5,6 @@ import { EWO } from "../indicator/ewo.ts";
 import { HMA } from "../indicator/hma.ts";
 
 export const limits: Limits = {
-  low_offset: { min: 0.85, max: 0.99, default: 0.96 },
   ewo_high: { min: 2.0, max: 15.0, default: 3.5 },
   ewo_low: { min: -15.0, max: 12.0, default: -3.5 },
   rsi_buy: { min: 10, max: 50, default: 30, int: true },
@@ -28,7 +27,6 @@ export type Input = Record<keyof typeof limits, number>;
  */
 function v8ichi(series: Series, values: Input): Series {
   const {
-    low_offset,
     ewo_high,
     ewo_low,
     rsi_buy,
@@ -103,7 +101,7 @@ function v8ichi(series: Series, values: Input): Series {
     let signal = 0;
 
     // --- Entry Logic ---
-    const dip_check = price < (v_ma_buy * low_offset);
+    const dip_check = price < v_ma_buy;
     const resistance_check = price < v_ma_sell;
     const strong_uptrend = (v_ewo > ewo_high) && (v_rsi < rsi_buy);
     const oversold = v_ewo < ewo_low;
