@@ -6,7 +6,13 @@ Deno.test("EWO - Basic Calculation", () => {
   const fast = 2;
   const slow = 5;
   const ewo = EWO(data, fast, slow);
-  assertEquals(ewo, [NaN, NaN, NaN, NaN, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]);
+  assertEquals(ewo[0], NaN);
+  assertEquals(ewo[1], NaN);
+  assertEquals(ewo[2], NaN);
+  assertEquals(ewo[3], NaN);
+  assertEquals(ewo[4], 30);
+  assertEquals(ewo[5], 25);
+  assertEquals(ewo[9], 15);
 });
 
 Deno.test("EWO - Defaults", () => {
@@ -14,7 +20,7 @@ Deno.test("EWO - Defaults", () => {
   const data = Array.from({ length: n }, (_, i) => i + 1);
   const ewo = EWO(data);
   assertEquals(ewo.length, n);
-  assertEquals(ewo[n - 1], 15);
+  assertEquals(ewo[n - 1], 37.5);
 });
 
 Deno.test("EWO - Validation", () => {

@@ -36,9 +36,9 @@ export type StrategyParameters = {
 };
 
 export const inputParameters: Limits = {
-  weekday: { min: 0, max: 6, default: 1, int: true },
+  weekday: { min: 1, max: 5, default: 1, int: true },
   position_size: { min: 0.005, max: 0.2, default: 0.07 },
-  stoploss: { min: 0.05, max: 0.95, default: 0.85 },
+  stoploss: { min: 0.85, max: 0.95, default: 0.85 },
   limit: { min: 1, max: 15, default: 3, int: true },
 };
 type Input = Record<keyof typeof inputParameters, number>;

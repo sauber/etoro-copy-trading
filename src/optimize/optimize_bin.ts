@@ -2,7 +2,6 @@ import { Exchange, Instruments } from "@sauber/backtest";
 import {
   Dashboard,
   Parameters as OptimizerParameters,
-  Parameters,
   Status,
 } from "@sauber/optimize";
 
@@ -34,7 +33,8 @@ const ranker: Rater = await loadRanker(repo);
 
 // Load training data
 const training_count: number = 800;
-const instruments: Instruments = await investors(training_count);
+const instruments: Instruments = (await investors(training_count))
+  .filter((instrument) => instrument.series.length >= 200);
 console.log("Testing Instruments loaded:", instruments.length);
 const spread = 0.001;
 const exchange: Exchange = new Exchange(instruments, spread);
@@ -42,7 +42,8 @@ const trainingModel = new Optimize(exchange, ranker);
 
 // Load Validation data
 const validation_count: number = 80;
-const validationInstruments: Instruments = await investors(validation_count);
+const validationInstruments: Instruments = (await investors(validation_count))
+  .filter((instrument) => instrument.series.length >= 200);
 console.log("Validation Instruments loaded:", validationInstruments.length);
 const validation: Exchange = new Exchange(instruments, spread);
 const validationModel = new Optimize(validation, ranker);

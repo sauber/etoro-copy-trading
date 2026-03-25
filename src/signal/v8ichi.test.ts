@@ -1,7 +1,7 @@
 import { createTestInstrument, Series } from "@sauber/backtest";
 import { limits, signal as v8ichi } from "./v8ichi.ts";
 import { assert } from "@std/assert";
-import { linechart } from "@sauber/widgets";
+// import { linechart } from "@sauber/widgets";
 
 Deno.test("V8 Ichi Signal", () => {
   // Test chart
@@ -17,26 +17,26 @@ Deno.test("V8 Ichi Signal", () => {
   // };
 
   const optimized = {
-    "ewo_high": 7.64,
-    "ewo_low": -0.601,
-    "rsi_buy": 19,
-    "rsi_sell": 71,
-    "ma_buy_period": 14,
-    "ma_sell_period": 87,
-    "hma_period": 62,
-    "ewo_fast_period": 2,
-    "ewo_slow_period": 61,
-    "rsi_fast_period": 9,
-    "rsi_period": 13,
-    "rsi_slow_period": 26,
+    low_offset: 0.987,
+    high_offset: 1.008,
+    high_offset_2: 1.016,
+    ewo_high: 7.64,
+    ewo_low: -0.601,
+    rsi_buy: 50,
+    rsi_sell: 71,
+    ma_buy_period: 14,
+    ma_sell_period: 87,
+    hma_period: 62,
+    ewo_fast_period: 2,
+    ewo_slow_period: 61,
+    rsi_fast_period: 9,
+    rsi_period: 13,
+    rsi_slow_period: 26,
   };
 
   const signals: Series = v8ichi(chart.series, optimized);
 
   // console.log(linechart(Array.from(signals), 11, 72));
-
-  // XXX: Most output is -1 instead of in the interval of [-1:0]
-  console.log(signals.filter((v) => v < 0));
 
   // Confirm signal values are in range [-1, 1]
   signals.forEach((value, index) =>
