@@ -59,7 +59,7 @@ Deno.test("Generate", () => {
     ) => [name, param.default]),
   );
   const signal = new Signal(defaultValues);
-  const instrument: Instrument = createTestInstrument(70);
+  const instrument: Instrument = createTestInstrument(270);
   const result: Instrument = signal.generate(instrument);
   assertInstanceOf(result, Instrument);
 
@@ -75,7 +75,7 @@ Deno.test("Generate", () => {
 
 Deno.test("Predict", () => {
   const signal = Signal.random();
-  const instrument: Instrument = createTestInstrument(70);
+  const instrument: Instrument = createTestInstrument(270);
   const result: number = signal.predict(instrument, instrument.end);
   assertGreaterOrEqual(result, -1);
   assertLessOrEqual(result, 1);

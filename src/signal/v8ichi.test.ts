@@ -6,7 +6,7 @@ import { linechart } from "@sauber/widgets";
 Deno.test("V8 Ichi Signal", () => {
   // Test chart
   const chart = createTestInstrument(400);
-  console.log(linechart(Array.from(chart.series), 11, 72));
+  // console.log(linechart(Array.from(chart.series), 11, 72));
 
   // Generate signals from chart
   // const values = {
@@ -33,7 +33,9 @@ Deno.test("V8 Ichi Signal", () => {
 
   const signals: Series = v8ichi(chart.series, optimized);
 
-  console.log(linechart(Array.from(signals), 11, 72));
+  // console.log(linechart(Array.from(signals), 11, 72));
+
+  // XXX: Most output is -1 instead of in the interval of [-1:0]
   console.log(signals.filter((v) => v < 0));
 
   // Confirm signal values are in range [-1, 1]

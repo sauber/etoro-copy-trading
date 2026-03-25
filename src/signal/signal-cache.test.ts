@@ -4,7 +4,7 @@ import { CachedSignal } from "./signal-cache.ts";
 
 Deno.test("CachedSignal generates and caches instrument", () => {
   const cachedSignal = CachedSignal.default() as unknown as CachedSignal;
-  const instrument: Instrument = createTestInstrument(70);
+  const instrument: Instrument = createTestInstrument(270);
 
   // First call should generate and cache
   const bar: Bar = instrument.end;
