@@ -26,12 +26,6 @@ export const limits: Limits = {
 
 export type Input = Record<keyof typeof limits, number>;
 
-function chart(series: Series | number[], title: string): void {
-  console.log(
-    title + "\n" + linechart(Array.from(series).map((v) => v || 0), 11, 72),
-  );
-}
-
 /**
  * V8ichi Strategy
  * A strategy combining EMA, HMA, EWO, and RSI for trend following and mean reversion.
@@ -67,25 +61,13 @@ function v8ichi(series: Series, values: Input): Series {
   const rsi_slow = new RSI(rsi_slow_period);
 
   // Pre-calculate HMA for the entire series
-  // HMA function returns a shorter array, we must align indices
   const series_array = Array.from(series);
   const hma_full = HMA(series_array, hma_period);
-  assert(hma_full.length === series_array.length, "HMA length mismatch");
-  // const hma_offset = (hma_period - 1) + (Math.floor(Math.sqrt(hma_period)) - 1);
-
-  // chart(hma_full, "hma");
 
   // Pre-calculate EWO for the entire series
   const ewo_full = EWO(series_array, ewo_fast_period, ewo_slow_period);
   assert(ewo_full.length === series_array.length, "EWO length mismatch");
-  // const ewo_offset = ewo_slow_period - 1;
 
-  // chart(ewo_full, "ewo");
-
-  // let prev_rsi_fast: number | undefined;
-  // let prev_rsi_slow: number | undefined;
-
-  // const signals = Array.from(series).map((price, index) => {
   const signals = series.map((price, index) => {
     // Update indicators
     const v_ma_buy = ma_buy.nextValue(price);
@@ -93,14 +75,6 @@ function v8ichi(series: Series, values: Input): Series {
     const v_rsi_fast = rsi_fast.nextValue(price);
     const v_rsi = rsi_std.nextValue(price);
     const v_rsi_slow = rsi_slow.nextValue(price);
-
-    // Get HMA value (aligned)
-    // const hma_index = index - hma_offset;
-    // const v_hma = hma_index >= 0 ? hma_full[hma_index] : undefined;
-
-    // Get EWO value (aligned)
-    // const ewo_index = index - ewo_offset;
-    // const raw_ewo = ewo_index >= 0 ? ewo_full[ewo_index] : undefined;
     const raw_ewo = ewo_full[index];
     const v_hma = hma_full[index];
 
@@ -114,17 +88,11 @@ function v8ichi(series: Series, values: Input): Series {
       v_rsi_slow === undefined ||
       v_hma === undefined
     ) {
-      // prev_rsi_fast = v_rsi_fast;
-      // prev_rsi_slow = v_rsi_slow;
       return 0;
     }
 
     // Calculate EWO (Normalized by price)
     const v_ewo = (raw_ewo / price) * 100;
-
-    // if (index === (series.length - 1)) {
-    // console.log("Index", index, series.length, price, raw_ewo, v_ewo);
-    // }
 
     let signal = 0;
 
@@ -149,35 +117,18 @@ function v8ichi(series: Series, values: Input): Series {
     const strong_uptrend = (v_ewo > ewo_high) && (v_rsi < rsi_buy);
     const oversold = v_ewo < ewo_low;
 
-    // if (dip_check && resistance_check && (strong_uptrend || oversold)) {
-    //   signal = 1;
-    // }
-
     // Bring range of oversold to 0 into range of 0 to -1
     if (price_below_ma && resistance_check && fast_rsi_dip) {
       if (strong_uptrend) {
-        // signal = Math.min(signal, (v_rsi - rsi_buy) / rsi_buy);
         signal = (v_rsi - rsi_buy) / rsi_buy;
-        // console.log({ v_rsi, rsi_buy });
-        // signal = v_rsi - rsi_buy;
-        // signal = -1;
       }
       if (oversold) {
         // EWO is usually within [-20;20] interval
         const osignal = (ewo_low - v_ewo) / (20 + ewo_low);
-        // if (index == series.length - 1) {
-        //   console.log("oversold", { index, v_ewo, ewo_low, osignal });
-        // }
         signal -= osignal;
-        // signal = -1;
       }
       // Clip if outside range
-      // signal = Math.max(-1, signal);
       signal = Math.tanh(signal);
-      // signal = -1;
-      // if (index == series.length - 1) {
-      // console.log("Buy signal", { v_ewo, ewo_low, v_rsi, rsi_buy, signal });
-      // }
     }
 
     // Exit Conditions, sell if either is true
@@ -195,37 +146,23 @@ function v8ichi(series: Series, values: Input): Series {
     const price_above_hma = price > v_hma;
     const fast_rsi_cross = v_rsi_fast > v_rsi_slow;
 
-    // --- Exit Logic ---
-    // const rsi_cross_up =
-    //   (prev_rsi_fast !== undefined && prev_rsi_slow !== undefined) &&
-    //   (prev_rsi_fast <= prev_rsi_slow) && (v_rsi_fast > v_rsi_slow);
-    // const take_profit = (price > v_hma) && (price > v_ma_sell) &&
-    //   (v_rsi > rsi_sell) && rsi_cross_up;
-    // const exit_weakness = (price < v_hma) && (price > v_ma_sell);
-    // if (take_profit || exit_weakness) signal = 1;
-
     if (price_above_hma && fast_rsi_cross) {
+      // Sell condition #1
       if (price > (v_ma_sell * high_offset_2) && v_rsi > rsi_sell) {
-        // Sell condition #1
-        // console.log({ price, v_ma_sell, high_offset_2, v_rsi, rsi_sell });
         signal = (v_rsi - rsi_sell) / (100 - rsi_sell);
       }
+
+      // Sell condition #2
       if (price > (v_ma_sell * high_offset)) {
-        // Sell condition #2
         const above = price - (v_ma_sell * high_offset);
-        // console.log({ price, v_ma_sell, high_offset, v_rsi, rsi_sell, above });
         signal += above / (v_ma_sell * high_offset);
       }
-      // Clip if outside range
-      signal = Math.min(1, signal);
+      // Bend values to range
+      signal = Math.tanh(signal);
     }
 
-    // prev_rsi_fast = v_rsi_fast;
-    // prev_rsi_slow = v_rsi_slow;
     return signal;
   });
-
-  // chart(signals, "signal");
 
   return new Float32Array(signals);
 }
