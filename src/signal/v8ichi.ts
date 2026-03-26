@@ -10,7 +10,7 @@ export const limits: Limits = {
   high_offset: { min: 0.95, max: 1.1, default: 1.008 },
   high_offset_2: { min: 0.99, max: 1.5, default: 1.016 },
   ewo_high: { min: 2.0, max: 12.0, default: 3.147 },
-  ewo_low: { min: -20.0, max: -8.0, default: -17.145 },
+  ewo_low: { min: -20.0, max: 8.0, default: -17.145 },
   rsi_buy: { min: 30, max: 70, default: 57, int: true },
   rsi_sell: { min: 30, max: 70, default: 50, int: true },
   ma_buy_period: { min: 5, max: 80, default: 12, int: true },
@@ -151,17 +151,21 @@ function v8ichi(series: Series, values: Input): Series {
         signal = (v_rsi - rsi_buy) / rsi_buy;
         // console.log({ v_rsi, rsi_buy });
         // signal = v_rsi - rsi_buy;
-        signal = -1;
+        // signal = -1;
       }
       if (oversold) {
         // EWO is usually within [-20;20] interval
         // console.log({ v_ewo, ewo_low });
         signal -= (ewo_low - v_ewo) / (20 + ewo_low);
-        signal = -1;
+        // signal = -1;
       }
       // Clip if outside range
-      signal = Math.max(-1, signal);
-      signal = -1;
+      // signal = Math.max(-1, signal);
+      signal = Math.tanh(signal);
+      // signal = -1;
+      // if (index == series.length - 1) {
+      // console.log("Buy signal", { v_ewo, ewo_low, v_rsi, rsi_buy, signal });
+      // }
     }
 
     // Exit Conditions, sell if either is true
