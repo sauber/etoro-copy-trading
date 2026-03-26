@@ -31,8 +31,6 @@ export function EWO(
   const slow = new EMA(slowPeriod);
 
   // return ewo;
-  return data.map((price) =>
-    (fast.nextValue(price) - slow.nextValue(price)) /
-    price * 100
+  return data.map((price) => (fast.nextValue(price) - slow.nextValue(price))// / price * 100
   );
 }

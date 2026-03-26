@@ -3,7 +3,8 @@ import { Series } from "@sauber/backtest";
 import { Limits } from "./indicator.ts";
 import { EWO } from "../indicator/ewo.ts";
 import { HMA } from "../indicator/hma.ts";
-// import { linechart } from "@sauber/widgets";
+import { linechart } from "@sauber/widgets";
+import { assert } from "@std/assert";
 
 export const limits: Limits = {
   low_offset: { min: 0.9, max: 0.99, default: 0.987 },
@@ -25,11 +26,11 @@ export const limits: Limits = {
 
 export type Input = Record<keyof typeof limits, number>;
 
-// function chart(series: Series | number[], title: string): void {
-//   console.log(
-//     title + "\n" + linechart(Array.from(series).map((v) => v || 0), 11, 72),
-//   );
-// }
+function chart(series: Series | number[], title: string): void {
+  console.log(
+    title + "\n" + linechart(Array.from(series).map((v) => v || 0), 11, 72),
+  );
+}
 
 /**
  * V8ichi Strategy
@@ -69,21 +70,23 @@ function v8ichi(series: Series, values: Input): Series {
   // HMA function returns a shorter array, we must align indices
   const series_array = Array.from(series);
   const hma_full = HMA(series_array, hma_period);
-  const hma_offset = (hma_period - 1) +
-    (Math.floor(Math.sqrt(hma_period)) - 1);
+  assert(hma_full.length === series_array.length, "HMA length mismatch");
+  // const hma_offset = (hma_period - 1) + (Math.floor(Math.sqrt(hma_period)) - 1);
 
   // chart(hma_full, "hma");
 
   // Pre-calculate EWO for the entire series
   const ewo_full = EWO(series_array, ewo_fast_period, ewo_slow_period);
-  const ewo_offset = ewo_slow_period - 1;
+  assert(ewo_full.length === series_array.length, "EWO length mismatch");
+  // const ewo_offset = ewo_slow_period - 1;
 
   // chart(ewo_full, "ewo");
 
   // let prev_rsi_fast: number | undefined;
   // let prev_rsi_slow: number | undefined;
 
-  const signals = Array.from(series).map((price, index) => {
+  // const signals = Array.from(series).map((price, index) => {
+  const signals = series.map((price, index) => {
     // Update indicators
     const v_ma_buy = ma_buy.nextValue(price);
     const v_ma_sell = ma_sell.nextValue(price);
@@ -92,12 +95,14 @@ function v8ichi(series: Series, values: Input): Series {
     const v_rsi_slow = rsi_slow.nextValue(price);
 
     // Get HMA value (aligned)
-    const hma_index = index - hma_offset;
-    const v_hma = hma_index >= 0 ? hma_full[hma_index] : undefined;
+    // const hma_index = index - hma_offset;
+    // const v_hma = hma_index >= 0 ? hma_full[hma_index] : undefined;
 
     // Get EWO value (aligned)
-    const ewo_index = index - ewo_offset;
-    const raw_ewo = ewo_index >= 0 ? ewo_full[ewo_index] : undefined;
+    // const ewo_index = index - ewo_offset;
+    // const raw_ewo = ewo_index >= 0 ? ewo_full[ewo_index] : undefined;
+    const raw_ewo = ewo_full[index];
+    const v_hma = hma_full[index];
 
     // Check data sufficiency
     if (
@@ -116,6 +121,10 @@ function v8ichi(series: Series, values: Input): Series {
 
     // Calculate EWO (Normalized by price)
     const v_ewo = (raw_ewo / price) * 100;
+
+    // if (index === (series.length - 1)) {
+    // console.log("Index", index, series.length, price, raw_ewo, v_ewo);
+    // }
 
     let signal = 0;
 
@@ -155,8 +164,11 @@ function v8ichi(series: Series, values: Input): Series {
       }
       if (oversold) {
         // EWO is usually within [-20;20] interval
-        // console.log({ v_ewo, ewo_low });
-        signal -= (ewo_low - v_ewo) / (20 + ewo_low);
+        const osignal = (ewo_low - v_ewo) / (20 + ewo_low);
+        // if (index == series.length - 1) {
+        //   console.log("oversold", { index, v_ewo, ewo_low, osignal });
+        // }
+        signal -= osignal;
         // signal = -1;
       }
       // Clip if outside range

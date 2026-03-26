@@ -15,7 +15,7 @@ export function WMA(data: number[], period: number): number[] {
       sum += data[i - j] * (period - j);
     }
 
-    wma.push(sum / weight);
+    wma[i] = sum / weight;
   }
   return wma;
 }

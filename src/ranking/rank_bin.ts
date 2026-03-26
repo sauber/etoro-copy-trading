@@ -36,11 +36,11 @@ const df = DataFrame.fromRecords(
   })),
 ).sort("Score");
 
-const desired = df.select((r) => r.Score as number > 0).reverse;
+const desired = df.reverse;
 desired.slice(0, 5).digits(3).print(
   `Most Desired Investors of ${desired.length}`,
 );
-const undesired = df.select((r) => r.Score as number < 0);
+const undesired = df;
 undesired.slice(0, 5).digits(3).print(
   `Most undesired Investors of ${undesired.length}`,
 );
