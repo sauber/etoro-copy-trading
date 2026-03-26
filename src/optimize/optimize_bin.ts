@@ -57,10 +57,10 @@ function dashboard(max: number, parameters: OptimizerParameters): Status {
 
   const callback: Status = (
     iterations: number,
-    _momentum: number,
+    momentum: number,
     _parameters: OptimizerParameters,
     reward: number[],
-  ) => console.log(dashboard.render(iterations, reward));
+  ) => console.log(dashboard.render(iterations, reward, momentum));
 
   return callback;
 }
