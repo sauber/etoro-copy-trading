@@ -11,6 +11,7 @@ import { Names, TestCommunity } from "../community/mod.ts";
 import { makeRepository } from "../repository/mod.ts";
 import { Backend } from "@sauber/journal";
 import { score } from "./score.ts";
+import { Table } from "@sauber/table";
 
 // Repo
 const path: string = Deno.args[0];
@@ -32,8 +33,41 @@ console.log("Simulation starts");
 simulation.run();
 
 // Display results
-console.log(simulation.account.toString());
+// console.log(simulation.account.toString());
+
+// Display transactions
+const transactions = simulation.account.transactions;
+const byDate: Array<
+  [string, string, string, number, number, number | string, number]
+> = transactions.map((
+  t,
+) => [
+  barToDate(t.Bar as number),
+  t.Action,
+  t.Symbol,
+  t.Price,
+  t.Amount,
+  t.Profit,
+  t.Value,
+]);
+const table = new Table();
+table.title = "Trades";
+table.headers = [
+  "Date",
+  "Action",
+  "Investor",
+  "Price",
+  "Amount",
+  "Profit",
+  "Value",
+];
+table.rows = byDate;
+console.log(table.toString());
+
+// Plot cash and value
 console.log(simulation.account.plot());
+
+// Display positions till open
 console.log(simulation.account.portfolio.toString(exchange.end));
 
 // Evaluation
