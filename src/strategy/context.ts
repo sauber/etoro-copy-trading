@@ -339,6 +339,7 @@ export class Context {
   private _positions: Positions | null = null;
   private async positions(): Promise<Positions> {
     if (this._positions !== null) return this._positions;
+    const bar: Bar = await this.tradingBar();
     await this.positions_lock.acquire();
     try {
       if (this._positions !== null) return this._positions;
@@ -348,8 +349,23 @@ export class Context {
       const positions: Positions = await Promise.all(
         mirrors.map((m: Mirror) => this.position(m.UserName, m.Value * scale)),
       );
-      this._positions = positions;
-      return positions;
+
+      // Confirm position has data, otherwise it's probably closed
+      const open: Positions = [];
+      for (const p of positions) {
+        if (p.instrument.end <= (bar + DELAY)) open.push(p);
+        else {console.warn(
+            "Warning: Position",
+            p.instrument.symbol,
+            "has no data at bar",
+            bar + DELAY,
+            "latest is",
+            p.instrument.end,
+          );}
+      }
+
+      this._positions = open;
+      return open;
     } finally {
       this.positions_lock.release();
     }
