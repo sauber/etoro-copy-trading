@@ -1,6 +1,7 @@
 import { Exchange, Instruments } from "@sauber/backtest";
 import {
   Dashboard,
+  Parameters,
   Parameters as OptimizerParameters,
   Status,
 } from "@sauber/optimize";

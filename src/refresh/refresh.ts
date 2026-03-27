@@ -120,14 +120,20 @@ export class Refresh {
       return true;
     };
 
+    // Eliminate properties with null value
+    const filter: Record<string, string | number | boolean> = Object
+      .fromEntries(
+        Object.entries(this.filter).filter(([_key, value]) => value != null),
+      );
+
     // Print filter
-    console.log("Discover filter:", this.filter);
+    console.log("Discover filter:", filter);
 
     const expire: Expire = this.expire;
     const available: boolean = await this.recent<DiscoverResults>(
       "discover",
       expire.discover,
-      () => this.fetcher.discover(this.filter),
+      () => this.fetcher.discover(filter),
       validate,
     );
     if (available) {
