@@ -16,6 +16,7 @@ import {
 } from "📚/strategy/mod.ts";
 
 import { Optimize } from "./optimize.ts";
+import { exit } from "node:process";
 
 // Repo
 const path: string = Deno.args[0];
@@ -101,19 +102,30 @@ const _iterations: number = trainingModel.optimize(
 );
 const result = trainingModel.getParameterValues();
 
-// Confirm final score
+// Retrieve final score from validation set
 validationModel.setParameterValues(result);
 const finalScore: number = validationModel.predict();
 console.log("Final score:", finalScore);
 
-// Save model only if score improved
-if (finalScore > initialScore) {
-  const strategy: Settings = trainingModel.getStrategySettings();
-  console.log("Saved strategy settings: ", strategy);
-  await saveStrategy(repo, strategy);
+// Confirm if best score also applies to validation set and is higher than final score
+validationModel.setParameterValues(trainingModel.best);
+const bestScore: number = validationModel.predict();
+console.log("Best score:", bestScore);
 
-  const settings: Settings = trainingModel.getTimerSettings();
-  console.log("Saved signal settings: ", settings);
-  const signal: Signal = Signal.import(settings);
-  await signal.save(repo);
+// No improvements found
+if (initialScore >= finalScore && initialScore >= bestScore) {
+  console.log("No improvements found.");
+  exit(0);
 }
+
+const savingModel = (finalScore > bestScore) ? trainingModel : validationModel;
+
+// Save final/best score
+const strategy: Settings = savingModel.getStrategySettings();
+console.log("Saved strategy final settings: ", strategy);
+await saveStrategy(repo, strategy);
+
+const settings: Settings = savingModel.getTimerSettings();
+console.log("Saved signal final settings: ", settings);
+const signal: Signal = Signal.import(settings);
+await signal.save(repo);

@@ -68,6 +68,9 @@ export class Optimize {
     ...this.timerParameters,
   ];
 
+  /** Best values seen during training */
+  public best: Settings = {};
+
   constructor(
     private readonly exchange: Exchange,
     private readonly ranker: Rater,
@@ -180,8 +183,12 @@ export class Optimize {
       epsilon,
       batchSize: 32,
     });
-
+    // Optimization loop
     const iterations = minimizer.run();
+
+    // Record best parameters values from history of training
+    this.best = zip(this.parameterKeys, minimizer.best_inputs);
+
     return iterations;
   }
 
