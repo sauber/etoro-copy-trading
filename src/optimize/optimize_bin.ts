@@ -72,6 +72,10 @@ let initialScore: number = 0;
 try {
   const strategy: Settings = await loadStrategySettings(repo);
   const signal: Settings = (await Signal.load(repo)).export();
+  trainingModel.setParameterValues({
+    ...strategy,
+    ...signal,
+  });
   validationModel.setParameterValues({
     ...strategy,
     ...signal,
