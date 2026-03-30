@@ -67,14 +67,18 @@ Deno.test("Visualized training", { ignore: true }, () => {
   // Dashboard
   const epochs = 50;
   const console_width = 84;
-  const dashboard: Dashboard = new Dashboard(optimizer.parameters, epochs, console_width);
+  const dashboard: Dashboard = new Dashboard(
+    optimizer.parameters,
+    epochs,
+    console_width,
+  );
   function status(
     iterations: number,
-    _momentum: number,
+    momentum: number,
     _parameters: Parameters,
     reward: Output[],
   ): void {
-    console.log(dashboard.render(iterations, reward));
+    console.log(dashboard.render(iterations, reward, momentum));
   }
 
   const iterations = optimizer.optimize(epochs, epsilon, status);

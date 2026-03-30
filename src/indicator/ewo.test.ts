@@ -10,9 +10,9 @@ Deno.test("EWO - Basic Calculation", () => {
   assertEquals(ewo[1], NaN);
   assertEquals(ewo[2], NaN);
   assertEquals(ewo[3], NaN);
-  assertEquals(ewo[4], 30);
-  assertEquals(ewo[5], 25);
-  assertEquals(ewo[9], 15);
+  assertEquals(ewo[4], 1.5);
+  assertEquals(ewo[5], 1.5);
+  assertEquals(ewo[9], 1.5);
 });
 
 Deno.test("EWO - Defaults", () => {
@@ -20,7 +20,7 @@ Deno.test("EWO - Defaults", () => {
   const data = Array.from({ length: n }, (_, i) => i + 1);
   const ewo = EWO(data);
   assertEquals(ewo.length, n);
-  assertEquals(ewo[n - 1], 37.5);
+  assertEquals(ewo[n - 1], 15);
 });
 
 Deno.test("EWO - Validation", () => {
@@ -32,6 +32,6 @@ Deno.test("EWO - Validation", () => {
   assertThrows(
     () => EWO([1, 2], 2, 5),
     Error,
-    "Insufficient data to calculate EWO. Needs at least 5 data points.",
+    "Insufficient data to calculate EWO. Needs at least 5 data points, got 2",
   );
 });
