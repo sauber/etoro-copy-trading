@@ -43,12 +43,12 @@ const byDate: Array<
   t,
 ) => [
   barToDate(t.Bar as number),
-  t.Action,
-  t.Symbol,
-  t.Price,
-  t.Amount,
-  t.Profit,
-  t.Value,
+  t.Action as string,
+  t.Symbol as string,
+  t.Price as number,
+  t.Amount as number,
+  t.Profit as string | number,
+  t.Value as number,
 ]);
 const table = new Table();
 table.title = "Trades";
