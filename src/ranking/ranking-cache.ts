@@ -69,18 +69,13 @@ export class RankingCache implements Ranking {
     for (let i = range[0]; i <= range[1]; i++) {
       series[i] = value;
     }
-    // console.log("cache fill", {
-    //   series: series.slice(range[0], range[1] + 1),
-    //   range,
-    //   value,
-    // });
-    // Deno.exit(42);
   }
 
   /** Lookup value from series, or fill if missing */
   private value(investor: Investor, tick: Tick): number {
     const series: Series = this.series(investor);
-    if (series[tick] === undefined || series[tick] === 0) {
+    const index: number = tick - investor.start;
+    if (series[index] === undefined || series[index] === 0) {
       const value = this.backend.predict(investor, tick);
       const range = this.range(investor, tick);
       // Shift range to offset of investor series
@@ -88,7 +83,7 @@ export class RankingCache implements Ranking {
       // console.log({ range, offset, tick, value });
       this.fill(series, value, offset);
     }
-    return series[tick - investor.start];
+    return series[index];
   }
 
   /** Predict value for investor at tick, using cache */
