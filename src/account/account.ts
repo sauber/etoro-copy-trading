@@ -1,8 +1,8 @@
 import { createMutex } from "@117/mutex";
 import { Backend } from "@sauber/journal";
 import { Amount } from "@sauber/backtest";
-import { Config } from "../config/mod.ts";
-import { Mirror } from "../repository/portfolio.ts";
+import { Config } from "📚/config/mod.ts";
+import { Mirror } from "📚/repository/portfolio.ts";
 
 /** Load account data from Config */
 export class Account {

@@ -1,19 +1,19 @@
-import { Bar, Instrument } from "@sauber/backtest";
+import { Instrument, Tick } from "@sauber/backtest";
 import { Signal } from "./signal.ts";
 
 /** Generate and cache signal charts for each instrument */
 export class CachedSignal extends Signal {
   private readonly charts = new Map<string, Instrument>();
 
-  public override predict(instrument: Instrument, bar: Bar): number {
+  public override predict(instrument: Instrument, tick: Tick): number {
     // Attempt to use already cached signal chart
     const cached: Instrument | undefined = this.charts.get(instrument.symbol);
-    if (cached) return cached.price(bar);
+    if (cached) return cached.price(tick);
 
     // Generate signal chart and store in cache
     const chart: Instrument = this.generate(instrument);
     this.charts.set(instrument.symbol, chart);
-    return chart.price(bar);
+    return chart.price(tick);
   }
 
   /** Count of cached entries */

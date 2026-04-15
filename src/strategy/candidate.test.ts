@@ -1,63 +1,134 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Amount, Bar, Position, Price, PurchaseOrder } from "@sauber/backtest";
+import { assertAlmostEquals, assertEquals } from "@std/assert";
 import { Candidate } from "./candidate.ts";
-import { context, instrument, test_ranking, test_timing } from "./testdata.ts";
+import {
+  Amount,
+  Instrument,
+  makeInstrument,
+  OpenPosition,
+} from "@sauber/backtest";
 
-const start: Bar = instrument.start;
-const first: Price = instrument.price(start);
-const amount: Amount = 100;
-const target: Amount = 200;
-const units1 = first / amount;
-const pos1 = new Position(instrument, amount, first, units1, start, 1);
-const rank: number = test_ranking(instrument, start);
-const opportunity: number = test_timing(instrument, start);
+const amount: Amount = 500;
+const instrument: Instrument = makeInstrument(100);
+const positions: OpenPosition[] = [
+  new OpenPosition(
+    instrument,
+    instrument.start,
+    amount,
+    amount / instrument.price(instrument.start),
+  ),
+];
 
-// Generate Candidate Object
-function makeCandidate(): Candidate {
-  return new Candidate(instrument, start, rank, opportunity, target);
-}
+Deno.test("Candidate - Skip action when no positions and no buy opportunity", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions: [],
+    target: 1000,
+    timing: 0,
+    tick: 50,
+    stoploss: 0.1,
+  });
+  assertEquals(candidate.action, "Skip");
+  assertEquals(candidate.buy, 0);
+});
 
-Deno.test("Instance", () => {
-  assertInstanceOf(
-    new Candidate(instrument, start, rank, opportunity, target),
-    Candidate,
+Deno.test("Candidate - Open action when no positions and buy opportunity", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions: [],
+    target: 1000,
+    timing: -0.5,
+    tick: 50,
+    stoploss: 0.1,
+  });
+  assertEquals(candidate.action, "Open");
+});
+
+Deno.test("Candidate - Take profit action when position exists and timing positive", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 1000,
+    timing: 1,
+    tick: 50,
+    stoploss: 0.1,
+  });
+  assertEquals(candidate.action, "Take");
+});
+
+Deno.test("Candidate - Increase action when position exists and buy opportunity", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 2000,
+    timing: -0.5,
+    tick: 50,
+    stoploss: 0.1,
+  });
+  assertEquals(candidate.action, "Increase");
+});
+
+Deno.test("Candidate - Keep action when position exists and no opportunity", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 1000,
+    timing: 0,
+    tick: 50,
+    stoploss: 0.1,
+  });
+  assertEquals(candidate.action, "Keep");
+});
+
+Deno.test("Candidate - Calculate gain", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 1000,
+    timing: 0,
+    tick: instrument.end,
+    stoploss: 0.1,
+  });
+  assertAlmostEquals(
+    candidate.gain,
+    instrument.price(instrument.end) / instrument.price(instrument.start) - 1,
   );
 });
 
-Deno.test("Add Position", () => {
-  const ca = makeCandidate();
-  const po: Position = context.positions[0];
-  ca.addPosition(po);
+Deno.test("Candidate - Calculate value", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 1000,
+    timing: 0,
+    tick: instrument.end,
+    stoploss: 0.1,
+  });
+  assertAlmostEquals(
+    candidate.value,
+    500 * instrument.price(instrument.end) / instrument.price(instrument.start),
+  );
 });
 
-Deno.test("Add PurchaseOrder", () => {
-  const ca = makeCandidate();
-  const po: PurchaseOrder = context.purchaseorders[0];
-  ca.addPurchaseOrder(po);
+Deno.test("Candidate - Calculate buying gap", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 1000,
+    timing: -0.5,
+    tick: instrument.start,
+    stoploss: 0.1,
+  });
+  assertAlmostEquals(candidate.buy, 250);
 });
 
-Deno.test("Instrument Name", () => {
-  const ca = makeCandidate();
-  assertEquals(ca.symbol, instrument.symbol);
-});
-
-Deno.test("Bar when opened", () => {
-  const ca = makeCandidate();
-  assertEquals(ca.start, undefined);
-  ca.addPosition(pos1);
-  assertEquals(ca.start, start);
-});
-
-Deno.test("Record", () => {
-  const ca = makeCandidate();
-  const _r = ca.export();
-  // console.log(r);
-});
-
-Deno.test("Sell or Buy", () => {
-  const ca = makeCandidate();
-  const sell: boolean = ca.isSell;
-  assertEquals(sell, false);
-  const buy: boolean = ca.isBuy;
-  assertEquals(buy, false);
+Deno.test("Candidate - Calculate no-buying gap", () => {
+  const candidate = new Candidate({
+    instrument,
+    positions,
+    target: 1000,
+    timing: 0.5,
+    tick: instrument.start,
+    stoploss: 0.1,
+  });
+  assertEquals(candidate.buy, 0);
 });

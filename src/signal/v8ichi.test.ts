@@ -1,11 +1,11 @@
-import { createTestInstrument, Series } from "@sauber/backtest";
+import { makeInstrument, Series } from "@sauber/backtest";
 import { limits, signal as v8ichi } from "./v8ichi.ts";
 import { assert } from "@std/assert";
 // import { linechart } from "@sauber/widgets";
 
 Deno.test("V8 Ichi Signal", () => {
   // Test chart
-  const chart = createTestInstrument(400);
+  const chart = makeInstrument(400);
   // console.log(linechart(Array.from(chart.series), 11, 72));
 
   // Generate signals from chart

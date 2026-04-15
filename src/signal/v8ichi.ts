@@ -3,7 +3,6 @@ import { Series } from "@sauber/backtest";
 import { Limits } from "./indicator.ts";
 import { EWO } from "../indicator/ewo.ts";
 import { HMA } from "../indicator/hma.ts";
-import { linechart } from "@sauber/widgets";
 import { assert } from "@std/assert";
 
 export const limits: Limits = {
@@ -25,6 +24,16 @@ export const limits: Limits = {
 };
 
 export type Input = Record<keyof typeof limits, number>;
+
+/** Minimum number of ticks required for the signal to compute */
+const min_ticks = (values: Input): number =>
+  Math.max(
+    values.ma_buy_period,
+    values.ma_sell_period,
+    values.hma_period,
+    values.ewo_slow_period,
+    values.rsi_slow_period,
+  );
 
 /**
  * V8ichi Strategy
@@ -49,6 +58,10 @@ function v8ichi(series: Series, values: Input): Series {
     rsi_slow_period,
   } = values;
 
+  // Confirm if series has enough data points for the longest indicator period
+  const required_length = min_ticks(values);
+  if (series.length < required_length) return new Float32Array(series.length); // Not enough data, return neutral signals
+
   // chart(series, "price");
 
   // Indicators
@@ -62,6 +75,20 @@ function v8ichi(series: Series, values: Input): Series {
 
   // Pre-calculate HMA for the entire series
   const series_array = Array.from(series);
+  // if (
+  //   series_array.length < Math.max(ma_buy_period, ma_sell_period, hma_period)
+  // ) {
+  //   console.error({
+  //     series_length: series.length,
+  //     array_length: series_array.length,
+  //     ma_buy_period,
+  //     ma_sell_period,
+  //     hma_period,
+  //   });
+  //   throw new Error(
+  //     "Series length must be at least as long as the longest indicator period",
+  //   );
+  // }
   const hma_full = HMA(series_array, hma_period);
 
   // Pre-calculate EWO for the entire series

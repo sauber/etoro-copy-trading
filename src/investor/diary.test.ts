@@ -1,9 +1,5 @@
-import {
-  assertEquals,
-  assertInstanceOf,
-  assertThrows,
-} from "@std/assert";
-import type { DateFormat } from "@sauber/dates";
+import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert";
+import type { DateFormat } from "📚/tick/mod.ts";
 import { Diary } from "📚/investor/diary.ts";
 
 type TestData = {
@@ -17,7 +13,7 @@ const testdata: Record<DateFormat, TestData> = {
 };
 const dates: DateFormat[] = Object.keys(testdata).sort();
 const start: DateFormat = dates[0];
-const end: DateFormat = dates[dates.length-1];
+const end: DateFormat = dates[dates.length - 1];
 
 Deno.test("Blank Initialization", () => {
   const diary = new Diary<TestData>({});

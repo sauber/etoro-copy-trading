@@ -1,35 +1,22 @@
 import { Backend } from "@sauber/journal";
 import { createMutex, Mutex } from "@117/mutex";
-import {
-  Bar,
-  DateFormat,
-  dateFromWeekday,
-  dateToBar,
-  diffDate,
-  nextDate,
-  today,
-} from "@sauber/dates";
+import { DateFormat, diffDate, nextDate, Tick, Timeline } from "📚/tick/mod.ts";
 import {
   Amount,
-  CloseOrders,
+  BuyOrder,
   Instrument,
-  Instruments,
+  OpenPosition,
+  Portfolio,
   Position,
-  PositionID,
-  Positions,
-  Price,
-  PurchaseOrders,
+  SellOrder,
   Series,
-  StrategyContext,
 } from "@sauber/backtest";
-import { sum } from "@sauber/statistics";
-import { Config } from "../config/mod.ts";
-import { Account } from "../account/mod.ts";
-import { Diary, Investor } from "../investor/mod.ts";
-import { Mirror } from "../repository/mod.ts";
-import { Community, Names } from "../community/mod.ts";
+import { Config } from "📚/config/mod.ts";
+import { Account } from "📚/account/mod.ts";
+import { Diary, Investor } from "📚/investor/mod.ts";
+import { Mirror } from "📚/repository/mod.ts";
+import { Community, Names } from "📚/community/mod.ts";
 
-const NOW: DateFormat = today();
 type Mirrors = Array<Mirror>;
 type Journal = Diary<Mirrors>;
 
@@ -38,16 +25,18 @@ export type ParameterData = Record<string, number>;
 // Count of days investor data is behind trading date
 export const DELAY = 2;
 
-/** Typs of values storable in cache */
+/** Types of values storable in cache */
 type CacheValue =
-  | CloseOrders
+  | BuyOrder[]
+  | SellOrder
+  | SellOrder[]
   | DateFormat
   | Instrument
-  | Instruments
+  | Instrument[]
   | Investor
   | null
   | Position
-  | PurchaseOrders;
+  | BuyOrder;
 
 /** Load all data for strategyContext */
 export class Context {
@@ -79,6 +68,22 @@ export class Context {
     this.cache_access++;
 
     return this.cached[key] as T;
+  }
+
+  /** Map of ticks and dates */
+  private readonly timeline_lock = createMutex();
+  private _timeline: Timeline | null = null;
+  private async timeline(): Promise<Timeline> {
+    if (this._timeline !== null) return this._timeline;
+    await this.timeline_lock.acquire();
+    try {
+      if (this._timeline !== null) return this._timeline;
+      const chartStart: DateFormat = await this.community.chartStart();
+      this._timeline = new Timeline(chartStart);
+      return this._timeline;
+    } finally {
+      this.timeline_lock.release();
+    }
   }
 
   /** Trading strategy parameters */
@@ -126,11 +131,19 @@ export class Context {
     try {
       if (this._tradingDate !== null) return this._tradingDate;
       // console.log("Loading TradingDate");
-      const repoEnd: DateFormat | null = await this.end();
+      const repoEnd: DateFormat = await this.end();
+      // Desired day of week fo trading
       const weekday: number = (await this.settings()).weekday;
-      const tradingDate: DateFormat = repoEnd
-        ? dateFromWeekday(repoEnd, weekday)
-        : NOW;
+      // const tradingDate: DateFormat = repoEnd
+      //   ? dateFromWeekday(repoEnd, weekday)
+      //   : NOW;
+      // Most recent date with data for trading day of week, upto DELAY days before end of repo
+      // Day of week for end of repo
+      const repoEndWeekday: number = repoEnd ? new Date(repoEnd).getDay() : 0;
+      // Number of days to subtract from repo end to get to desired weekday
+      const daysToSubtract: number = (repoEndWeekday - weekday + 7) % 7;
+      // Trading date is repo end minus days to subtract
+      const tradingDate: DateFormat = nextDate(repoEnd, -daysToSubtract);
       this._tradingDate = tradingDate;
       return tradingDate;
     } finally {
@@ -139,12 +152,14 @@ export class Context {
   }
 
   /** tradingDate as Bar */
-  private async tradingBar(): Promise<Bar> {
-    return dateToBar(await this.tradingDate());
+  public async tradingTick(): Promise<Tick> {
+    const timeline: Timeline = await this.timeline();
+    const date: DateFormat = await this.tradingDate();
+    return timeline.tick(date);
   }
 
   /** Total value of account */
-  private async value(): Promise<Amount> {
+  public async value(): Promise<Amount> {
     const value: Amount = await this.account.value();
     if (value == null) throw new Error("Account Value is null");
     return value;
@@ -300,35 +315,58 @@ export class Context {
           const end: DateFormat = await this.end();
           const series: Series = new Float32Array(diffDate(start, end) + 1)
             .fill(10000);
-          const bar: Bar = diffDate(end, NOW);
-          return new Instrument(series, bar, username, "Placeholder");
+          const timeline: Timeline = await this.timeline();
+          const startChart: DateFormat = timeline.date(0);
+          const startTick: Tick = diffDate(startChart, start);
+          return new Instrument(series, startTick, username, "Placeholder");
         }
       },
     );
   }
 
   /** Position for mirror */
-  private positionid: PositionID = 0;
-  private position(username: string, amount: Amount): Promise<Position> {
-    return this.cache<Position>(
+  // private positionid: PositionID = 0;
+  private async position(
+    username: string,
+    amount: Amount,
+  ): Promise<OpenPosition> {
+    const timeline = await this.timeline();
+    return this.cache<OpenPosition>(
       "position_" + username,
       async () => {
         const instrument = await this.instrument(username);
         const startDate: DateFormat = await this.positionStart(username);
-        const startBar: Bar = diffDate(startDate, NOW);
-        const endBar: Bar = instrument.end;
-        const startPrice: Price = instrument.price(startBar);
-        const endPrice: Price = instrument.price(endBar);
+        const startTick: Tick = timeline.tick(startDate);
+        const endTick: Tick = instrument.end;
+        // console.log({
+        //   startDate,
+        //   startTick,
+        //   endTick,
+        //   endDate: timeline.date(endTick),
+        // });
+        // console.log(instrument);
+        const startPrice: number = instrument.price(startTick);
+        const endPrice: number = instrument.price(endTick);
         const startAmount: Amount = startPrice / endPrice * amount;
-        const units: number = startAmount / startPrice;
-        const position: Position = new Position(
+        const quantity: number = startAmount / startPrice;
+        const position: Position = new OpenPosition(
           instrument,
+          startTick,
           startAmount,
-          startPrice,
-          units,
-          startBar,
-          ++this.positionid,
+          quantity,
         );
+        // console.log(
+        //   "Position loaded for",
+        //   username,
+        //   "start",
+        //   startDate,
+        //   "start tick",
+        //   startTick,
+        //   "end tick",
+        //   endTick,
+        //   "amount",
+        //   amount,
+        // );
         return position;
       },
     );
@@ -336,36 +374,39 @@ export class Context {
 
   /** All mirrors of account */
   private readonly positions_lock = createMutex();
-  private _positions: Positions | null = null;
-  private async positions(): Promise<Positions> {
-    if (this._positions !== null) return this._positions;
-    const bar: Bar = await this.tradingBar();
+  private _portfolio: Portfolio | null = null;
+  public async portfolio(): Promise<Portfolio> {
+    if (this._portfolio !== null) return this._portfolio;
+    const tick: Tick = await this.tradingTick();
+    // console.log("Loading positions for tick", tick);
     await this.positions_lock.acquire();
     try {
-      if (this._positions !== null) return this._positions;
+      if (this._portfolio !== null) return this._portfolio;
 
       const mirrors: Mirrors = await this.mirrors();
+      // console.log("Mirrors for portfolio", mirrors.length);
       const scale: number = (await this.value()) / 100;
-      const positions: Positions = await Promise.all(
+      // console.log("Scaling positions % by", scale);
+      const positions: OpenPosition[] = await Promise.all(
         mirrors.map((m: Mirror) => this.position(m.UserName, m.Value * scale)),
       );
 
       // Confirm position has data, otherwise it's probably closed
-      const open: Positions = [];
+      const open: OpenPosition[] = [];
       for (const p of positions) {
-        if (p.instrument.end <= (bar + DELAY)) open.push(p);
+        if (p.instrument.end >= (tick - DELAY)) open.push(p);
         else {console.warn(
             "Warning: Position",
             p.instrument.symbol,
             "has no data at bar",
-            bar + DELAY,
+            tick - DELAY,
             "latest is",
             p.instrument.end,
           );}
       }
 
-      this._positions = open;
-      return open;
+      this._portfolio = new Portfolio(open);
+      return this._portfolio;
     } finally {
       this.positions_lock.release();
     }
@@ -380,12 +421,10 @@ export class Context {
     try {
       if (this._amount !== null) return this._amount;
 
-      const bar: Bar = await this.tradingBar();
+      const tick: Tick = await this.tradingTick();
       const value: Amount = await this.value();
-      const positions: Positions = await this.positions();
-      const invested: Amount = sum(
-        positions.map((p: Position) => p.value(bar + DELAY)),
-      );
+      const portfolio: Portfolio = await this.portfolio();
+      const invested: Amount = portfolio.value(tick);
       const amount: Amount = value - invested;
       this._amount = amount;
       return amount;
@@ -395,8 +434,8 @@ export class Context {
   }
 
   /** Load instruments by list of investor names */
-  private async instruments(names: Names): Promise<Instruments> {
-    const instruments: Instruments = await Promise.all(
+  private async instruments(names: Names): Promise<Instrument[]> {
+    const instruments: Instrument[] = await Promise.all(
       Array.from(names).map((name: string) => this.instrument(name)),
     );
     return instruments;
@@ -408,8 +447,8 @@ export class Context {
   }
 
   /** Investors available on (upto EXTEND days before) trading date */
-  public tradingInstruments(): Promise<Instruments> {
-    return this.cache<Instruments>(
+  public tradingInstruments(): Promise<Instrument[]> {
+    return this.cache<Instrument[]>(
       "trading_instruments",
       async () => {
         const tradingDate: DateFormat = await this.tradingDate();
@@ -421,51 +460,51 @@ export class Context {
   }
 
   /** Investors available for purchase */
-  private purchaseOrders(): Promise<PurchaseOrders> {
-    return this.cache<PurchaseOrders>(
-      "po",
-      async () => {
-        const instruments: Instruments = await this.tradingInstruments();
-        const total: Amount = await this.amount();
-        const amount: Amount = total / instruments.length;
-        const purchaseOrders: PurchaseOrders = instruments.map(
-          (instrument: Instrument) => ({ instrument, amount }),
-        );
-        return purchaseOrders;
-      },
-    );
-  }
+  // private purchaseOrders(): Promise<BuyOrder[]> {
+  //   return this.cache<BuyOrder[]>(
+  //     "po",
+  //     async () => {
+  //       const instruments: Instrument[] = await this.tradingInstruments();
+  //       const total: Amount = await this.amount();
+  //       const amount: Amount = total / instruments.length;
+  //       const purchaseOrders: BuyOrder[] = instruments.map(
+  //         (instrument: Instrument) => ({ instrument, amount }),
+  //       );
+  //       return purchaseOrders;
+  //     },
+  //   );
+  // }
 
-  /** Investors available for purchase */
-  private closeOrders(): Promise<CloseOrders> {
-    return this.cache<CloseOrders>(
-      "co",
-      async () => {
-        const positions: Positions = await this.positions();
-        const closeOrders: CloseOrders = positions.map(
-          (position: Position) => ({
-            position,
-            confidence: 1,
-            reason: "Close",
-          }),
-        );
-        return closeOrders;
-      },
-    );
-  }
+  /** Investors in Portfolio */
+  // private closeOrders(): Promise<SellOrder[]> {
+  //   return this.cache<SellOrder[]>(
+  //     "co",
+  //     async () => {
+  //       const positions: OpenPosition[] = await this.positions();
+  //       const closeOrders: SellOrder[] = positions.map(
+  //         (position: OpenPosition) => ({
+  //           position,
+  //           confidence: 1,
+  //           reason: "Close",
+  //         }),
+  //       );
+  //       return closeOrders;
+  //     },
+  //   );
+  // }
 
-  public async strategyContext(): Promise<StrategyContext> {
-    const [bar, value, amount, purchaseorders, closeorders, positions] =
-      await Promise.all(
-        [
-          this.tradingBar(),
-          this.value(),
-          this.amount(),
-          this.purchaseOrders(),
-          this.closeOrders(),
-          this.positions(),
-        ],
-      ) as [Bar, Amount, Amount, PurchaseOrders, CloseOrders, Positions];
-    return { bar, value, amount, purchaseorders, closeorders, positions };
-  }
+  // public async strategyContext(): Promise<StrategyContext> {
+  //   const [bar, value, amount, purchaseorders, closeorders, positions] =
+  //     await Promise.all(
+  //       [
+  //         this.tradingTick(),
+  //         this.value(),
+  //         this.amount(),
+  //         this.purchaseOrders(),
+  //         this.closeOrders(),
+  //         this.positions(),
+  //       ],
+  //     ) as [Tick, Amount, Amount, PurchaseOrders, CloseOrders, Positions];
+  //   return { bar, value, amount, purchaseorders, closeorders, positions };
+  // }
 }

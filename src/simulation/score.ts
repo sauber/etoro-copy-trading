@@ -1,37 +1,54 @@
-import { Simulation } from "@sauber/backtest";
-import { avg } from "@sauber/statistics";
+import { Amount, Backtest, Series, Transactions } from "@sauber/backtest";
+import { avg, regression, std } from "@sauber/statistics";
+
+/** How much values diverts on average from exponential curve */
+function fragility(series: Series): number {
+  const reg = regression(Array.from(series.map((v) => Math.log(v))));
+  const curve: Series = series.map((_, i) =>
+    Math.exp(reg.intercept + reg.gradiant * i)
+  );
+  const dev: number = std(Array.from(series.map((v, i) => v - curve[i])));
+  const mean: number = series.slice().sort()[Math.floor(series.length / 2)];
+  const fragility: number = dev / mean;
+  return fragility;
+}
 
 /** Calculate score of simulation */
-export function score(simulation: Simulation): number {
-  const trades: number = simulation.account.trades.length;
-  if (trades === 0) {
-    return 0;
-  }
-  const profit: number = simulation.account.profit;
-  const win: number = simulation.account.WinRatioTrades;
-  const frag: number = simulation.account.fragility;
+export function score(simulation: Backtest): number {
+  const closed: Transactions = simulation.transactions;
+  if (closed.length === 0) return 0;
+
+  const wins: Transactions = closed.filter((t) => t.profit > 0);
+  const expired: Transactions = closed.filter((t) => t.reason === "Expire");
+  const value: Series = simulation.value;
+  const first: Amount = value[0];
+  const last: Amount = value[value.length - 1];
+
+  const profitRatio: number = last / first - 1;
+  const winRatio: number = wins.length / closed.length;
+  const frag: number = fragility(value);
 
   // Normalize costs: 0=no cost, 1=worst cost
   // The more trades the worse
-  const trades_cost: number = Math.tanh(
-    trades / simulation.account.bars,
-  );
+  const trades_cost: number = Math.tanh(closed.length / value.length);
+
   // The more losses the worse
-  const lose_cost = 1 - win;
+  const lose_cost: number = 1 - winRatio;
 
   // Favor normal closes
-  const abrupt = 1 - simulation.account.closeRatio;
+  const abrupt: number = 1 - expired.length / closed.length;
 
   // Scale average of penalties to profit
-  const cost = Math.abs(profit) * avg([trades_cost, lose_cost, frag, abrupt]);
-;
+  const cost: number = Math.abs(profitRatio) *
+    avg([trades_cost, lose_cost, frag, abrupt]);
+
   // Subtract cost from profit;
-  const result = profit - cost;
+  const result: number = profitRatio - cost;
   if (!isFinite(result)) {
     console.log({
-      trades,
-      profit,
-      win,
+      trades: closed.length,
+      profitRatio,
+      winRatio,
       frag,
       abrupt,
       trades_cost,

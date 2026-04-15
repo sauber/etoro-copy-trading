@@ -1,6 +1,10 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import {
+  assertEquals,
+  assertGreaterOrEqual,
+  assertInstanceOf,
+} from "@std/assert";
 import { HeapBackend, JournaledAsset } from "@sauber/journal";
-import { nextDate, today } from "@sauber/dates";
+import { DateFormat, nextDate, today } from "📚/tick/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Community, Names } from "../community/community.ts";
 import { repo as temprepo } from "📚/repository/testdata.ts";
@@ -68,19 +72,29 @@ Deno.test("Heap repo", async (t) => {
 Deno.test("Disk repo", async (t) => {
   const community: Community = new Community(temprepo);
 
-  await t.step("all names", async () => {
-    const names: Names = await community.allNames();
-    assertEquals(names.size, 25);
-  });
+  const names: Names = await community.allNames();
+  assertEquals(names.size, 25);
 });
 
 Deno.test("Test Investor", async (t) => {
   const community: Community = new TestCommunity(temprepo);
 
-  await t.step("all names", async () => {
-    const names: Names = await community.samples(1);
-    const name: string = [...names][0];
-    const investor: Investor = await community.investor(name);
-    assertInstanceOf(investor, Investor);
-  });
+  const names: Names = await community.samples(1);
+  const name: string = [...names][0];
+  const investor: Investor = await community.investor(name);
+  assertGreaterOrEqual(investor.start, 0);
+  assertGreaterOrEqual(investor.end, investor.start);
+  assertInstanceOf(investor, Investor);
+});
+
+Deno.test("Chart Start", async () => {
+  const community: Community = new TestCommunity(temprepo);
+  const start: DateFormat = await community.chartStart();
+  assertEquals(start, "2020-12-01");
+});
+
+Deno.test("Active Investors", async () => {
+  const community: Community = new TestCommunity(temprepo);
+  const active: Names = await community.active("2022-04-23");
+  assertEquals(active.size, 13);
 });

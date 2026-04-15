@@ -1,4 +1,4 @@
-import { Bar, Instrument, Series } from "@sauber/backtest";
+import { Instrument, Series, Tick } from "@sauber/backtest";
 import { Backend } from "@sauber/journal";
 import { Config } from "../config/config.ts";
 import { limits, signal } from "./indicator.ts";
@@ -12,8 +12,12 @@ export class Signal {
   /** Name of settings group in config asset */
   static readonly assetName = "signal";
 
+  /** Minimum number of ticks required for signal */
+  // public readonly min_ticks: number;
+
   constructor(private readonly values: Settings) {
     this.validate(values);
+    // this.min_ticks = min_ticks(values);
   }
 
   /** Confirm parameters are valid */
@@ -94,10 +98,15 @@ export class Signal {
 
   /** Generate signal from instrument */
   public generate(instrument: Instrument): Instrument {
+    // if (instrument.series.length < this.min_ticks) {
+    //   throw new Error(
+    //     `Not enough data to generate signal, need at least ${this.min_ticks} ticks, ${instrument.symbol} has ${instrument.series.length}`,
+    //   );
+    // }
     const signals: Series = signal(instrument.series, this.values);
     const result = new Instrument(
       signals,
-      instrument.end,
+      instrument.start,
       instrument.symbol,
       instrument.name + ":signal",
     );
@@ -105,8 +114,8 @@ export class Signal {
   }
 
   /** Signal value at bar */
-  public predict(instrument: Instrument, bar: Bar): number {
+  public predict(instrument: Instrument, tick: Tick): number {
     const chart: Instrument = this.generate(instrument);
-    return chart.price(bar);
+    return chart.price(tick);
   }
 }

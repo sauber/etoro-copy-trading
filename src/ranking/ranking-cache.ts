@@ -1,38 +1,44 @@
-import { InvestorRanking } from "./investor-ranking.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { Bar } from "@sauber/backtest";
-import { type DateFormat, dateToBar } from "@sauber/dates";
+import { type DateFormat, Timeline } from "📚/tick/mod.ts";
 import { Ranking } from "📚/ranking/mod.ts";
+import { Tick } from "@sauber/backtest";
 
-type Range = [Bar, Bar];
+type Range = [Tick, Tick];
 type Series = Float16Array;
 
 /** Cache results from Ranking Model */
 export class RankingCache implements Ranking {
   private readonly cache: Map<string, Series> = new Map();
+  private readonly ticker: Timeline;
 
-  constructor(private readonly backend: InvestorRanking) {}
+  constructor(
+    private readonly backend: Ranking,
+    private readonly start: DateFormat,
+  ) {
+    this.ticker = new Timeline(this.start);
+  }
 
   /**
    *        5
    * 10  8   4   2
    */
 
-  /** Find first and last date refering to same stats */
-  private range(investor: Investor, bar: Bar): Range {
-    // Dates are sorted from oldest to newest, and so are bars
-    const bars: Bar[] = investor.stats.dates.map((date: DateFormat) =>
-      dateToBar(date)
+  /** Find first and last date refering to same stats, translate to ticks */
+  private range(investor: Investor, tick: Tick): Range {
+    // Dates are sorted from oldest to newest, and so are ticks
+    const ticks: Tick[] = investor.stats.dates.map((date: DateFormat) =>
+      this.ticker.tick(date)
     );
-    let range: Range = [bar, bar];
-    for (const b of bars) {
-      if (b < bar) {
+    let range: Range = [tick, tick];
+    for (const b of ticks) {
+      if (b > tick) {
         range = [range[0], b];
         break;
       }
-      if (b >= bar) range = [b, range[1]];
-
+      if (b <= tick) range = [b, range[1]];
     }
+    // console.log({ range, ticks, tick });
+    // throw new Error("Debug: Check range calculation");
     return range;
   }
 
@@ -43,30 +49,58 @@ export class RankingCache implements Ranking {
     if (series) return series;
 
     // const created: Series = [];
-    const created: Series = new Float16Array(investor.start);
+    const created: Series = new Float16Array(investor.length);
+    // console.log(
+    //   "Create new blank series for",
+    //   investor.UserName,
+    //   "length",
+    //   created.length,
+    //   "start",
+    //   investor.start,
+    //   "end",
+    //   investor.end,
+    // );
     this.cache.set(key, created);
     return created;
   }
 
   /** Fill section of series with value */
   private fill(series: Series, value: number, range: Range): void {
-    for (let i = range[0]; i >= range[1]; i--) {
+    for (let i = range[0]; i <= range[1]; i++) {
       series[i] = value;
     }
+    // console.log("cache fill", {
+    //   series: series.slice(range[0], range[1] + 1),
+    //   range,
+    //   value,
+    // });
+    // Deno.exit(42);
   }
 
   /** Lookup value from series, or fill if missing */
-  private value(investor: Investor, bar: Bar): number {
+  private value(investor: Investor, tick: Tick): number {
     const series: Series = this.series(investor);
-    if (series[bar] === undefined || series[bar] === 0) {
-      const value = this.backend.predict(investor, bar);
-      const range = this.range(investor, bar);
-      this.fill(series, value, range);
+    if (series[tick] === undefined || series[tick] === 0) {
+      const value = this.backend.predict(investor, tick);
+      const range = this.range(investor, tick);
+      // Shift range to offset of investor series
+      const offset: Range = range.map((tick) => tick - investor.start) as Range;
+      // console.log({ range, offset, tick, value });
+      this.fill(series, value, offset);
     }
-    return series[bar];
+    return series[tick - investor.start];
   }
 
-  public predict(investor: Investor, bar: Bar): number {
-    return this.value(investor, bar);
+  /** Predict value for investor at tick, using cache */
+  public predict(investor: Investor, tick: Tick): number {
+    const value = this.value(investor, tick);
+    if (isNaN(value)) {
+      throw new Error(
+        `NaN ranking for ${investor.UserName} at tick ${tick} with range ${
+          this.range(investor, tick)
+        }`,
+      );
+    }
+    return value;
   }
 }

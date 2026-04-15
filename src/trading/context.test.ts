@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { Backend, HeapBackend } from "@sauber/journal";
-import { DateFormat } from "@sauber/dates";
-import { Instrument, Instruments, StrategyContext } from "@sauber/backtest";
+import { DateFormat } from "📚/tick/mod.ts";
+import { Instrument, Portfolio } from "@sauber/backtest";
 
 import { makeTestRepository } from "../repository/mod.ts";
 import { Settings } from "../signal/mod.ts";
@@ -28,6 +28,12 @@ Deno.test("Trading Date", async () => {
   assertEquals(date, "2022-04-25");
 });
 
+Deno.test("Trading Tick", async () => {
+  const context = new Context(repo);
+  const tick = await context.tradingTick();
+  assertEquals(tick, 510);
+});
+
 Deno.test("Username", async () => {
   const context = new Context(repo);
   const name: string = await context.username();
@@ -42,17 +48,18 @@ Deno.test("Any Instrument", async () => {
 
 Deno.test("Available Investors", async () => {
   const context = new Context(repo);
-  const instr: Instruments = await context.tradingInstruments();
+  const instr: Instrument[] = await context.tradingInstruments();
   assertEquals(instr.length, 13);
 });
 
-Deno.test("Strategy Context", async () => {
+Deno.test("Value", async () => {
   const context = new Context(repo);
-  const ctx: StrategyContext = await context.strategyContext();
-  assert("bar" in ctx);
-  assert("value" in ctx);
-  assert("amount" in ctx);
-  assert("purchaseorders" in ctx);
-  assert("closeorders" in ctx);
-  assert("positions" in ctx);
+  const value: number = await context.value();
+  assertEquals(value, 100000);
+});
+
+Deno.test("Positions", async () => {
+  const context = new Context(repo);
+  const p: Portfolio = await context.portfolio();
+  assertEquals(p.positions.length, 20);
 });

@@ -1,4 +1,4 @@
-import { type DateFormat, nextDate, today } from "@sauber/dates";
+import { type DateFormat, nextDate, today } from "📚/tick/mod.ts";
 import type { ChartItem, ChartResults } from "@sauber/etoro-investors";
 
 /** Convert scraped timestamps to DateFormat */

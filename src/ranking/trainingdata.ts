@@ -1,7 +1,7 @@
 import { Investor } from "📚/investor/mod.ts";
-import { type DateFormat, diffDate, today } from "@sauber/dates";
+import { type DateFormat, Timeline } from "📚/tick/mod.ts";
 import { Features } from "📚/ranking/features.ts";
-import { Bar, Instrument } from "@sauber/backtest";
+import { Instrument, Tick } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";
 import { DataFrame } from "@sauber/dataframe";
 import { Investors } from "📚/community/mod.ts";
@@ -22,18 +22,24 @@ function outlierFilter(data: DataFrame, factor: number = 10): DataFrame {
   return (data.length == prev) ? data : outlierFilter(data, factor);
 }
 
-
 /** A list of training samples */
 export type Samples = Array<Sample>;
 
 /** Prepare data for training models for a since*/
 export class TrainingData {
   readonly samples: Array<Sample> = [];
+  private readonly ticker: Timeline;
 
   /**
    * @param window - Minimum number of chart values available after date of stats for calculating future score
+   * @param start - Date where tick=0
    */
-  constructor(private readonly window = 30) {}
+  constructor(
+    private readonly window = 30,
+    private readonly start: DateFormat,
+  ) {
+    this.ticker = new Timeline(start);
+  }
 
   /**
    * Load input features and output score for an investor.
@@ -42,19 +48,20 @@ export class TrainingData {
   private features(investor: Investor): Samples {
     const samples: Samples = [];
     const dates: DateFormat[] = investor.stats.dates;
+    // Convert dates to ticks
+    const ticks = dates.map((date) => this.ticker.tick(date));
 
     const chart: Instrument = investor;
-    const end: Bar = chart.end;
+    const end: Tick = chart.end;
 
     // Test if each date of where stats are available have
     // enough data available for calculating future score
-    dates
-      .map((date: DateFormat) => diffDate(date, today()))
-      .filter((bar: Bar) => bar - end >= this.window)
-      .forEach((bar: Bar) => {
-        const features: Features = new Features(investor);
-        const input: Input = features.input(bar);
-        const output: Output = features.output(bar);
+    ticks
+      .filter((tick: Tick) => end - tick >= this.window)
+      .forEach((tick: Tick) => {
+        const features: Features = new Features(investor, this.ticker);
+        const input: Input = features.input(tick);
+        const output: Output = features.output(tick);
         if (isFinite(output)) samples.push({ input, output });
       });
 

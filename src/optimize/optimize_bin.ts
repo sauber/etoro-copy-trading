@@ -1,7 +1,6 @@
-import { Exchange, Instruments } from "@sauber/backtest";
+import { Instrument, Market } from "@sauber/backtest";
 import {
   Dashboard,
-  Parameters,
   Parameters as OptimizerParameters,
   Status,
 } from "@sauber/optimize";
@@ -18,14 +17,16 @@ import {
 
 import { Optimize } from "./optimize.ts";
 import { exit } from "node:process";
+import { DateFormat } from "📚/tick/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
 const repo = makeRepository(path);
 const community: Community = new TestCommunity(repo);
+const chartStart: DateFormat = await community.chartStart();
 
 // Load a sample of random investors
-async function investors(count: number): Promise<Instruments> {
+async function investors(count: number): Promise<Instrument[]> {
   const names: Names = await community.samples(count);
   return community.load(names);
 }
@@ -35,20 +36,26 @@ const ranker: Rater = await loadRanker(repo);
 
 // Load training data
 const training_count: number = 800;
-const instruments: Instruments = (await investors(training_count))
-  .filter((instrument) => instrument.series.length >= 200);
-console.log("Testing Instruments loaded:", instruments.length);
+// const instruments: Instruments = (await investors(training_count))
+const trainingMarket: Market = new Market((await investors(training_count))
+  .filter((instrument) => instrument.series.length >= 200));
+console.log("Testing Instruments loaded:", trainingMarket.length);
 const spread = 0.001;
-const exchange: Exchange = new Exchange(instruments, spread);
-const trainingModel = new Optimize(exchange, ranker);
+// const exchange: Exchange = new Exchange(instruments, spread);
+const trainingModel = new Optimize(trainingMarket, ranker, chartStart, spread);
 
 // Load Validation data
 const validation_count: number = 80;
-const validationInstruments: Instruments = (await investors(validation_count))
-  .filter((instrument) => instrument.series.length >= 200);
-console.log("Validation Instruments loaded:", validationInstruments.length);
-const validation: Exchange = new Exchange(instruments, spread);
-const validationModel = new Optimize(validation, ranker);
+const validationMarket: Market = new Market((await investors(validation_count))
+  .filter((instrument) => instrument.series.length >= 200));
+console.log("Validation Instruments loaded:", validationMarket.length);
+// const validation: Exchange = new Exchange(instruments, spread);
+const validationModel = new Optimize(
+  validationMarket,
+  ranker,
+  chartStart,
+  spread,
+);
 
 // Console width
 const console_width = 88;

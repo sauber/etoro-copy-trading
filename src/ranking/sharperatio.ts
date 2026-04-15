@@ -1,4 +1,4 @@
-import { Series, Price } from "@sauber/backtest";
+import { Series } from "@sauber/backtest";
 
 /** Add all numbers together */
 const sum = (series: Series): number =>
@@ -26,8 +26,8 @@ function returns(series: Series): Series {
 /** Annual Yield */
 function annual_return(series: Series): number {
   const years: number = (series.length - 1) / 365;
-  const first: Price = series[0];
-  const last: Price = series[series.length - 1];
+  const first: number = series[0];
+  const last: number = series[series.length - 1];
   const annual_return = (last / first) ** (1 / years) - 1;
   return annual_return;
 }

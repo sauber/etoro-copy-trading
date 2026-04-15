@@ -5,7 +5,7 @@ import {
   assertLessOrEqual,
   assertThrows,
 } from "@std/assert";
-import { createTestInstrument, Instrument } from "@sauber/backtest";
+import { Instrument, makeInstrument } from "@sauber/backtest";
 import { Signal } from "./signal.ts";
 import { limits } from "./indicator.ts";
 
@@ -59,23 +59,26 @@ Deno.test("Generate", () => {
     ) => [name, param.default]),
   );
   const signal = new Signal(defaultValues);
-  const instrument: Instrument = createTestInstrument(270);
+  const instrument: Instrument = makeInstrument(270);
   const result: Instrument = signal.generate(instrument);
   assertInstanceOf(result, Instrument);
 
+  assertEquals(instrument.start, result.start);
   assertEquals(instrument.end, result.end);
   assertEquals(instrument.series.length, result.series.length);
   assertEquals(instrument.symbol, result.symbol);
-  assertEquals(
-    instrument.name,
-    result.name.substring(0, instrument.name.length),
-  );
-  assertEquals(result.name.substring(instrument.name.length), ":signal");
+  if (instrument.name && result.name) {
+    assertEquals(
+      instrument.name,
+      result.name.substring(0, instrument.name.length),
+    );
+    assertEquals(result.name.substring(instrument.name.length), ":signal");
+  }
 });
 
 Deno.test("Predict", () => {
   const signal = Signal.random();
-  const instrument: Instrument = createTestInstrument(270);
+  const instrument: Instrument = makeInstrument(270);
   const result: number = signal.predict(instrument, instrument.end);
   assertGreaterOrEqual(result, -1);
   assertLessOrEqual(result, 1);

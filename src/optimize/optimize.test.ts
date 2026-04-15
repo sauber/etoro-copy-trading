@@ -6,36 +6,25 @@ import {
   assertThrows,
 } from "@std/assert";
 import { Dashboard, Output, Parameters } from "@sauber/optimize";
-import {
-  Bar,
-  createTestInstrument,
-  Exchange,
-  Instrument,
-} from "@sauber/backtest";
+import { Instrument, makeMarket, Market } from "@sauber/backtest";
 
 import { Rater } from "📚/strategy/mod.ts";
 
 import { Optimize, Settings } from "./optimize.ts";
-
-// Random instruments on an exchange
-function makeExchange(count: number = 3): Exchange {
-  return new Exchange(
-    Array.from(Array(count).keys().map(() => createTestInstrument())),
-  );
-}
+import { Tick, today } from "📚/tick/mod.ts";
 
 // Random ranker
-const ranker: Rater = (_instrument: Instrument, _bar: Bar) =>
+const ranker: Rater = (_instrument: Instrument, _tick: Tick) =>
   2 * Math.random() - 1;
 
 /** Generate an optimizer */
 function makeOptimizer(investorCount: number = 3): Optimize {
-  const exchange = makeExchange(investorCount);
-  return new Optimize(exchange, ranker);
+  const market: Market = makeMarket(investorCount);
+  return new Optimize(market, ranker, today(), 0.01);
 }
 
 Deno.test("Optimizer instance", () => {
-  const optimizer = new Optimize(makeExchange(), ranker);
+  const optimizer = new Optimize(makeMarket(3), ranker, today(), 0.01);
   assertInstanceOf(optimizer, Optimize);
 });
 

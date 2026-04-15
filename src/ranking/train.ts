@@ -5,6 +5,7 @@ import { Model } from "📚/ranking/model.ts";
 import { Investors } from "📚/community/mod.ts";
 import { TrainingData } from "📚/ranking/trainingdata.ts";
 import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
+import { DateFormat } from "📚/tick/mod.ts";
 
 // Dashboard size
 const WIDTH = 78;
@@ -64,7 +65,7 @@ function createDashboard(
 export class Train {
   /** Minimum number of future bars after stats */
   // 15 for testdata, 180 for real data
-  public readonly bar_count: number = 180;
+  public readonly tick_count: number = 180;
 
   /** Maximum number fo training iterations */
   public readonly epochs: number = 2000;
@@ -81,6 +82,7 @@ export class Train {
   constructor(
     private readonly model: Model,
     private readonly investors: Investors,
+    private readonly start: DateFormat,
     params: Partial<Train> = {},
   ) {
     Object.assign(this, params);
@@ -89,7 +91,9 @@ export class Train {
   private _data?: DataFrame;
   public trainingdata(): DataFrame {
     if (!this._data) {
-      this._data = new TrainingData(this.bar_count).generate(this.investors);
+      this._data = new TrainingData(this.tick_count, this.start).generate(
+        this.investors,
+      );
     }
     return this._data;
   }

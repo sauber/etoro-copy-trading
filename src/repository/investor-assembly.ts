@@ -1,11 +1,11 @@
-import { type DateFormat, diffDate, today } from "@sauber/dates";
+import { type DateFormat, diffDate, nextDate } from "📚/tick/mod.ts";
 import { Backend, JournaledAsset } from "@sauber/journal";
 import type {
   ChartResults,
   PortfolioResults,
   StatsResults,
 } from "@sauber/etoro-investors";
-import { Bar, Instrument } from "@sauber/backtest";
+import { Instrument, Tick } from "@sauber/backtest";
 
 import { Diary, Investor } from "📚/investor/mod.ts";
 
@@ -67,7 +67,11 @@ export class InvestorAssembly {
   private readonly statsAsset: JournaledAsset<StatsResults>;
   private readonly compiledAsset: JournaledAsset<InvestorExport>;
 
-  constructor(public readonly UserName: string, readonly repo: Backend) {
+  constructor(
+    public readonly UserName: string,
+    readonly repo: Backend,
+    private readonly marketstart: DateFormat,
+  ) {
     this.chartAsset = new JournaledAsset<ChartResults>(
       this.UserName + ".chart",
       repo,
@@ -374,8 +378,20 @@ export class InvestorAssembly {
 
   /** Generate investor object from raw data */
   private generate(data: InvestorExport, series: number[]): Investor {
-    const end: Bar = diffDate(data.chartend, today());
-    const chart = new Instrument(new Float32Array(series), end);
+    const chartstart = nextDate(data.chartend, 1 - data.chart.length);
+    const start: Tick = diffDate(this.marketstart, chartstart);
+    // console.log("generate investor dates", {
+    //   marketstart: this.marketstart,
+    //   chartstart,
+    //   chartend: data.chartend,
+    //   start,
+    //   length: series.length,
+    // });
+    const chart = new Instrument(
+      new Float32Array(series),
+      start,
+      this.UserName,
+    );
     return new Investor(
       this.UserName,
       data.customerid,

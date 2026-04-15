@@ -2,7 +2,7 @@
 
 import { DataFrame } from "@sauber/dataframe";
 import { makeRepository } from "📚/repository/mod.ts";
-import { DateFormat, dateToBar } from "@sauber/dates";
+import { DateFormat, dateToBar } from "📚/tick/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { InvestorRanking } from "📚/ranking/investor-ranking.ts";
 import { Community, Investors } from "../community/mod.ts";

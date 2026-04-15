@@ -1,10 +1,14 @@
-import { AssetNames, Backend } from "@sauber/journal";
-import { DateFormat, diffDate, nextDate, today } from "@sauber/dates";
+import { AssetNames, Backend, JournaledAsset } from "@sauber/journal";
+import { DateFormat, diffDate, nextDate, Tick } from "📚/tick/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
-import { Bar } from "@sauber/backtest";
 import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
-import { Account } from "../account/mod.ts";
+import { Account } from "📚/account/mod.ts";
+import { Chart } from "📚/repository/chart.ts";
+import { ChartResults } from "@sauber/etoro-investors";
+import { assertGreater } from "@std/assert/greater";
+import { assertGreaterOrEqual } from "@std/assert";
+import { createMutex } from "@117/mutex";
 
 export type Names = Set<string>;
 export type Investors = Array<Investor>;
@@ -78,6 +82,41 @@ export class Community {
     return null;
   }
 
+  private _chartStart: DateFormat | undefined;
+  private readonly start_lock = createMutex();
+  /** Earliest date in any chart */
+  // TODO: This is still loaded too many times. Convert to singleton.
+  public async chartStart(): Promise<DateFormat> {
+    if (this._chartStart) return this._chartStart;
+    await this.start_lock.acquire();
+    try {
+      if (this._chartStart) return this._chartStart;
+
+      console.log("Finding earliest chart date...");
+      const folderStart: DateFormat | null = await this.start();
+      if (!folderStart) throw new Error("No start date found in repo");
+      let chartStart: DateFormat | undefined;
+      const names: Names = await this.namesByDate(folderStart);
+      for (const UserName of names) {
+        const chartAsset = new JournaledAsset<ChartResults>(
+          UserName + ".chart",
+          this.repo,
+        );
+        // TODO: Read all charts in parallel
+        const lastData: ChartResults = await chartAsset.retrieve(folderStart);
+        const chart = new Chart(lastData);
+        const first = chart.start;
+        if (!chartStart || first < chartStart) chartStart = first;
+      }
+      if (!chartStart) throw new Error("No chart start date found");
+      this._chartStart = chartStart;
+      return chartStart;
+    } finally {
+      this.start_lock.release();
+    }
+    // return this._chartStart;
+  }
+
   /** The last directory where names exists */
   public async end(): Promise<DateFormat | null> {
     const dates: Dates = await this.dates();
@@ -87,14 +126,15 @@ export class Community {
     return null;
   }
 
-  /** Test if investor is active at bar */
+  /** Test if investor is active at tick */
   private async activeName(
     username: string,
     date: DateFormat,
   ): Promise<boolean> {
     const investor = await this.investor(username);
-    const bar: Bar = diffDate(date, today());
-    return investor.isActive(bar);
+    const chartStart: DateFormat = await this.chartStart();
+    const tick: Tick = diffDate(chartStart, date);
+    return investor.isActive(tick);
   }
 
   /** Names of investors where date is within active range */
@@ -115,8 +155,15 @@ export class Community {
   public async investor(username: string): Promise<Investor> {
     const key = username.toLowerCase();
     if (!(key in this._loaded)) {
-      const assembly = new InvestorAssembly(username, this.repo);
-      this._loaded[key] = await assembly.investor();
+      const start: DateFormat = await this.chartStart();
+      const assembly = new InvestorAssembly(username, this.repo, start);
+      const investor: Investor = await assembly.investor();
+      assertGreaterOrEqual(investor.start, 0);
+      assertGreater(investor.end, investor.start);
+      console.log(
+        `Loaded investor ${username} with chart range [${investor.start};${investor.end}]`,
+      );
+      this._loaded[key] = investor;
     }
     return this._loaded[key];
   }

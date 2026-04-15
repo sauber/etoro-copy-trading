@@ -8,8 +8,9 @@ import { type Input, input_labels, type Output } from "📚/ranking/types.ts";
 import { Community } from "📚/community/mod.ts";
 import { Train } from "📚/ranking/train.ts";
 import { Dashboard } from "@sauber/ml-cli-dashboard";
-import { Bar } from "@sauber/backtest";
+import { Tick } from "@sauber/backtest";
 import { Ranking } from "📚/ranking/mod.ts";
+import { Timeline } from "📚/tick/mod.ts";
 
 export class InvestorRanking implements Ranking {
   public static readonly assetName = "ranking.network";
@@ -17,7 +18,10 @@ export class InvestorRanking implements Ranking {
   public model?: Model;
 
   // TODO: model should be private
-  constructor(private readonly repo: Backend) {
+  constructor(
+    private readonly repo: Backend,
+    private readonly ticker: Timeline,
+  ) {
     this.asset = new Asset<NetworkData>(InvestorRanking.assetName, this.repo);
   }
 
@@ -42,13 +46,16 @@ export class InvestorRanking implements Ranking {
   /** Predicted future Score for an investor */
   public predict(
     investor: Investor,
-    bar: Bar,
+    tick: Tick,
   ): number {
     if (!this.model) {
       throw new Error("Error: Model not defined, cannot predict.");
     }
-    const input: Input = new Features(investor).input(bar);
+    const input: Input = new Features(investor, this.ticker).input(tick);
     const prediction: Output = this.model.predict(input);
+    // if (isNaN(prediction)) throw new Error("Error: Output is not a number.");
+    // console.log({ input, prediction });
+    // Deno.exit(42);
     return prediction;
   }
 
@@ -56,7 +63,8 @@ export class InvestorRanking implements Ranking {
     if (!this.model) throw new Error("Error: Model not defined, cannot train.");
     const community: Community = new Community(this.repo);
     const investors = await community.all();
-    const train = new Train(this.model, investors);
+    const start = await community.chartStart();
+    const train = new Train(this.model, investors, start);
     const dashboard: Dashboard = train.dashboard;
     const baseline: number = train.validate();
     train.run(dashboard);

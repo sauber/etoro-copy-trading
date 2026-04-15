@@ -1,19 +1,19 @@
-import { Exchange, Simulation, Strategy } from "@sauber/backtest";
+import { Backtest, Market, Strategy } from "@sauber/backtest";
 import {
   IntegerParameter,
   Maximize,
   Parameter,
   Status,
 } from "@sauber/optimize";
-
 import {
-  buildStrategy,
   createTimer,
-  inputParameters,
   Rater,
+  strategy,
+  strategyParameters,
 } from "📚/strategy/mod.ts";
 import { score as calculateScore } from "📚/simulation/mod.ts";
 import { type Limits, limits } from "📚/signal/mod.ts";
+import { DateFormat, Tick } from "📚/tick/mod.ts";
 
 // Numerical result of simulation
 type Score = number;
@@ -45,7 +45,7 @@ const makeParameters = (limits: Limits): Parameters =>
 /** Create strategy from settings and calculate score of simulation */
 export class Optimize {
   // Limits from strategy and timing
-  private readonly strategyLimits: Limits = inputParameters;
+  private readonly strategyLimits: Limits = strategyParameters;
   private readonly timerLimits: Limits = limits;
 
   // Keys of strategy and timing parameters
@@ -72,8 +72,10 @@ export class Optimize {
   public best: Settings = {};
 
   constructor(
-    private readonly exchange: Exchange,
+    private readonly market: Market,
     private readonly ranker: Rater,
+    private readonly startDate: DateFormat,
+    private readonly spread: number,
   ) {}
 
   /** Random values from parameters */
@@ -117,7 +119,7 @@ export class Optimize {
     );
 
     const timer: Rater = createTimer(timerSettings);
-    return buildStrategy(strategySettings, this.ranker, timer);
+    return strategy(strategySettings, this.ranker, timer, this.startDate, 0);
   }
 
   /** Run simulation from input parameters and return score */
@@ -125,7 +127,14 @@ export class Optimize {
     settings: Settings,
   ): Score {
     const strategy: Strategy = this.strategy(settings);
-    const simulation = new Simulation(this.exchange, strategy);
+    const initial_cash: number = 100000;
+    const simulation = new Backtest(
+      this.market,
+      strategy,
+      initial_cash,
+      this.spread,
+      this.spread,
+    );
     simulation.run();
     return calculateScore(simulation);
   }

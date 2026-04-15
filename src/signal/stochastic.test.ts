@@ -1,10 +1,10 @@
-import { createTestInstrument, Series } from "@sauber/backtest";
+import { makeInstrument, Series } from "@sauber/backtest";
 import { limits, signal as stochastic } from "./stochastic.ts";
 import { assert } from "@std/assert";
 
 Deno.test("Stochastic Oscillator Signal", () => {
   // Test chart
-  const chart = createTestInstrument(70);
+  const chart = makeInstrument(70);
 
   // Generate signals from chart
   const values = {

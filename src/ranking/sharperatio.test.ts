@@ -1,11 +1,11 @@
 import { assertNotEquals } from "@std/assert";
-import { Series, Price } from "@sauber/backtest";
+import { Series } from "@sauber/backtest";
 import { randn } from "@sauber/statistics";
 import { sharpe_ratio } from "./sharperatio.ts";
 
 function makeSeries(count: number): Series {
   const chart = Array<number>(count);
-  let price: Price = 1000 * Math.random();
+  let price: number = 1000 * Math.random();
   for (let i = 0; i < count; i++) {
     const change = (randn() - 0.5) / 5;
     price *= 1 + change;

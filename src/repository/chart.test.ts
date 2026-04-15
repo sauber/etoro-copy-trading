@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import type { ChartResults } from "@sauber/etoro-investors";
-import { type DateFormat, diffDate, today } from "@sauber/dates";
+import { type DateFormat, diffDate, today } from "📚/tick/mod.ts";
 import { Chart } from "./chart.ts";
 import { testAssets } from "./testdata.ts";
 
@@ -33,6 +33,6 @@ Deno.test("Values", () => {
 Deno.test("maxAge", () => {
   const age: number = diffDate(end, today());
   console.log(`maxAge: ${age}`);
-  assertEquals(new Chart(chartData, {maxAge: age}).validate(), true);
-  assertEquals(new Chart(chartData, {maxAge: age-1}).validate(), false);
+  assertEquals(new Chart(chartData, { maxAge: age }).validate(), true);
+  assertEquals(new Chart(chartData, { maxAge: age - 1 }).validate(), false);
 });

@@ -3,39 +3,40 @@ import {
   assertEquals,
   assertInstanceOf,
 } from "@std/assert";
-import { community } from "📚/ranking/testdata.ts";
+import { chartStart, community } from "📚/ranking/testdata.ts";
 import { Features } from "📚/ranking/features.ts";
 import type { Input, Output } from "📚/ranking/types.ts";
-import { DateFormat, dateToBar } from "@sauber/dates";
-import { Bar } from "@sauber/backtest";
+import { DateFormat, Timeline } from "📚/tick/mod.ts";
+import { Tick } from "@sauber/backtest";
 
 const investor = await community.investor("Robier89");
+const ticker = new Timeline(chartStart);
 
 Deno.test("Initialization", () => {
-  const rank = new Features(investor);
+  const rank = new Features(investor, ticker);
   assertInstanceOf(rank, Features);
 });
 
 Deno.test("Input at oldest date", () => {
-  const rank = new Features(investor);
+  const rank = new Features(investor, ticker);
   const date: DateFormat = investor.stats.start;
-  const bar: Bar = dateToBar(date);
-  const features: Input = rank.input(bar);
+  const tick: Tick = ticker.tick(date);
+  const features: Input = rank.input(tick);
   assertEquals(features.Gain, 50.53);
 });
 
 Deno.test("Input at most recent date", () => {
-  const rank = new Features(investor);
+  const rank = new Features(investor, ticker);
   const date: DateFormat = investor.stats.end;
-  const bar: Bar = dateToBar(date);
-  const features: Input = rank.input(bar);
+  const tick: Tick = ticker.tick(date);
+  const features: Input = rank.input(tick);
   assertEquals(features.Gain, 31.86);
 });
 
 Deno.test("Output", () => {
-  const rank = new Features(investor);
+  const rank = new Features(investor, ticker);
   const date: DateFormat = investor.stats.start;
-  const bar: Bar = dateToBar(date);
-  const output: Output = rank.output(bar);
-  assertAlmostEquals(output, 2.19, 0.01);
+  const tick: Tick = ticker.tick(date);
+  const output: Output = rank.output(tick);
+  assertAlmostEquals(output, 2.04, 0.01);
 });

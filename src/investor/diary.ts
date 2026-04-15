@@ -1,4 +1,4 @@
-import type { DateFormat } from "@sauber/dates";
+import type { DateFormat } from "📚/tick/mod.ts";
 
 /** Collection of same objects from various dates */
 export class Diary<T> {

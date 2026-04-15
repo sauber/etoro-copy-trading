@@ -1,4 +1,4 @@
-import { Bar, Instrument, Series } from "@sauber/backtest";
+import { Instrument, Series, Tick } from "@sauber/backtest";
 import { Diary } from "📚/investor/diary.ts";
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
 
@@ -11,12 +11,12 @@ export class Investor extends Instrument {
     public readonly mirrors: Diary<Mirror[]>,
     public readonly stats: Diary<StatsExport>,
   ) {
-    super(chart.series, chart.end, UserName, FullName);
+    super(chart.series, chart.start, UserName, FullName);
   }
 
   /** Confirm if investor has chart data at this bar */
-  public isActive(bar: Bar): boolean {
-    return this.has(bar);
+  public isActive(tick: Tick): boolean {
+    return this.has(tick);
   }
 
   /** Is Fund? */
@@ -60,8 +60,7 @@ export class Investor extends Instrument {
 
     // Slice series
     const target = source.slice(start, end);
-    const endBar: Bar = this.end + source.length - end;
 
-    return this.derived(new Instrument(target, endBar));
+    return this.derived(new Instrument(target, start, this.UserName));
   }
 }

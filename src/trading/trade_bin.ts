@@ -1,17 +1,13 @@
 import { Table } from "@cliffy/table";
-
-import { StrategyContext } from "@sauber/backtest";
 import { DataFrame } from "@sauber/dataframe";
-import { type DateFormat } from "@sauber/dates";
-import {
-  Classifier,
-  Context,
-  loadTimer,
-  ParameterData,
-  Rater,
-} from "📚/strategy/mod.ts";
+import { loadTimer, Rater } from "📚/strategy/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
+import { Context, ParameterData } from "./context.ts";
+import { DateFormat, Tick } from "📚/tick/mod.ts";
+import { Amount, Instrument, Portfolio } from "@sauber/backtest";
+import { candidates } from "📚/strategy/orders.ts";
+import { investor } from "📚/ranking/testdata.ts";
 
 const start: number = performance.now();
 
@@ -19,22 +15,27 @@ const start: number = performance.now();
 const path: string = Deno.args[0];
 const repo = makeRepository(path);
 let loader: Context | null = new Context(repo);
+const tick: Tick = await loader.tradingTick();
 
 // Models
-const ranker: Rater = await loadRanker(repo);
-const timer: Rater = await loadTimer(repo);
+const ranking: Rater = await loadRanker(repo);
+const timing: Rater = await loadTimer(repo);
 
 // Strategy Context
-const situation: StrategyContext = await loader.strategyContext();
+// const situation: StrategyContext = await loader.strategyContext();
 
 // Settings
 const settings: ParameterData = await loader.settings();
 const tradingDate: DateFormat = await loader.tradingDate();
 const username: string = await loader.username();
-const available: number = (await loader.tradingInstruments()).length;
+const instruments: Instrument[] = await loader.tradingInstruments();
+const value: Amount = await loader.value();
+const portfolio: Portfolio = await loader.portfolio();
 
 // Loading finished, free cache memory
 loader = null;
+
+const money = (amount: Amount): number => parseFloat(amount.toFixed(2));
 
 // Print settings
 const snap: number = performance.now();
@@ -48,30 +49,63 @@ const weekday = [
   "Saturday",
 ];
 const table: Table = new Table(
-  ["Loading", Math.round(snap - start) + " ms", "Investors", available],
+  [
+    "Loading",
+    Math.round(snap - start) + " ms",
+    "Investors",
+    instruments.length,
+  ],
   ["Account", username, "Position Size", settings.position_size],
   ["Trading Day", weekday[settings.weekday], "Trading Date", tradingDate],
   ["Stoploss", settings.stoploss, "Limit", settings.limit],
-  ["Amount", situation.value.toFixed(2), "Cash", situation.amount.toFixed(2)],
+  ["Amount", money(value), "Cash", "TBD"],
 );
 table.render();
 
-const classifier = new Classifier(
-  situation,
-  ranker,
-  timer,
-  settings.position_size,
-);
-const records = classifier.records;
-// console.log(records);
-const df = DataFrame.fromRecords(records);
-df
-  .select((r) => r["Action"] != undefined)
-  .sort("Timing", false)
-  .sort("Rank", false)
-  .sort("Value")
-  .sort("Sell")
-  .sort("Buy", false)
-  .scale("Gain", 100).rename({ "Gain": "Gain%" })
-  .digits(2)
-  .print("Candidates");
+// const classifier = new Classifier(
+//   situation,
+//   ranker,
+//   timer,
+//   settings.position_size,
+// );
+// const records = classifier.records;
+// // console.log(records);
+
+const investors = candidates({
+  instruments,
+  positions: portfolio.positions,
+  ranking,
+  timing,
+  tick,
+  target: value * settings.position_size,
+  stoploss: settings.stoploss,
+});
+// const df = DataFrame.fromRecords(records);
+// df
+//   .select((r) => r["Action"] != undefined)
+//   .sort("Timing", false)
+//   .sort("Rank", false)
+//   .sort("Value")
+//   .sort("Sell")
+//   .sort("Buy", false)
+//   .scale("Gain", 100).rename({ "Gain": "Gain%" })
+//   .digits(2)
+//   .print("Candidates");
+
+const pct = (amount: number): number =>
+  parseFloat((100 * amount).toPrecision(3));
+
+const records = investors.map((i) => ({
+  Name: i.instrument.symbol,
+  Ranking: parseFloat(ranking(i.instrument, tick).toPrecision(2)),
+  Timing: parseFloat(i.timing.toPrecision(2)),
+  Action: i.action,
+  Invested: i.invested > 0 ? money(i.invested) : undefined,
+  Value: i.invested > 0 ? money(i.value) : undefined,
+  "Gain%": i.invested > 0 ? pct(i.gain) : undefined,
+  Buy: i.isBuy ? money(i.buy) : undefined,
+}));
+
+const df: DataFrame = DataFrame.fromRecords(records);
+df.select((r) => r.Action !== "Skip").sort("Timing", false)
+  .sort("Value").sort("Buy", false).print("Candidates");
