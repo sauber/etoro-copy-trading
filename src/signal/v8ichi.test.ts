@@ -34,7 +34,7 @@ Deno.test("V8 Ichi Signal", () => {
     rsi_slow_period: 26,
   };
 
-  const signals: Series = v8ichi(chart.series, optimized);
+  const signals: Series = v8ichi(chart.series, optimized, "symbol");
 
   // console.log(linechart(Array.from(signals), 11, 72));
 
