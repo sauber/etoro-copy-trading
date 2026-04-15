@@ -103,7 +103,11 @@ export class Signal {
     //     `Not enough data to generate signal, need at least ${this.min_ticks} ticks, ${instrument.symbol} has ${instrument.series.length}`,
     //   );
     // }
-    const signals: Series = signal(instrument.series, this.values);
+    const signals: Series = signal(
+      instrument.series,
+      this.values,
+      instrument.symbol,
+    );
     const result = new Instrument(
       signals,
       instrument.start,

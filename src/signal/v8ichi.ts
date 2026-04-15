@@ -1,9 +1,10 @@
 import { EMA, RSI } from "@debut/indicators";
-import { Series } from "@sauber/backtest";
+import { Instrument, Series } from "@sauber/backtest";
 import { Limits } from "./indicator.ts";
 import { EWO } from "../indicator/ewo.ts";
 import { HMA } from "../indicator/hma.ts";
 import { assert } from "@std/assert";
+import { instruments } from "@sauber/etoro-investors";
 
 export const limits: Limits = {
   low_offset: { min: 0.9, max: 0.99, default: 0.987 },
@@ -35,11 +36,14 @@ const min_ticks = (values: Input): number =>
     values.rsi_slow_period,
   );
 
+/** caching of hma series */
+const HMA_cache: Record<string, Series> = {};
+
 /**
  * V8ichi Strategy
  * A strategy combining EMA, HMA, EWO, and RSI for trend following and mean reversion.
  */
-function v8ichi(series: Series, values: Input): Series {
+function v8ichi(series: Series, values: Input, symbol: string): Series {
   const {
     low_offset,
     high_offset,
@@ -89,7 +93,12 @@ function v8ichi(series: Series, values: Input): Series {
   //     "Series length must be at least as long as the longest indicator period",
   //   );
   // }
-  const hma_full = HMA(series_array, hma_period);
+  // const hma_full = HMA(series_array, hma_period);
+  const hma_cache_key: string = symbol + "+" + hma_period;
+  if (!(hma_cache_key in HMA_cache)) {
+    HMA_cache[hma_cache_key] = new Float32Array(HMA(series_array, hma_period));
+  }
+  const hma_full = HMA_cache[hma_cache_key];
 
   // Pre-calculate EWO for the entire series
   const ewo_full = EWO(series_array, ewo_fast_period, ewo_slow_period);
