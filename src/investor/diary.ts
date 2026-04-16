@@ -1,85 +1,85 @@
-import type { DateFormat } from "📚/tick/mod.ts";
+import type { Tick } from "📚/tick/mod.ts";
 
-/** Collection of same objects from various dates */
+/** Collection of same objects from various ticks */
 export class Diary<T> {
-  /** Sorted list of dates where data is available */
-  public readonly dates: DateFormat[];
+  /** Sorted list of ticks where data is available */
+  public readonly ticks: Tick[];
 
-  constructor(private readonly cards: Record<DateFormat, T>) {
-    this.dates = Object.keys(cards).sort();
+  constructor(private readonly cards: Record<Tick, T>) {
+    this.ticks = Object.keys(cards).map(Number).sort((a, b) => a - b);
   }
 
-  /** Throw Error if no dates are available */
+  /** Throw Error if no ticks are available */
   private validate(): void {
-    if (this.dates.length < 1) {
-      throw new Error("Data is not available at any date");
+    if (this.ticks.length < 1) {
+      throw new Error("Data is not available at any tick");
     }
   }
 
-  /** First date */
-  public get start(): DateFormat {
+  /** First tick */
+  public get start(): Tick {
     this.validate();
-    return this.dates[0];
+    return this.ticks[0];
   }
 
-  /** Last date */
-  public get end(): DateFormat {
+  /** Last tick */
+  public get end(): Tick {
     this.validate();
-    return this.dates[this.dates.length - 1];
+    return this.ticks[this.ticks.length - 1];
   }
 
-  /** Data at first date */
+  /** Data at first tick */
   public get first(): T {
     this.validate();
     return this.cards[this.start];
   }
 
-  /** Data at first date */
+  /** Data at first tick */
   public get last(): T {
     this.validate();
     return this.cards[this.end];
   }
 
-  /** Data on date */
-  public on(date: DateFormat): T {
+  /** Data on specific tick */
+  public on(tick: Tick): T {
     this.validate();
-    if (date in this.cards) return this.cards[date];
-    throw new Error(`Asset on ${date} doesn't exist`);
+    if (tick in this.cards) return this.cards[tick];
+    throw new Error(`Asset on tick ${tick} doesn't exist`);
   }
 
-  /** Find most recent data at or before date */
-  public before(date: DateFormat): T {
+  /** Find most recent data at or before tick */
+  public before(tick: Tick): T {
     this.validate();
-    if (date < this.start) {
+    if (tick < this.start) {
       throw new Error(
-        `Searching for asset before ${date} but first date is ${this.start}`,
+        `Searching for asset before ${tick} but first tick is ${this.start}`,
       );
     }
-    for (const d of [...this.dates].reverse()) {
-      if (d <= date) return this.cards[d];
+    for (const d of [...this.ticks].reverse()) {
+      if (d <= tick) return this.cards[d];
     }
 
-    console.log({ date, dates: this.dates, start: this.start, end: this.end });
+    console.log({ tick, ticks: this.ticks, start: this.start, end: this.end });
     throw new Error("This code should never be reached");
   }
 
-  /** Find oldest data at or after date */
-  public after(date: DateFormat): T {
+  /** Find oldest data at or after tick */
+  public after(tick: Tick): T {
     this.validate();
-    if (date > this.end) {
+    if (tick > this.end) {
       throw new Error(
-        `Searching for asset after ${date} but last date is ${this.end}`,
+        `Searching for asset after ${tick} but last tick is ${this.end}`,
       );
     }
-    for (const d of this.dates) {
-      if (d >= date) return this.cards[d];
+    for (const d of this.ticks) {
+      if (d >= tick) return this.cards[d];
     }
 
-    console.log({ date, dates: this.dates, start: this.start, end: this.end });
+    console.log({ tick, ticks: this.ticks, start: this.start, end: this.end });
     throw new Error("This code should never be reached");
   }
 
-  public get export(): Record<DateFormat, T> {
+  public get export(): Record<Tick, T> {
     return this.cards;
   }
 }

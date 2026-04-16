@@ -21,13 +21,13 @@ export class Investor extends Instrument {
 
   /** Is Fund? */
   public get isFund(): boolean {
-    if (this.stats.dates.length < 1) return false;
+    if (this.stats.ticks.length < 1) return false;
     return this.stats.last.IsFund;
   }
 
   /** Is Popular Investor? */
   public get isPopularInvestor(): boolean {
-    if (this.stats.dates.length < 1) return false;
+    if (this.stats.ticks.length < 1) return false;
     return this.stats.last.PopularInvestor;
   }
 

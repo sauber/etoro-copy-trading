@@ -1,5 +1,5 @@
 import { Investor } from "📚/investor/mod.ts";
-import { type DateFormat, Timeline } from "📚/tick/mod.ts";
+// import { type DateFormat, Timeline } from "📚/tick/mod.ts";
 import { Ranking } from "📚/ranking/mod.ts";
 import { Tick } from "@sauber/backtest";
 
@@ -9,13 +9,13 @@ type Series = Float16Array;
 /** Cache results from Ranking Model */
 export class RankingCache implements Ranking {
   private readonly cache: Map<string, Series> = new Map();
-  private readonly ticker: Timeline;
+  // private readonly ticker: Timeline;
 
   constructor(
     private readonly backend: Ranking,
-    private readonly start: DateFormat,
+    // private readonly start: DateFormat,
   ) {
-    this.ticker = new Timeline(this.start);
+    // this.ticker = new Timeline(this.start);
   }
 
   /**
@@ -26,9 +26,10 @@ export class RankingCache implements Ranking {
   /** Find first and last date refering to same stats, translate to ticks */
   private range(investor: Investor, tick: Tick): Range {
     // Dates are sorted from oldest to newest, and so are ticks
-    const ticks: Tick[] = investor.stats.dates.map((date: DateFormat) =>
-      this.ticker.tick(date)
-    );
+    // const ticks: Tick[] = investor.stats.dates.map((date: DateFormat) =>
+    //   this.ticker.tick(date)
+    // );
+    const ticks = investor.stats.ticks;
     let range: Range = [tick, tick];
     for (const b of ticks) {
       if (b > tick) {

@@ -33,8 +33,9 @@ export const test_timing: Rater = (instr: Instrument, _tick: Tick) => {
 
 const ranker: Rater = test_ranking;
 const timer: Rater = test_timing;
-const start: DateFormat = "2022-04-25";
-const timeline = new Timeline(start);
+const startDate: DateFormat = "2022-04-25";
+const timeline = new Timeline(startDate);
+const start = 0;
 const futureDays: number = 30;
 
 Deno.test("Instance", () => {
@@ -118,7 +119,7 @@ Deno.test("Sell Orders", () => {
   const timer: Rater = () => 1;
 
   // Configure strategy
-  const strategy: Strategy = trading(p, ranker, timer, startDate, 180);
+  const strategy: Strategy = trading(p, ranker, timer, start, 180);
 
   // Create positions
   const positions: OpenPosition[] = makeMarket(3, 700).instruments.map((

@@ -1,4 +1,3 @@
-import { type DateFormat, diffDate, nextDate } from "📚/tick/mod.ts";
 import { Backend, JournaledAsset } from "@sauber/journal";
 import type {
   ChartResults,
@@ -7,6 +6,7 @@ import type {
 } from "@sauber/etoro-investors";
 import { Instrument, Tick } from "@sauber/backtest";
 
+import { type DateFormat, diffDate, nextDate, Timeline } from "📚/tick/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";
 
 import { Trimmer } from "./trimmer.ts";
@@ -70,7 +70,7 @@ export class InvestorAssembly {
   constructor(
     public readonly UserName: string,
     readonly repo: Backend,
-    private readonly marketstart: DateFormat,
+    private readonly timeline: Timeline,
   ) {
     this.chartAsset = new JournaledAsset<ChartResults>(
       this.UserName + ".chart",
@@ -378,27 +378,38 @@ export class InvestorAssembly {
 
   /** Generate investor object from raw data */
   private generate(data: InvestorExport, series: number[]): Investor {
-    const chartstart = nextDate(data.chartend, 1 - data.chart.length);
-    const start: Tick = diffDate(this.marketstart, chartstart);
-    // console.log("generate investor dates", {
-    //   marketstart: this.marketstart,
-    //   chartstart,
-    //   chartend: data.chartend,
-    //   start,
-    //   length: series.length,
-    // });
+    const chartStart: DateFormat = nextDate(
+      data.chartend,
+      1 - data.chart.length,
+    );
+    const start: Tick = this.timeline.tick(chartStart);
     const chart = new Instrument(
       new Float32Array(series),
       start,
       this.UserName,
     );
+
+    // Convert dates to ticks
+    const mirrors: Record<Tick, Mirror[]> = Object.fromEntries(
+      Object.entries(data.mirrors).map(([date, value]) => [
+        this.timeline.tick(date),
+        value,
+      ]),
+    );
+    const stats: Record<Tick, StatsExport> = Object.fromEntries(
+      Object.entries(data.stats).map(([date, value]) => [
+        this.timeline.tick(date),
+        value,
+      ]),
+    );
+
     return new Investor(
       this.UserName,
       data.customerid,
       data.fullname,
       chart,
-      new Diary(data.mirrors),
-      new Diary(data.stats),
+      new Diary(mirrors),
+      new Diary(stats),
     );
   }
 

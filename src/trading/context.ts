@@ -30,7 +30,7 @@ type CacheValue =
   | BuyOrder[]
   | SellOrder
   | SellOrder[]
-  | DateFormat
+  | Tick
   | Instrument
   | Instrument[]
   | Investor
@@ -77,9 +77,9 @@ export class Context {
     if (this._timeline !== null) return this._timeline;
     await this.timeline_lock.acquire();
     try {
-      if (this._timeline !== null) return this._timeline;
-      const chartStart: DateFormat = await this.community.chartStart();
-      this._timeline = new Timeline(chartStart);
+      // if (this._timeline !== null) return this._timeline;
+      // const chartStart: DateFormat = await this.community.chartStart();
+      this._timeline = await this.community.timeline();
       return this._timeline;
     } finally {
       this.timeline_lock.release();
@@ -107,31 +107,33 @@ export class Context {
   }
 
   /** First date of community data */
-  private start(): Promise<DateFormat> {
-    return this.cache<DateFormat>(
+  private start(): Promise<Tick> {
+    return this.cache<Tick>(
       "start",
-      async () => (await this.community.start()) as DateFormat,
+      async () => (await this.community.start()),
     );
   }
 
   /** Last date of community data */
-  private end(): Promise<DateFormat> {
-    return this.cache<DateFormat>(
+  private end(): Promise<Tick> {
+    return this.cache<Tick>(
       "end",
-      async () => (await this.community.end()) as DateFormat,
+      async () => (await this.community.end()),
     );
   }
 
   /** Identify date of trading */
   private readonly tradingDate_lock = createMutex();
   private _tradingDate: DateFormat | null = null;
-  public async tradingDate(): Promise<DateFormat> {
+  private async tradingDate(): Promise<DateFormat> {
     if (this._tradingDate !== null) return this._tradingDate;
     await this.tradingDate_lock.acquire();
     try {
       if (this._tradingDate !== null) return this._tradingDate;
       // console.log("Loading TradingDate");
-      const repoEnd: DateFormat = await this.end();
+      const repoEnd: Tick = await this.end();
+      const timeline = await this.timeline();
+      const repoEndDate: DateFormat = timeline.date(repoEnd);
       // Desired day of week fo trading
       const weekday: number = (await this.settings()).weekday;
       // const tradingDate: DateFormat = repoEnd
@@ -139,11 +141,13 @@ export class Context {
       //   : NOW;
       // Most recent date with data for trading day of week, upto DELAY days before end of repo
       // Day of week for end of repo
-      const repoEndWeekday: number = repoEnd ? new Date(repoEnd).getDay() : 0;
+      const repoEndWeekday: number = repoEndDate
+        ? new Date(repoEndDate).getDay()
+        : 0;
       // Number of days to subtract from repo end to get to desired weekday
       const daysToSubtract: number = (repoEndWeekday - weekday + 7) % 7;
       // Trading date is repo end minus days to subtract
-      const tradingDate: DateFormat = nextDate(repoEnd, -daysToSubtract);
+      const tradingDate: DateFormat = nextDate(repoEndDate, -daysToSubtract);
       this._tradingDate = tradingDate;
       return tradingDate;
     } finally {
@@ -231,11 +235,11 @@ export class Context {
       if (this._mirrors !== null) return this._mirrors;
 
       // Resolve mirrors
-      const trading: DateFormat = await this.tradingDate();
+      const trading: Tick = await this.tradingTick();
       const journal: Journal = await this.mirrorJournal();
-      const dates: Array<DateFormat> = journal.dates;
-      const start: DateFormat = dates[0];
-      const recent: DateFormat = dates.findLast((d) => d <= trading) || start;
+      const ticks: Array<Tick> = journal.ticks;
+      const start: Tick = ticks[0];
+      const recent: Tick = ticks.findLast((d) => d <= trading) || start;
       const mirrors: Mirrors = journal.before(recent);
       // console.log("Mirrors loaded from date", recent, mirrors.length);
       this._mirrors = mirrors;
@@ -245,17 +249,17 @@ export class Context {
     }
   }
 
-  /** Start date of position.
+  /** Start tick of position.
    * If previous list of mirrors exists, and mirror is missing, then assume it was opened here.
    * Otherwise assume opened at beginning of time.
    */
-  private positionStart(username: string): Promise<DateFormat> {
-    return this.cache<DateFormat>(
+  private positionStart(username: string): Promise<Tick> {
+    return this.cache<Tick>(
       "start_" + username,
       async () => {
-        const trading = await this.tradingDate();
-        const journal = await this.mirrorJournal();
-        const priorDates: Array<DateFormat> = journal.dates
+        const trading: Tick = await this.tradingTick();
+        const journal: Journal = await this.mirrorJournal();
+        const priorDates: Array<Tick> = journal.ticks
           .filter((d) => d < trading).reverse();
         if (priorDates) {
           // Find first date where mirror is no longer included
@@ -266,7 +270,7 @@ export class Context {
           }
           // No opening date found
         }
-        const start: DateFormat = await this.start();
+        const start: Tick = await this.start();
         return start;
       },
     );
@@ -311,14 +315,13 @@ export class Context {
           return investor;
         } else {
           // Create placeholder instrument
-          const start: DateFormat = await this.start();
-          const end: DateFormat = await this.end();
-          const series: Series = new Float32Array(diffDate(start, end) + 1)
-            .fill(10000);
-          const timeline: Timeline = await this.timeline();
-          const startChart: DateFormat = timeline.date(0);
-          const startTick: Tick = diffDate(startChart, start);
-          return new Instrument(series, startTick, username, "Placeholder");
+          const start: Tick = await this.start();
+          const end: Tick = await this.end();
+          const series: Series = new Float32Array(end - start + 1).fill(10000);
+          // const timeline: Timeline = await this.timeline();
+          // const startChart: DateFormat = timeline.date(0);
+          // const startTick: Tick = diffDate(startChart, start);
+          return new Instrument(series, start, username, "Placeholder");
         }
       },
     );
@@ -326,17 +329,17 @@ export class Context {
 
   /** Position for mirror */
   // private positionid: PositionID = 0;
-  private async position(
+  private position(
     username: string,
     amount: Amount,
   ): Promise<OpenPosition> {
-    const timeline = await this.timeline();
+    // const timeline = await this.timeline();
     return this.cache<OpenPosition>(
       "position_" + username,
       async () => {
         const instrument = await this.instrument(username);
-        const startDate: DateFormat = await this.positionStart(username);
-        const startTick: Tick = timeline.tick(startDate);
+        const startTick: Tick = await this.positionStart(username);
+        // const startTick: Tick = timeline.tick(startDate);
         const endTick: Tick = instrument.end;
         // console.log({
         //   startDate,
@@ -451,9 +454,9 @@ export class Context {
     return this.cache<Instrument[]>(
       "trading_instruments",
       async () => {
-        const tradingDate: DateFormat = await this.tradingDate();
-        const activeDate: DateFormat = nextDate(tradingDate, -DELAY);
-        const names: Names = await this.community.active(activeDate);
+        const tradingTick: Tick = await this.tradingTick();
+        const activeTick: Tick = tradingTick - DELAY;
+        const names: Names = await this.community.active(activeTick);
         return this.instruments(names);
       },
     );

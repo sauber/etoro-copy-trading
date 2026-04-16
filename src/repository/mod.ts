@@ -3,6 +3,8 @@ export * from "📚/repository/portfolio.ts";
 export * from "📚/repository/stats.ts";
 export * from "📚/repository/discover.ts";
 export * from "📚/repository/types.ts";
+export * from "📚/repository/investor-assembly.ts";
+
 export type { Mirror } from "📚/repository/portfolio.ts";
 
 import { Backend, CachingBackend, DiskBackend } from "@sauber/journal";

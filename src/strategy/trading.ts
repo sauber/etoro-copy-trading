@@ -5,16 +5,15 @@ import {
   OpenPosition,
   Order,
   Portfolio,
-  Position,
   SellOrder,
   Strategy,
   Tick,
 } from "@sauber/backtest";
-import { DateFormat } from "📚/tick/mod.ts";
+// import { DateFormat } from "📚/tick/mod.ts";
 import { Backend } from "@sauber/journal";
 import { Config } from "📚/config/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
-import { Community } from "📚/community/mod.ts";
+// import { Community } from "📚/community/mod.ts";
 import { CachedSignal, Settings, Signal } from "📚/signal/mod.ts";
 import { candidates, MultiPosition } from "📚/strategy/orders.ts";
 import { Candidate } from "📚/strategy/candidate.ts";
@@ -147,7 +146,7 @@ export const trading = (
   // Close or Open signal of instrument
   timer: Rater,
   // First date of simulation
-  start: DateFormat,
+  start: Tick,
   // Number of days in chart required after current tick
   futureDays: number,
 ): Strategy => {
@@ -367,9 +366,10 @@ export async function loadStrategy(repo: Backend): Promise<Strategy> {
     loadTimer(repo),
   ]);
 
-  const community = new Community(repo);
-  const start: DateFormat | null = await community.chartStart();
-  if (!start) throw new Error("No first chart date found");
+  // const community = new Community(repo);
+  // const start: DateFormat | null = await community.chartStart();
+  // if (!start) throw new Error("No first chart date found");
+  const start: Tick = 0;
 
   return trading(settings, ranker, timer, start, 180);
 }

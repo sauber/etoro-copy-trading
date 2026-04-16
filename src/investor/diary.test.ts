@@ -1,5 +1,5 @@
 import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert";
-import type { DateFormat } from "📚/tick/mod.ts";
+import type { Tick } from "📚/tick/mod.ts";
 import { Diary } from "📚/investor/diary.ts";
 
 type TestData = {
@@ -7,13 +7,13 @@ type TestData = {
   id: number;
 };
 
-const testdata: Record<DateFormat, TestData> = {
-  "2024-01-11": { name: "bar", id: 2 },
-  "2024-01-09": { name: "foo", id: 1 },
+const testdata: Record<Tick, TestData> = {
+  20240111: { name: "bar", id: 2 },
+  20240109: { name: "foo", id: 1 },
 };
-const dates: DateFormat[] = Object.keys(testdata).sort();
-const start: DateFormat = dates[0];
-const end: DateFormat = dates[dates.length - 1];
+const ticks: Tick[] = Object.keys(testdata).map(Number).sort((a, b) => a - b);
+const start: Tick = ticks[0];
+const end: Tick = ticks[ticks.length - 1];
 
 Deno.test("Blank Initialization", () => {
   const diary = new Diary<TestData>({});
@@ -25,9 +25,9 @@ Deno.test("Validate", () => {
   assertThrows(() => diary.start);
 });
 
-Deno.test("Dates", () => {
+Deno.test("Ticks", () => {
   const diary = new Diary<TestData>(testdata);
-  assertEquals(diary.dates, dates);
+  assertEquals(diary.ticks, ticks);
   assertEquals(diary.start, start);
   assertEquals(diary.end, end);
 });
@@ -38,8 +38,15 @@ Deno.test("First and last data", () => {
   assertEquals(diary.last, testdata[end]);
 });
 
-Deno.test("Data before and after date", () => {
+Deno.test("Data before and after tick", () => {
   const diary = new Diary<TestData>(testdata);
   assertEquals(diary.before(start), testdata[start]);
   assertEquals(diary.after(end), testdata[end]);
+});
+
+Deno.test("Confirm ticks are sorted by smallest first", () => {
+  const diary = new Diary<TestData>(testdata);
+  const ticks: Tick[] = diary.ticks;
+  const sorted: Tick[] = Object.keys(testdata).map(Number);
+  assertEquals(ticks, sorted);
 });

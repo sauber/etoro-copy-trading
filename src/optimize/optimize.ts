@@ -119,7 +119,8 @@ export class Optimize {
     );
 
     const timer: Rater = createTimer(timerSettings);
-    return strategy(strategySettings, this.ranker, timer, this.startDate, 0);
+    const start: Tick = 0;
+    return strategy(strategySettings, this.ranker, timer, start, 0);
   }
 
   /** Run simulation from input parameters and return score */

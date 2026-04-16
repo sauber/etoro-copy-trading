@@ -5,8 +5,8 @@ import { Instrument, Tick } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
 import { Ranking } from "📚/ranking/mod.ts";
 import { RankingCache } from "./ranking-cache.ts";
-import { DateFormat, Timeline } from "📚/tick/mod.ts";
-import { Community } from "📚/community/mod.ts";
+// import { DateFormat, Timeline } from "📚/tick/mod.ts";
+// import { Community } from "📚/community/mod.ts";
 
 /** Given a Ranking model, create callback to evaluate instrument at bar */
 export function createRanker(ranking: Ranking): Rater {
@@ -29,11 +29,11 @@ export function createRanker(ranking: Ranking): Rater {
 
 /** Load model from repo and create ranker */
 export async function loadRanker(repo: Backend): Promise<Rater> {
-  const start: DateFormat = await (new Community(repo).chartStart());
-  const ticker = new Timeline(start);
-  const rankingModel = new InvestorRanking(repo, ticker);
+  // const start: DateFormat = await (new Community(repo).chartStart());
+  // const ticker = new Timeline(start);
+  const rankingModel = new InvestorRanking(repo);
   await rankingModel.load();
-  const cacher: Ranking = new RankingCache(rankingModel, start);
+  const cacher: Ranking = new RankingCache(rankingModel);
   const ranker: Rater = createRanker(cacher);
   return ranker;
 }

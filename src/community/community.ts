@@ -1,14 +1,15 @@
-import { AssetNames, Backend, JournaledAsset } from "@sauber/journal";
-import { DateFormat, diffDate, nextDate, Tick } from "📚/tick/mod.ts";
-import { Investor } from "📚/investor/mod.ts";
-import { InvestorAssembly } from "📚/repository/investor-assembly.ts";
 import shuffleArray from "@hugoalh/shuffle-array";
-import { Account } from "📚/account/mod.ts";
-import { Chart } from "📚/repository/chart.ts";
-import { ChartResults } from "@sauber/etoro-investors";
-import { assertGreater } from "@std/assert/greater";
-import { assertGreaterOrEqual } from "@std/assert";
+import { assertGreater, assertGreaterOrEqual } from "@std/assert";
 import { createMutex } from "@117/mutex";
+import { AssetNames, Backend, JournaledAsset } from "@sauber/journal";
+import { ChartResults } from "@sauber/etoro-investors";
+
+import { DateFormat, nextDate, Tick } from "📚/tick/mod.ts";
+import { Investor } from "📚/investor/mod.ts";
+import { Chart, InvestorAssembly } from "📚/repository/mod.ts";
+import { Account } from "📚/account/mod.ts";
+import { Timeline } from "📚/tick/timeline.ts";
+import { time } from "node:console";
 
 export type Names = Set<string>;
 export type Investors = Array<Investor>;
@@ -31,7 +32,7 @@ export class Community {
   }
 
   /** Identify all investor names on a date */
-  public async namesByDate(date: DateFormat): Promise<Names> {
+  private async namesByDate(date: DateFormat): Promise<Names> {
     const assets: AssetNames = await (await this.repo.sub(date)).names();
     const valid = /(chart|portfolio|stats)$/;
 
@@ -46,8 +47,13 @@ export class Community {
     // Don't include portfolio owner
     const owner: string = await this.owner();
     names.delete(owner);
-    // return Array.from(names);
     return names;
+  }
+
+  /** List of investor names available at tick */
+  public async namesByTick(tick: Tick): Promise<Names> {
+    const date = (await this.timeline()).date(tick);
+    return this.namesByDate(date);
   }
 
   /** Unique set of names across all dates */
@@ -74,26 +80,34 @@ export class Community {
   }
 
   /** The first directory where names exists */
-  public async start(): Promise<DateFormat | null> {
+  private async startDate(): Promise<DateFormat> {
     const dates: Dates = await this.dates();
     for (const date of [...dates]) {
       if ((await this.namesByDate(date)).size) return date;
     }
-    return null;
+    // return null;
+    throw new Error("No community start date");
   }
 
-  private _chartStart: DateFormat | undefined;
-  private readonly start_lock = createMutex();
+  /** The first tick where names exists */
+  public async start(): Promise<Tick> {
+    const timeline = await this.timeline();
+    const date = await this.startDate();
+    return timeline.tick(date);
+  }
+
+  private _timeline: Timeline | undefined;
+  private readonly _timeline_lock = createMutex();
   /** Earliest date in any chart */
   // TODO: This is still loaded too many times. Convert to singleton.
-  public async chartStart(): Promise<DateFormat> {
-    if (this._chartStart) return this._chartStart;
-    await this.start_lock.acquire();
+  public async timeline(): Promise<Timeline> {
+    if (this._timeline) return this._timeline;
+    await this._timeline_lock.acquire();
     try {
-      if (this._chartStart) return this._chartStart;
+      if (this._timeline) return this._timeline;
 
       console.log("Finding earliest chart date...");
-      const folderStart: DateFormat | null = await this.start();
+      const folderStart: DateFormat | null = await this.startDate();
       if (!folderStart) throw new Error("No start date found in repo");
       let chartStart: DateFormat | undefined;
       const names: Names = await this.namesByDate(folderStart);
@@ -109,36 +123,45 @@ export class Community {
         if (!chartStart || first < chartStart) chartStart = first;
       }
       if (!chartStart) throw new Error("No chart start date found");
-      this._chartStart = chartStart;
-      return chartStart;
+      this._timeline = new Timeline(chartStart);
+      return this._timeline;
     } finally {
-      this.start_lock.release();
+      this._timeline_lock.release();
     }
-    // return this._chartStart;
   }
 
   /** The last directory where names exists */
-  public async end(): Promise<DateFormat | null> {
+  private async endDate(): Promise<DateFormat> {
     const dates: Dates = await this.dates();
     for (const date of [...dates].reverse()) {
       if ((await this.namesByDate(date)).size) return date;
     }
-    return null;
+    // return null;
+    throw new Error("No community end date");
   }
 
-  /** Test if investor is active at tick */
+  /** Last tick where name exists */
+  public async end(): Promise<Tick> {
+    const endDate: DateFormat = await this.endDate();
+    const timeline = await this.timeline();
+    return timeline.tick(endDate);
+  }
+
+  /** Test if investor is active at date */
   private async activeName(
     username: string,
     date: DateFormat,
   ): Promise<boolean> {
     const investor = await this.investor(username);
-    const chartStart: DateFormat = await this.chartStart();
-    const tick: Tick = diffDate(chartStart, date);
+    const timeline = await this.timeline();
+    const tick = timeline.tick(date);
     return investor.isActive(tick);
   }
 
   /** Names of investors where date is within active range */
-  public async active(date: DateFormat): Promise<Names> {
+  public async active(tick: Tick): Promise<Names> {
+    const timeline = await this.timeline();
+    const date = timeline.date(tick);
     const allNames: Names = await this.allNames();
     const validVector: Array<boolean> = await Promise.all(
       allNames.values().map((name) => this.activeName(name, date)),
@@ -155,8 +178,10 @@ export class Community {
   public async investor(username: string): Promise<Investor> {
     const key = username.toLowerCase();
     if (!(key in this._loaded)) {
-      const start: DateFormat = await this.chartStart();
-      const assembly = new InvestorAssembly(username, this.repo, start);
+      // const start: DateFormat = await this.chartStart();
+      const timeline = await this.timeline();
+      // const start: DateFormat = timeline.date(0);
+      const assembly = new InvestorAssembly(username, this.repo, timeline);
       const investor: Investor = await assembly.investor();
       assertGreaterOrEqual(investor.start, 0);
       assertGreater(investor.end, investor.start);
@@ -189,7 +214,7 @@ export class Community {
 
   /** Investors on latest date */
   public async latest(): Promise<Investors> {
-    const end: DateFormat | null = await this.end();
+    const end: DateFormat | null = await this.endDate();
     if (!end) return [];
     // Charts are two days old
     const chartend: DateFormat = nextDate(end, -2);

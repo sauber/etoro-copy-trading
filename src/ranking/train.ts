@@ -82,7 +82,7 @@ export class Train {
   constructor(
     private readonly model: Model,
     private readonly investors: Investors,
-    private readonly start: DateFormat,
+    // private readonly start: DateFormat,
     params: Partial<Train> = {},
   ) {
     Object.assign(this, params);
@@ -91,7 +91,7 @@ export class Train {
   private _data?: DataFrame;
   public trainingdata(): DataFrame {
     if (!this._data) {
-      this._data = new TrainingData(this.tick_count, this.start).generate(
+      this._data = new TrainingData(this.tick_count).generate(
         this.investors,
       );
     }

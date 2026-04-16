@@ -9,30 +9,36 @@ import {
 } from "@std/assert";
 
 import { Investor } from "📚/investor/mod.ts";
+import { DateFormat, nextDate } from "📚/tick/mod.ts";
 
 import { InvestorAssembly, type InvestorExport } from "./investor-assembly.ts";
 import { repo } from "./testdata.ts";
 import type { InvestorId } from "./types.ts";
-import { today } from "📚/tick/mod.ts";
+import { Timeline } from "📚/tick/timeline.ts";
 
 // Test Data
 const username = "Schnaub123";
 const customerid = 2792934;
-const now = today();
+const startDate: DateFormat = "2020-12-01";
+const timeline = new Timeline(nextDate(startDate, -1));
 
 Deno.test("Blank Initialization", () => {
-  const assembly: InvestorAssembly = new InvestorAssembly(username, repo, now);
+  const assembly: InvestorAssembly = new InvestorAssembly(
+    username,
+    repo,
+    timeline,
+  );
   assertInstanceOf(assembly, InvestorAssembly);
 });
 
 Deno.test("UserName", () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const name: string = assembly.UserName;
   assertEquals(name, username);
 });
 
 Deno.test("Caching", async () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const _investor: Investor = await assembly.investor();
   const asset = new JournaledAsset<InvestorExport>(
     username + ".compiled",
@@ -42,19 +48,19 @@ Deno.test("Caching", async () => {
 });
 
 Deno.test("CustomerId", async () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const investor: Investor = await assembly.investor();
   assertEquals(investor.CustomerID, customerid);
 });
 
 Deno.test("FullName", async () => {
-  const assembly = new InvestorAssembly("hech123", repo, now);
+  const assembly = new InvestorAssembly("hech123", repo, timeline);
   const investor: Investor = await assembly.investor();
   assertEquals(investor.FullName, "Martin Stewart Henshaw");
 });
 
 Deno.test("Chart", async () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const investor: Investor = await assembly.investor();
   const chart: Instrument = investor;
   const series: Series = chart.series;
@@ -64,27 +70,17 @@ Deno.test("Chart", async () => {
 });
 
 Deno.test("Stats", async () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const investor: Investor = await assembly.investor();
   const stats = investor.stats;
-  assertEquals(stats.dates, [
-    "2022-02-05",
-    "2022-02-12",
-    "2022-04-18",
-    "2022-04-25",
-  ]);
+  assertEquals(stats.ticks, [432, 439, 504, 511]);
 });
 
 Deno.test("Mirrors", async () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const investor: Investor = await assembly.investor();
   const mirrors = investor.mirrors;
-  assertEquals(mirrors.dates, [
-    "2022-02-05",
-    "2022-02-12",
-    "2022-04-18",
-    "2022-04-25",
-  ]);
+  assertEquals(mirrors.ticks, [432, 439, 504, 511]);
   const mirror: InvestorId[] = mirrors.last;
   for (const id in mirror) {
     assertNotEquals(id, "");
@@ -92,7 +88,7 @@ Deno.test("Mirrors", async () => {
 });
 
 Deno.test("Test Investor", async () => {
-  const assembly = new InvestorAssembly(username, repo, now);
+  const assembly = new InvestorAssembly(username, repo, timeline);
   const investor: Investor = await assembly.testInvestor();
   assertInstanceOf(investor, Investor);
   const chart: Instrument = investor;

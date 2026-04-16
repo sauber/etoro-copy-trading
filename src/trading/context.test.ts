@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { Backend, HeapBackend } from "@sauber/journal";
-import { DateFormat } from "📚/tick/mod.ts";
+import { DateFormat, Tick } from "📚/tick/mod.ts";
 import { Instrument, Portfolio } from "@sauber/backtest";
 
 import { makeTestRepository } from "../repository/mod.ts";
@@ -22,10 +22,10 @@ Deno.test("Settings", async () => {
   assertInstanceOf(settings, Object);
 });
 
-Deno.test("Trading Date", async () => {
+Deno.test("Trading Tick", async () => {
   const context = new Context(repo);
-  const date: DateFormat = await context.tradingDate();
-  assertEquals(date, "2022-04-25");
+  const tick: Tick = await context.tradingTick();
+  assertEquals(tick, 510);
 });
 
 Deno.test("Trading Tick", async () => {

@@ -1,4 +1,4 @@
-import { type DateFormat, Timeline } from "📚/tick/mod.ts";
+// import { Timeline } from "📚/tick/mod.ts";
 import { Series, Tick } from "@sauber/backtest";
 import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
@@ -10,17 +10,17 @@ import { score } from "📚/ranking/score.ts";
 export class Features {
   constructor(
     private readonly investor: Investor,
-    private readonly ticker: Timeline,
+    // private readonly ticker: Timeline,
   ) {}
 
   /** Prediction input parameters */
   public input(tick: Tick): Input {
-    if (this.investor.stats.dates.length < 1) {
+    if (this.investor.stats.ticks.length < 1) {
       throw new Error(`Investor ${this.investor.UserName} has no stats`);
     }
-    const date: DateFormat = this.ticker.date(tick);
-    const values: StatsExport = (date && this.investor.stats.start <= date)
-      ? this.investor.stats.before(date)
+    // const date: DateFormat = this.ticker.date(tick);
+    const values: StatsExport = (this.investor.stats.start <= tick)
+      ? this.investor.stats.before(tick)
       : this.investor.stats.first;
 
     return Object.fromEntries(
