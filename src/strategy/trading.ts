@@ -17,6 +17,10 @@ import { loadRanker } from "📚/ranking/mod.ts";
 import { CachedSignal, Settings, Signal } from "📚/signal/mod.ts";
 import { candidates, MultiPosition } from "📚/strategy/orders.ts";
 import { Candidate } from "📚/strategy/candidate.ts";
+import { Weekday } from "📚/tick/mod.ts";
+import { Timeline } from "📚/tick/timeline.ts";
+import { time } from "node:console";
+import { Community } from "📚/community/mod.ts";
 
 // Count of days investor data is behind trading date
 export const DELAY = 2;
@@ -145,15 +149,15 @@ export const trading = (
   ranker: Rater,
   // Close or Open signal of instrument
   timer: Rater,
-  // First date of simulation
-  start: Tick,
+  // Which day of week is first date of simulation, ie. tick=0
+  startWeekDay: Weekday,
   // Number of days in chart required after current tick
   futureDays: number,
 ): Strategy => {
   validation(settings);
 
   // First day in simulation, which weekday is it?
-  const startWeekDay: number = new Date(start).getDay();
+  // const startWeekDay: number = new Date(start).getDay();
   // console.log({ startWeekDay });
 
   const strategy: Strategy = (
@@ -201,6 +205,7 @@ export const trading = (
     // if (close.length > 0) console.log("Stoploss closing length", close.length);
 
     // No more decisions to open or close if not trading day, but still close positions that hit stoploss
+    // if (!isTradingDay) console.log("Not trading day");
     if (!isTradingDay) return close;
 
     const totalValue = cash + portfolio.value(tick);
@@ -356,22 +361,17 @@ export async function saveSettings(
 
 /** Strategy with parameters and models loaded from repository */
 export async function loadStrategy(repo: Backend): Promise<Strategy> {
-  // const config = new Config(repo);
-  // const settings = await config.get(assetName) as Input;
-  // const ranker: Rater = await loadRanker(repo);
-  // const timer: Rater = await loadTimer(repo);
   const [settings, ranker, timer] = await Promise.all([
     loadSettings(repo),
     loadRanker(repo),
     loadTimer(repo),
   ]);
 
-  // const community = new Community(repo);
-  // const start: DateFormat | null = await community.chartStart();
-  // if (!start) throw new Error("No first chart date found");
-  const start: Tick = 0;
+  const community = new Community(repo);
+  const timeline: Timeline = await community.timeline();
+  const startWeekday: Weekday = timeline.weekday(0);
 
-  return trading(settings, ranker, timer, start, 180);
+  return trading(settings, ranker, timer, startWeekday, 180);
 }
 
 /** Create a prediction wrapper */

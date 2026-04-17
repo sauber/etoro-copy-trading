@@ -17,7 +17,7 @@ import {
   Strategy,
   Tick,
 } from "@sauber/backtest";
-import { DateFormat, Timeline, today } from "📚/tick/mod.ts";
+import { DateFormat, Timeline } from "📚/tick/mod.ts";
 
 // Calculate a dummy ranking score based on length of username.
 export const test_ranking: Rater = (instr: Instrument, _tick: Tick) => {
@@ -36,6 +36,7 @@ const timer: Rater = test_timing;
 const startDate: DateFormat = "2022-04-25";
 const timeline = new Timeline(startDate);
 const start = 0;
+const startWeekDay = timeline.weekday(start);
 const futureDays: number = 30;
 
 Deno.test("Instance", () => {
@@ -45,7 +46,7 @@ Deno.test("Instance", () => {
     limit: 1,
     weekday: 1,
   };
-  const strategy: Strategy = trading(p, ranker, timer, start, 180);
+  const strategy: Strategy = trading(p, ranker, timer, startWeekDay, 180);
   assertInstanceOf(strategy, Function);
 });
 
@@ -56,7 +57,7 @@ Deno.test("Parameter out of range", () => {
     limit: 1,
     weekday: 0,
   };
-  assertThrows(() => trading(p, ranker, timer, start, 180));
+  assertThrows(() => trading(p, ranker, timer, startWeekDay, 180));
 });
 
 Deno.test("Empty Orders", () => {
@@ -66,7 +67,7 @@ Deno.test("Empty Orders", () => {
     limit: 1,
     weekday: 1,
   };
-  const strategy: Strategy = trading(p, ranker, timer, start, 180);
+  const strategy: Strategy = trading(p, ranker, timer, startWeekDay, 180);
   const orders: Order[] = strategy(0, 1000, [], new Portfolio());
   assertEquals(orders.length, 0);
 });
@@ -81,7 +82,13 @@ Deno.test("Buy Orders", () => {
   };
   const ranker: Rater = () => 1;
   const timer: Rater = () => -1;
-  const strategy: Strategy = trading(p, ranker, timer, start, futureDays);
+  const strategy: Strategy = trading(
+    p,
+    ranker,
+    timer,
+    startWeekDay,
+    futureDays,
+  );
   const market: Market = makeMarket(3, 700);
   const chartStart: Tick = Math.max(...market.instruments.map((i) => i.start));
   const tradingday: Tick = timeline.nextWeekday(chartStart, p.weekday);
@@ -100,7 +107,7 @@ Deno.test("Buy Orders", () => {
 
 Deno.test("Sell Orders", () => {
   // First date in market (tick=0), and day of week
-  const startDate: DateFormat = today();
+  // const startDate: DateFormat = today();
   // const startWeekday: number = new Date(startDate).getDay();
 
   // Weekday where trading happens
@@ -119,7 +126,7 @@ Deno.test("Sell Orders", () => {
   const timer: Rater = () => 1;
 
   // Configure strategy
-  const strategy: Strategy = trading(p, ranker, timer, start, 180);
+  const strategy: Strategy = trading(p, ranker, timer, startWeekDay, 180);
 
   // Create positions
   const positions: OpenPosition[] = makeMarket(3, 700).instruments.map((
@@ -152,20 +159,22 @@ Deno.test("Sell Orders", () => {
   const lastOpenTick = Math.max(
     ...portfolio.positions.map((position) => position.start),
   );
-  const lastOpenDate = new Date();
-  lastOpenDate.setDate(new Date(startDate).getDate() + lastOpenTick);
-  const lastOpenWeekday: number = lastOpenDate.getDay();
+  // const lastOpenDate = new Date();
+  // lastOpenDate.setDate(new Date(startDate).getDate() + lastOpenTick);
+  const lastOpenDate = timeline.date(lastOpenTick);
+  const lastOpenWeekday: number = timeline.weekday(lastOpenTick);
 
   // Number of days until the next trading day after most recent position open
   const daysUntilTrading: number = 1 + (8 - weekday - lastOpenWeekday) % 7;
   const tradingTick = lastOpenTick + daysUntilTrading;
-  const tradingDate = new Date();
-  tradingDate.setDate(new Date(startDate).getDate() + tradingTick);
+  const tradingDate = timeline.date(tradingTick);
+  // tradingDate.setDate(new Date(startDate).getDate() + tradingTick);
   // const tradingWeekday: number = tradingDate.getDay();
+  const tradingWeekday = timeline.weekday(tradingTick);
 
   // console.log({
   //   startDate,
-  //   startWeekday,
+  //   // startWeekday,
   //   weekday,
   //   lastOpenTick,
   //   lastOpenDate,

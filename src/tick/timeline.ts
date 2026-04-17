@@ -1,6 +1,7 @@
 import { Tick } from "@sauber/backtest";
 
 export type DateFormat = string;
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /** Number of ticks between dates */
 export const diffDate = (start: DateFormat, end: DateFormat): number => {
@@ -63,10 +64,16 @@ export class Timeline {
     return this._dates[tick];
   }
 
+  /** Which day of week is tick */
+  public weekday(tick: Tick): Weekday {
+    const date = new Date(this.date(tick));
+    const currentWeekday = date.getDay() as Weekday;
+    return currentWeekday;
+  }
+
   /** Tick of next occurrence of a specific weekday */
   public nextWeekday(tick: Tick, weekday: number): Tick {
-    const date = new Date(this.date(tick));
-    const currentWeekday = date.getDay();
+    const currentWeekday: Weekday = this.weekday(tick);
     const daysUntilNext = (weekday - currentWeekday + 7) % 7 || 7;
     return tick + daysUntilNext;
   }
