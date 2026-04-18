@@ -1,8 +1,7 @@
 import { Instrument, Series, Tick } from "@sauber/backtest";
 import { Backend } from "@sauber/journal";
-import { Config } from "../config/config.ts";
+import { Config } from "📚/config/config.ts";
 import { limits, signal } from "./indicator.ts";
-import { DELAY } from "📚/strategy/mod.ts";
 
 // TODO: Move to stochastic.ts and be specific about each key required
 export type Settings = Record<string, number>;
@@ -122,6 +121,6 @@ export class Signal {
   public predict(instrument: Instrument, tick: Tick): number {
     const chart: Instrument = this.generate(instrument);
     // Prices are delayed for two ticks
-    return chart.price(tick - DELAY);
+    return chart.price(tick);
   }
 }

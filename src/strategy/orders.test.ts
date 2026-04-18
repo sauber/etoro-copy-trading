@@ -1,6 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { Instrument, makeInstrument } from "@sauber/backtest";
 import { candidates } from "./orders.ts";
+import { DELAY } from "📚/strategy/mod.ts";
 
 Deno.test("candidates - returns empty array when no instruments", () => {
   const result = candidates({
@@ -23,7 +24,7 @@ Deno.test("candidates - creates candidate for each instrument", () => {
     positions: [],
     ranking: () => 1,
     timing: () => 0.5,
-    tick: Math.max(...instruments.map((i) => i.start)),
+    tick: DELAY + Math.max(...instruments.map((i) => i.start)),
     target: 1000,
     stoploss: 0.8,
   });
@@ -39,7 +40,7 @@ Deno.test("candidates - applies ranking to target amount", () => {
     positions: [],
     ranking: () => 0.5,
     timing: () => 0.5,
-    tick: Math.max(...instruments.map((i) => i.start)),
+    tick: DELAY + Math.max(...instruments.map((i) => i.start)),
     target: 1000,
     stoploss: 0.8,
   });

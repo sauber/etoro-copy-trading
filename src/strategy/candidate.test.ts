@@ -6,6 +6,7 @@ import {
   makeInstrument,
   OpenPosition,
 } from "@sauber/backtest";
+import { DELAY } from "📚/strategy/mod.ts";
 
 const amount: Amount = 500;
 const instrument: Instrument = makeInstrument(100);
@@ -90,7 +91,8 @@ Deno.test("Candidate - Calculate gain", () => {
   });
   assertAlmostEquals(
     candidate.gain,
-    instrument.price(instrument.end) / instrument.price(instrument.start) - 1,
+    instrument.price(instrument.end - DELAY) /
+        instrument.price(instrument.start) - 1,
   );
 });
 
@@ -105,7 +107,8 @@ Deno.test("Candidate - Calculate value", () => {
   });
   assertAlmostEquals(
     candidate.value,
-    500 * instrument.price(instrument.end) / instrument.price(instrument.start),
+    500 * instrument.price(instrument.end - DELAY) /
+      instrument.price(instrument.start),
   );
 });
 
@@ -115,7 +118,7 @@ Deno.test("Candidate - Calculate buying gap", () => {
     positions,
     target: 1000,
     timing: -0.5,
-    tick: instrument.start,
+    tick: DELAY + instrument.start,
     stoploss: 0.1,
   });
   assertAlmostEquals(candidate.buy, 250);
@@ -127,7 +130,7 @@ Deno.test("Candidate - Calculate no-buying gap", () => {
     positions,
     target: 1000,
     timing: 0.5,
-    tick: instrument.start,
+    tick: DELAY + instrument.start,
     stoploss: 0.1,
   });
   assertEquals(candidate.buy, 0);

@@ -1,9 +1,9 @@
 import { EMA, RSI } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
-import { Limits } from "./indicator.ts";
-import { EWO } from "../indicator/ewo.ts";
-import { HMA } from "../indicator/hma.ts";
 import { assert } from "@std/assert";
+import { EWO } from "📚/indicator/ewo.ts";
+import { HMA } from "📚/indicator/hma.ts";
+import { Limits } from "./indicator.ts";
 
 export const limits: Limits = {
   low_offset: { min: 0.9, max: 0.99, default: 0.987 },
