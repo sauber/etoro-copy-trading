@@ -29,8 +29,8 @@ console.log(`${instruments.length} instruments loaded for simulation`);
 
 const spread: number = 0.001;
 const market: Market = new Market(instruments);
-const chartStart: DateFormat = await community.chartStart();
-const timeline = new Timeline(chartStart);
+// const chartStart: DateFormat = await community.chartStart();
+// const timeline = new Timeline(chartStart);
 const initial_cash: Amount = 1000;
 
 // Run Simulation
@@ -42,6 +42,7 @@ simulation.run();
 const currency = (x: number): number => parseFloat(x.toFixed(2));
 
 // Display transactions
+const timeline = await community.timeline();
 const transactions = simulation.transactions;
 const rows: Array<
   [DateFormat, DateFormat, number, string, number, number, string]

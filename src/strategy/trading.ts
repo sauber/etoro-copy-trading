@@ -178,8 +178,10 @@ export const trading = (
       else bundle[symbol].positions.push(position);
     }
 
-    // List of instruments as Set
-    const instrumentSet = new Set<Instrument>(instruments);
+    // List of available instruments as Set
+    const instrumentSet = new Set<Instrument>(
+      instruments.filter((instrument) => instrument.start <= (tick - DELAY)),
+    );
 
     // Positions to close
     const close: SellOrder[] = [];
@@ -198,8 +200,11 @@ export const trading = (
         // Instrument no longer available for opening
         instrumentSet.delete(multiPosition.instrument);
       } else {
-        // Positions not automatically closed by stoploss, so still avilable
+        // Positions not automatically closed by stoploss, so still available
+        // Only available if price date is in range
+        // if (multiPosition.start >= (tick + DELAY)) {
         remainingPositions.push(...multiPosition.positions);
+        // }
       }
     });
     // if (close.length > 0) console.log("Stoploss closing length", close.length);

@@ -73,7 +73,7 @@ export class Context {
   /** Map of ticks and dates */
   private readonly timeline_lock = createMutex();
   private _timeline: Timeline | null = null;
-  private async timeline(): Promise<Timeline> {
+  public async timeline(): Promise<Timeline> {
     if (this._timeline !== null) return this._timeline;
     await this.timeline_lock.acquire();
     try {

@@ -23,7 +23,9 @@ import { DateFormat } from "📚/tick/mod.ts";
 const path: string = Deno.args[0];
 const repo = makeRepository(path);
 const community: Community = new TestCommunity(repo);
-const chartStart: DateFormat = await community.chartStart();
+// const chartStart: DateFormat = await community.chartStart();
+const timeline = await community.timeline();
+const chartStart: DateFormat = timeline.date(0);
 
 // Load a sample of random investors
 async function investors(count: number): Promise<Instrument[]> {

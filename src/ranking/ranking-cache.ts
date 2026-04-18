@@ -50,16 +50,12 @@ export class RankingCache implements Ranking {
     if (series) return series;
 
     // const created: Series = [];
-    const created: Series = new Float16Array(investor.length);
+    const start: Tick = investor.start;
+    const end: Tick = investor.stats.end;
+    const length: number = end - start + 1;
+    const created: Series = new Float16Array(length);
     // console.log(
-    //   "Create new blank series for",
-    //   investor.UserName,
-    //   "length",
-    //   created.length,
-    //   "start",
-    //   investor.start,
-    //   "end",
-    //   investor.end,
+    //   `Create new ranking series length ${length} for ${investor.UserName} [${start};${end}]`,
     // );
     this.cache.set(key, created);
     return created;
@@ -75,14 +71,23 @@ export class RankingCache implements Ranking {
   /** Lookup value from series, or fill if missing */
   private value(investor: Investor, tick: Tick): number {
     const series: Series = this.series(investor);
-    const index: number = tick - investor.start;
+    let index: number = tick - investor.start;
+    if (index > (series.length - 1)) index = series.length - 1;
     if (series[index] === undefined || series[index] === 0) {
       const value = this.backend.predict(investor, tick);
       const range = this.range(investor, tick);
       // Shift range to offset of investor series
       const offset: Range = range.map((tick) => tick - investor.start) as Range;
-      // console.log({ range, offset, tick, value });
       this.fill(series, value, offset);
+      // console.log({
+      //   range,
+      //   offset,
+      //   tick,
+      //   value,
+      //   length: series.length,
+      //   index,
+      //   lookup: series[index],
+      // });
     }
     return series[index];
   }
@@ -91,6 +96,7 @@ export class RankingCache implements Ranking {
   public predict(investor: Investor, tick: Tick): number {
     const value = this.value(investor, tick);
     if (isNaN(value)) {
+      // console.log(investor);
       throw new Error(
         `NaN ranking for ${investor.UserName} at tick ${tick} with range ${
           this.range(investor, tick)

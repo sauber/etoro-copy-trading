@@ -1,5 +1,6 @@
 import { Amount, Instrument, OpenPosition } from "@sauber/backtest";
 import { Tick } from "📚/tick/mod.ts";
+import { DELAY } from "📚/strategy/mod.ts";
 
 /** Export data examples
  * TODO: Field names and types need to be finalized
@@ -94,7 +95,7 @@ export class Candidate {
     this.positions = p.positions;
     this.target = p.target;
     this.timing = p.timing;
-    this.tick = p.tick;
+    this.tick = p.tick - DELAY; // Prices are delayed
     this.stoploss = p.stoploss;
 
     // First position opened at tick, and how many ticks since then

@@ -4,10 +4,9 @@ import { loadTimer, Rater } from "📚/strategy/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
 import { Context, ParameterData } from "./context.ts";
-import { DateFormat, Tick } from "📚/tick/mod.ts";
+import { DateFormat, Tick, Timeline } from "📚/tick/mod.ts";
 import { Amount, Instrument, Portfolio } from "@sauber/backtest";
 import { candidates } from "📚/strategy/orders.ts";
-import { investor } from "📚/ranking/testdata.ts";
 
 const start: number = performance.now();
 
@@ -26,7 +25,9 @@ const timing: Rater = await loadTimer(repo);
 
 // Settings
 const settings: ParameterData = await loader.settings();
-const tradingDate: DateFormat = await loader.tradingDate();
+const tradingTick: Tick = await loader.tradingTick();
+const timeline: Timeline = await loader.timeline();
+const tradingDate: DateFormat = timeline.date(tradingTick);
 const username: string = await loader.username();
 const instruments: Instrument[] = await loader.tradingInstruments();
 const value: Amount = await loader.value();
@@ -56,7 +57,12 @@ const table: Table = new Table(
     instruments.length,
   ],
   ["Account", username, "Position Size", settings.position_size],
-  ["Trading Day", weekday[settings.weekday], "Trading Date", tradingDate],
+  [
+    "Trading Day",
+    weekday[settings.weekday],
+    "Trading Date",
+    tradingDate + ` (tick ${tradingTick})`,
+  ],
   ["Stoploss", settings.stoploss, "Limit", settings.limit],
   ["Amount", money(value), "Cash", "TBD"],
 );
