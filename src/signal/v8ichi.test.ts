@@ -6,15 +6,6 @@ import { assert } from "@std/assert";
 Deno.test("V8 Ichi Signal", () => {
   // Test chart
   const chart = makeInstrument(400);
-  // console.log(linechart(Array.from(chart.series), 11, 72));
-
-  // Generate signals from chart
-  // const values = {
-  //   ewo_high: limits.ewo_high.default,
-  //   ewo_low: limits.ewo_low.default,
-  //   rsi_buy: limits.rsi_buy.default,
-  //   rsi_sell: limits.rsi_sell.default,
-  // };
 
   const optimized = {
     low_offset: 0.987,
@@ -35,8 +26,6 @@ Deno.test("V8 Ichi Signal", () => {
   };
 
   const signals: Series = v8ichi(chart.series, optimized, "symbol");
-
-  // console.log(linechart(Array.from(signals), 11, 72));
 
   // Confirm signal values are in range [-1, 1]
   signals.forEach((value, index) =>

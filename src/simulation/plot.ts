@@ -1,6 +1,6 @@
 import { Backtest, Series } from "@sauber/backtest";
 import { downsample } from "@sauber/statistics";
-import * as asciichart from "npm:asciichart";
+import * as asciichart from "asciichart";
 
 /** Plot cash and equity line charts */
 export function simulationPlot(

@@ -5,19 +5,14 @@ import { limits, signal } from "./indicator.ts";
 
 // TODO: Move to stochastic.ts and be specific about each key required
 export type Settings = Record<string, number>;
-// type Input = Record<keyof typeof inputParameters, number>;
 
 /** Calculate a series of buying and sell opportunity from instrument chart */
 export class Signal {
   /** Name of settings group in config asset */
   static readonly assetName = "signal";
 
-  /** Minimum number of ticks required for signal */
-  // public readonly min_ticks: number;
-
   constructor(private readonly values: Settings) {
     this.validate(values);
-    // this.min_ticks = min_ticks(values);
   }
 
   /** Confirm parameters are valid */
@@ -98,11 +93,6 @@ export class Signal {
 
   /** Generate signal from instrument */
   public generate(instrument: Instrument): Instrument {
-    // if (instrument.series.length < this.min_ticks) {
-    //   throw new Error(
-    //     `Not enough data to generate signal, need at least ${this.min_ticks} ticks, ${instrument.symbol} has ${instrument.series.length}`,
-    //   );
-    // }
     const signals: Series = signal(
       instrument.series,
       this.values,
@@ -120,7 +110,6 @@ export class Signal {
   /** Signal value at bar */
   public predict(instrument: Instrument, tick: Tick): number {
     const chart: Instrument = this.generate(instrument);
-    // Prices are delayed for two ticks
     return chart.price(tick);
   }
 }

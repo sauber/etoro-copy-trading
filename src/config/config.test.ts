@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { HeapBackend, type StorableValue } from "@sauber/journal";
-import { Config } from "📚/config/config.ts";
+import { Config } from "./config.ts";
 
 Deno.test("Get/Set", async (t) => {
   const repo = new HeapBackend();

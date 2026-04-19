@@ -8,3 +8,4 @@
 - Combine candiate.ts and orders.ts into one file
 - Rewrite Candidate class as function
 - Create fast indicators instead of using npm module
+- src/strategy/trading.test.ts fails occasionally in various ways

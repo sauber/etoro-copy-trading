@@ -1,6 +1,5 @@
 import { Backend } from "@sauber/journal";
 import { createMutex, Mutex } from "@117/mutex";
-import { DateFormat, diffDate, nextDate, Tick, Timeline } from "📚/tick/mod.ts";
 import {
   Amount,
   BuyOrder,
@@ -11,6 +10,8 @@ import {
   SellOrder,
   Series,
 } from "@sauber/backtest";
+
+import { DateFormat, nextDate, Tick, Timeline } from "📚/tick/mod.ts";
 import { Config } from "📚/config/mod.ts";
 import { Account } from "📚/account/mod.ts";
 import { Diary, Investor } from "📚/investor/mod.ts";

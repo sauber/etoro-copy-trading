@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf, assertThrows } from "@std/assert";
 import type { Tick } from "📚/tick/mod.ts";
-import { Diary } from "📚/investor/diary.ts";
+import { Diary } from "./diary.ts";
 
 type TestData = {
   name: string;

@@ -1,10 +1,11 @@
-// import { Timeline } from "📚/tick/mod.ts";
 import { Series, Tick } from "@sauber/backtest";
+
 import { Investor } from "📚/investor/mod.ts";
 import type { StatsExport } from "📚/repository/mod.ts";
-import { input_labels } from "📚/ranking/types.ts";
-import type { Input, Output } from "📚/ranking/types.ts";
-import { score } from "📚/ranking/score.ts";
+
+import { input_labels } from "./types.ts";
+import type { Input, Output } from "./types.ts";
+import { score } from "./score.ts";
 
 /** Extract features for Investor at Bar */
 export class Features {
@@ -18,7 +19,6 @@ export class Features {
     if (this.investor.stats.ticks.length < 1) {
       throw new Error(`Investor ${this.investor.UserName} has no stats`);
     }
-    // const date: DateFormat = this.ticker.date(tick);
     const values: StatsExport = (this.investor.stats.start <= tick)
       ? this.investor.stats.before(tick)
       : this.investor.stats.first;

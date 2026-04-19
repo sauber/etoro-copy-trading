@@ -5,7 +5,6 @@ import { Model } from "📚/ranking/model.ts";
 import { Investors } from "📚/community/mod.ts";
 import { TrainingData } from "📚/ranking/trainingdata.ts";
 import type { Input, Inputs, Outputs } from "📚/ranking/types.ts";
-import { DateFormat } from "📚/tick/mod.ts";
 
 // Dashboard size
 const WIDTH = 78;
@@ -82,7 +81,6 @@ export class Train {
   constructor(
     private readonly model: Model,
     private readonly investors: Investors,
-    // private readonly start: DateFormat,
     params: Partial<Train> = {},
   ) {
     Object.assign(this, params);
@@ -152,7 +150,6 @@ export class Train {
       : () => {};
 
     // Training
-    // console.log("Training...");
     const iterations = this.epochs;
     const results = this.model.train(
       inputs,

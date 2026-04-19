@@ -1,9 +1,10 @@
-import { Instrument, Series, Tick } from "@sauber/backtest";
-import { Investor } from "📚/investor/mod.ts";
-import { loadTimer, Rater } from "../strategy/mod.ts";
-import { Community } from "../community/mod.ts";
-import { makeRepository } from "../repository/mod.ts";
+import { Series, Tick } from "@sauber/backtest";
 import { linechart } from "@sauber/widgets";
+
+import { Investor } from "📚/investor/mod.ts";
+import { loadTimer, Rater } from "📚/strategy/mod.ts";
+import { Community } from "📚/community/mod.ts";
+import { makeRepository } from "📚/repository/mod.ts";
 
 // Display information about an investor
 
@@ -29,12 +30,8 @@ console.log(linechart(Array.from(investor.series), 15, 72));
 // Display buy/sell signal strength
 console.log("Signal (>0=sell, <0=buy):");
 const timer: Rater = await loadTimer(repo);
-// const instrument: Instrument = await community.investor(username);
 const start: Tick = investor.start;
 const end: Tick = investor.end;
-// console.log(`Signal for range [${investor.start};${investor.end}]`);
-// console.log(`Signal for range [${investor.start};${investor.end}]`);
-// console.log(instrument);
 const signals: Array<number> = [];
 for (let tick: Tick = start; tick <= end; tick++) {
   signals.push(timer(investor, tick));

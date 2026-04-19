@@ -5,14 +5,16 @@ import {
   Market,
   Strategy,
 } from "@sauber/backtest";
-import { loadStrategy } from "../strategy/mod.ts";
-import { Names, TestCommunity } from "../community/mod.ts";
-import { makeRepository } from "../repository/mod.ts";
 import { Backend } from "@sauber/journal";
 import { Table } from "@sauber/table";
-import { DateFormat, Timeline } from "📚/tick/mod.ts";
-import { simulationPlot } from "📚/simulation/plot.ts";
-import { score } from "📚/simulation/score.ts";
+
+import { loadStrategy } from "📚/strategy/mod.ts";
+import { Names, TestCommunity } from "📚/community/mod.ts";
+import { makeRepository } from "📚/repository/mod.ts";
+import { DateFormat } from "📚/tick/mod.ts";
+
+import { simulationPlot } from "./plot.ts";
+import { score } from "./score.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -29,8 +31,6 @@ console.log(`${instruments.length} instruments loaded for simulation`);
 
 const spread: number = 0.001;
 const market: Market = new Market(instruments);
-// const chartStart: DateFormat = await community.chartStart();
-// const timeline = new Timeline(chartStart);
 const initial_cash: Amount = 1000;
 
 // Run Simulation
@@ -56,11 +56,8 @@ const rows: Array<
   // Number of days open
   t.end - t.start,
   t.instrument.symbol,
-  // t.Price as number,
-  // t.Amount as number,
   currency(t.invested),
   currency(t.profit),
-  // t.Value as number,
   t.reason,
 ]);
 const transaction_table = new Table();
@@ -69,10 +66,7 @@ transaction_table.headers = [
   "Open",
   "Close",
   "Days",
-  // "Action",
   "Investor",
-  // "Price",
-  // "Amount",
   "Invested",
   "Profit",
   "Reason",

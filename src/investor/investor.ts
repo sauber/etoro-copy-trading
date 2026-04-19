@@ -1,6 +1,7 @@
-import { Instrument, Series, Tick } from "@sauber/backtest";
-import { Diary } from "📚/investor/diary.ts";
+import { Instrument, Series } from "@sauber/backtest";
+import { Tick } from "📚/tick/mod.ts";
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
+import { Diary } from "./diary.ts";
 
 export class Investor extends Instrument {
   constructor(

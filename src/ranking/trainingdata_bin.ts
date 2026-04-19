@@ -1,9 +1,11 @@
 /** Generate training data in csv file format */
-import { TrainingData } from "📚/ranking/trainingdata.ts";
-import { makeRepository } from "📚/repository/mod.ts";
 import { DataFrame } from "@sauber/dataframe";
-import { Community, Investors, TestCommunity } from "../community/mod.ts";
 import { Backend } from "@sauber/journal";
+
+import { Community, Investors, TestCommunity } from "📚/community/mod.ts";
+import { makeRepository } from "📚/repository/mod.ts";
+
+import { TrainingData } from "./trainingdata.ts";
 
 // Minimum count of future bars to calculate score
 const min_bars = 30;

@@ -1,8 +1,11 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Investor } from "📚/investor/investor.ts";
-import { Diary } from "📚/investor/diary.ts";
-import { Instrument, Tick } from "@sauber/backtest";
+import { Instrument } from "@sauber/backtest";
+
 import type { Mirror, StatsExport } from "📚/repository/mod.ts";
+import { Tick } from "📚/tick/mod.ts";
+
+import { Investor } from "./investor.ts";
+import { Diary } from "./diary.ts";
 
 const username = "john123";
 const id = 1;
@@ -19,7 +22,6 @@ Deno.test("Initialization", () => {
 
 Deno.test("Properties", () => {
   const investor = new Investor(username, id, fullname, chart, mirrors, stats);
-  // console.log(investor);
 
   assertEquals(investor.isActive(start), true);
   assertEquals(investor.isFund, false);

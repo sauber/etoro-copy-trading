@@ -4,12 +4,10 @@ import { createMutex } from "@117/mutex";
 import { AssetNames, Backend, JournaledAsset } from "@sauber/journal";
 import { ChartResults } from "@sauber/etoro-investors";
 
-import { DateFormat, nextDate, Tick } from "📚/tick/mod.ts";
+import { DateFormat, nextDate, Tick, Timeline } from "📚/tick/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { Chart, InvestorAssembly } from "📚/repository/mod.ts";
 import { Account } from "📚/account/mod.ts";
-import { Timeline } from "📚/tick/timeline.ts";
-import { time } from "node:console";
 
 export type Names = Set<string>;
 export type Investors = Array<Investor>;

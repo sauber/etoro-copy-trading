@@ -1,12 +1,12 @@
 import { assertInstanceOf, assertNotEquals } from "@std/assert";
 import { HeapBackend } from "@sauber/journal";
-import { InvestorRanking } from "./investor-ranking.ts";
+
 import { investor } from "📚/ranking/testdata.ts";
-import { Tick } from "@sauber/backtest";
-// import { Timeline } from "📚/tick/mod.ts";
+import { Tick } from "📚/tick/mod.ts";
+
+import { InvestorRanking } from "./investor-ranking.ts";
 
 const repo = new HeapBackend();
-// const ticker = new Timeline(chartStart);
 
 Deno.test("Initialize", () => {
   const rank = new InvestorRanking(repo);

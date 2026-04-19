@@ -4,9 +4,10 @@ import {
   assertInstanceOf,
   assertNotEquals,
 } from "@std/assert";
-import { TrainingData } from "📚/ranking/trainingdata.ts";
-import { investors } from "📚/ranking/testdata.ts";
 import { DataFrame } from "@sauber/dataframe";
+
+import { TrainingData } from "./trainingdata.ts";
+import { investors } from "./testdata.ts";
 
 Deno.test("Instance", () => {
   const t = new TrainingData(10);

@@ -1,4 +1,4 @@
-import { Tick } from "@sauber/backtest";
+import { Tick } from "./mod.ts";
 
 export type DateFormat = string;
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;

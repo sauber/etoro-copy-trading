@@ -1,4 +1,4 @@
-import { Tick } from "@sauber/backtest";
+import { Tick } from "📚/tick/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 
 /** Rank of investor at bar as single numeric value */

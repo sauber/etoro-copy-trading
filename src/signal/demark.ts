@@ -89,21 +89,6 @@ export function demark_signal(
       const threshold = (50 - sell_threshold) / 50;
       if (signal > threshold) return 0;
     }
-    // Debugging output
-    // const d = (v: number): number => parseFloat(v.toFixed(2));
-    // console.log(
-    //   streak_number,
-    //   index,
-    //   d(value),
-    //   d(current_streak),
-    //   d(previous_streak),
-    //   d(max_streak),
-    //   d(reversal),
-    //   d(previous_streak_ratio),
-    //   direction,
-    //   d(signal),
-    // );
-
     return -signal;
   });
 

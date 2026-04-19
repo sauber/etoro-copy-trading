@@ -1,10 +1,10 @@
 import { assert, assertEquals, assertInstanceOf } from "@std/assert";
 import { Backend, HeapBackend } from "@sauber/journal";
-import { DateFormat, Tick } from "📚/tick/mod.ts";
 import { Instrument, Portfolio } from "@sauber/backtest";
 
-import { makeTestRepository } from "../repository/mod.ts";
-import { Settings } from "../signal/mod.ts";
+import { Tick } from "📚/tick/mod.ts";
+import { makeTestRepository } from "📚/repository/mod.ts";
+import { Settings } from "📚/signal/mod.ts";
 
 import { Context } from "./context.ts";
 

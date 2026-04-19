@@ -9,9 +9,9 @@ import { Dashboard, Output, Parameters } from "@sauber/optimize";
 import { Instrument, makeMarket, Market } from "@sauber/backtest";
 
 import { Rater } from "📚/strategy/mod.ts";
+import { Tick, today } from "📚/tick/mod.ts";
 
 import { Optimize, Settings } from "./optimize.ts";
-import { Tick, today } from "📚/tick/mod.ts";
 
 // Random ranker
 const ranker: Rater = (_instrument: Instrument, _tick: Tick) =>

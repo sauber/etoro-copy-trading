@@ -65,8 +65,6 @@ function v8ichi(series: Series, values: Input, symbol: string): Series {
   const required_length = min_ticks(values);
   if (series.length < required_length) return new Float32Array(series.length); // Not enough data, return neutral signals
 
-  // chart(series, "price");
-
   // Indicators
   const ma_buy = new EMA(ma_buy_period);
   const ma_sell = new EMA(ma_sell_period);
@@ -78,21 +76,6 @@ function v8ichi(series: Series, values: Input, symbol: string): Series {
 
   // Pre-calculate HMA for the entire series
   const series_array = Array.from(series);
-  // if (
-  //   series_array.length < Math.max(ma_buy_period, ma_sell_period, hma_period)
-  // ) {
-  //   console.error({
-  //     series_length: series.length,
-  //     array_length: series_array.length,
-  //     ma_buy_period,
-  //     ma_sell_period,
-  //     hma_period,
-  //   });
-  //   throw new Error(
-  //     "Series length must be at least as long as the longest indicator period",
-  //   );
-  // }
-  // const hma_full = HMA(series_array, hma_period);
   const hma_cache_key: string = symbol + "+" + hma_period;
   if (!(hma_cache_key in HMA_cache)) {
     HMA_cache[hma_cache_key] = new Float32Array(HMA(series_array, hma_period));
@@ -131,20 +114,6 @@ function v8ichi(series: Series, values: Input, symbol: string): Series {
 
     let signal = 0;
 
-    // Entry conditions, buy if either is true
-    // Buy condition #1 (Strong Uptrend)
-    // (dataframe['rsi_fast'] < self.rsi_buy.value) &
-    // (dataframe['close'] < (dataframe[f'ma_buy'] * self.low_offset.value)) &
-    // (dataframe['close'] < (dataframe[f'ma_sell'] * self.high_offset.value)) &
-    // (dataframe['EWO'] > self.ewo_high.value) &
-    // (dataframe['rsi'] < self.rsi_buy.value)
-    //
-    // Buy condition #2 (Oversold)
-    // (dataframe['rsi_fast'] < self.rsi_buy.value) &
-    // (dataframe['close'] < (dataframe[f'ma_buy'] * self.low_offset.value)) &
-    // (dataframe['close'] < (dataframe[f'ma_sell'] * self.high_offset.value)) &
-    // (dataframe['EWO'] < self.ewo_low.value)
-
     // --- Entry Logic ---
     const fast_rsi_dip = v_rsi_fast < rsi_buy;
     const price_below_ma = price < (v_ma_buy * low_offset);
@@ -167,17 +136,6 @@ function v8ichi(series: Series, values: Input, symbol: string): Series {
     }
 
     // Exit Conditions, sell if either is true
-    // Sell condition #1 (Take Profit)
-    // (dataframe['close'] > dataframe['hma'])&
-    // (dataframe['rsi_fast'] > dataframe['rsi_slow']) &
-    // (dataframe['close'] > (dataframe[f'ma_sell'] * self.high_offset_2.value)) &
-    // (dataframe['rsi'] > self.rsi_sell.value)&
-    //
-    // Sell condition #2 (Weakness)
-    // (dataframe['close'] < dataframe['hma'])&
-    // (dataframe['rsi_fast'] > dataframe['rsi_slow']) &
-    // (dataframe['close'] > (dataframe[f'ma_sell'] * self.high_offset.value))
-
     const price_above_hma = price > v_hma;
     const fast_rsi_cross = v_rsi_fast > v_rsi_slow;
 

@@ -1,5 +1,4 @@
 import { Investor } from "📚/investor/mod.ts";
-import { type DateFormat, Timeline } from "📚/tick/mod.ts";
 import { Features } from "📚/ranking/features.ts";
 import { Instrument, Tick } from "@sauber/backtest";
 import type { Input, Output } from "📚/ranking/types.ts";
@@ -28,17 +27,13 @@ export type Samples = Array<Sample>;
 /** Prepare data for training models for a since*/
 export class TrainingData {
   readonly samples: Array<Sample> = [];
-  // private readonly ticker: Timeline;
-
   /**
    * @param window - Minimum number of chart values available after date of stats for calculating future score
    * @param start - Date where tick=0
    */
   constructor(
     private readonly window = 30,
-    // private readonly start: DateFormat,
   ) {
-    // this.ticker = new Timeline(start);
   }
 
   /**
@@ -48,9 +43,6 @@ export class TrainingData {
   private features(investor: Investor): Samples {
     const samples: Samples = [];
     const ticks: Tick[] = investor.stats.ticks;
-    // Convert dates to ticks
-    // const ticks = ticks.map((date) => this.ticker.tick(date));
-
     const chart: Instrument = investor;
     const end: Tick = chart.end;
 

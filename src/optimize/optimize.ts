@@ -5,6 +5,7 @@ import {
   Parameter,
   Status,
 } from "@sauber/optimize";
+
 import {
   createTimer,
   Rater,
@@ -13,7 +14,7 @@ import {
 } from "📚/strategy/mod.ts";
 import { score as calculateScore } from "📚/simulation/mod.ts";
 import { type Limits, limits } from "📚/signal/mod.ts";
-import { DateFormat, Tick, Timeline, Weekday } from "📚/tick/mod.ts";
+import { DateFormat, Timeline, Weekday } from "📚/tick/mod.ts";
 
 // Numerical result of simulation
 type Score = number;
@@ -119,7 +120,6 @@ export class Optimize {
     );
 
     const timer: Rater = createTimer(timerSettings);
-    // const start: Tick = 0;
     const timeline = new Timeline(this.startDate);
     const startWeekday: Weekday = timeline.weekday(0);
     return strategy(strategySettings, this.ranker, timer, startWeekday, 0);

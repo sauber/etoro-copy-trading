@@ -1,7 +1,7 @@
 import { Investor } from "📚/investor/mod.ts";
 // import { type DateFormat, Timeline } from "📚/tick/mod.ts";
 import { Ranking } from "📚/ranking/mod.ts";
-import { Tick } from "@sauber/backtest";
+import { Tick } from "📚/tick/mod.ts";
 
 type Range = [Tick, Tick];
 type Series = Float16Array;

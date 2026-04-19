@@ -4,10 +4,12 @@ import {
   assertInstanceOf,
 } from "@std/assert";
 import { HeapBackend, JournaledAsset } from "@sauber/journal";
+
 import { nextDate, Tick, Timeline, today } from "📚/tick/mod.ts";
 import { Investor } from "📚/investor/mod.ts";
 import { repo as temprepo } from "📚/repository/testdata.ts";
 import { Account } from "📚/account/mod.ts";
+
 import { TestCommunity } from "./test-community.ts";
 import { Community, Names } from "./community.ts";
 

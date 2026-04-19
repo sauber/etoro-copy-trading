@@ -9,17 +9,14 @@ import {
   Strategy,
   Tick,
 } from "@sauber/backtest";
-// import { DateFormat } from "📚/tick/mod.ts";
 import { Backend } from "@sauber/journal";
 import { Config } from "📚/config/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
-// import { Community } from "📚/community/mod.ts";
 import { CachedSignal, Settings, Signal } from "📚/signal/mod.ts";
 import { candidates, MultiPosition } from "📚/strategy/orders.ts";
 import { Candidate } from "📚/strategy/candidate.ts";
 import { Weekday } from "📚/tick/mod.ts";
 import { Timeline } from "📚/tick/timeline.ts";
-import { time } from "node:console";
 import { Community } from "📚/community/mod.ts";
 
 // Count of days investor data is behind trading date
@@ -70,33 +67,6 @@ function validation(settings: Input): boolean {
 // weekday: Confirm if tick is on weekday
 const isWeekday = (tick: Tick, start: Tick, weekday: number): boolean =>
   (start + tick) % 7 === weekday;
-// {
-//   const modulus = (start + tick) % 7;
-//   console.log({ start, tick, modulus, weekday });
-//   return (start + tick) % 7 === weekday;
-// };
-
-// Confirm if position is below stoploss
-// const isStoploss = (
-//   tick: Tick,
-//   position: Position,
-//   stoploss: number,
-// ): boolean => position.instrument.price(tick) / position.invested < stoploss;
-
-// Confirm is value is below stoploss ratio of max since open
-// const isTrailing = (
-//   tick: Tick,
-//   position: Position,
-//   stoploss: number,
-// ): boolean => {
-//   const seriesSinceOpen = position.instrument.series.slice(
-//     position.start,
-//     tick,
-//   );
-//   const maxSinceOpen = Math.max(...seriesSinceOpen);
-//   const currentValue = position.instrument.price(tick);
-//   return currentValue / maxSinceOpen < stoploss;
-// };
 
 // Confirm if instrument has number of ticks in the future
 const hasFuture = (
@@ -113,35 +83,7 @@ const hasFuture = (
 // const portfolioValue = (portfolio: Portfolio, tick: Tick): number =>
 //   portfolio.reduce((sum, position) => sum + positionValue(position, tick), 0);
 
-/** Trading strategy
-## Open Strategy
-
-and(
-  Weekday
-  Future
-  Timing < 0
-  Rating > 0
-  PositionSizing
-  Limit
-  Rounding
-)
-
-## Closing strategy
-
-or(
-  Stoploss
-  and(
-    Weekday
-    or(
-      Trailing
-      and(
-        Timing > 0
-        limit
-      )
-    )
-  )
-)
-*/
+/** Trading strategy */
 export const trading = (
   // Loaded limit, position_size, weekday, stoploss
   settings: Input,
@@ -156,10 +98,6 @@ export const trading = (
 ): Strategy => {
   validation(settings);
 
-  // First day in simulation, which weekday is it?
-  // const startWeekDay: number = new Date(start).getDay();
-  // console.log({ startWeekDay });
-
   const strategy: Strategy = (
     tick: Tick,
     cash: Amount,
@@ -167,9 +105,6 @@ export const trading = (
     portfolio: Portfolio,
   ): Order[] => {
     const isTradingDay = isWeekday(tick, startWeekDay, settings.weekday);
-    // console.log({ tick, startWeekDay, weekday: settings.weekday, isTrading });
-    // const positions: OpenPosition[] = [...portfolio.add];
-
     // Combined positions of same instrument
     const bundle: Record<Symbol, MultiPosition> = {};
     for (const position of portfolio.positions) {
@@ -207,10 +142,8 @@ export const trading = (
         // }
       }
     });
-    // if (close.length > 0) console.log("Stoploss closing length", close.length);
 
     // No more decisions to open or close if not trading day, but still close positions that hit stoploss
-    // if (!isTradingDay) console.log("Not trading day");
     if (!isTradingDay) return close;
 
     const totalValue = cash + portfolio.value(tick);
@@ -227,17 +160,6 @@ export const trading = (
 
     // Confirm if any positions should be closed due to trailing stoploss or timing
     let maxSell: number = settings.limit;
-    // for (const position of portfolio.positions) {
-    //   const amount = positionValue(position, tick);
-    //   if (isTrailing(tick, position, settings.stoploss)) {
-    //     close.push({ position, reason: "Trail" });
-    //     cash += amount;
-    //   } else if (timer(position.instrument, tick) > 0 && maxSell-- > 0) {
-    //     close.push({ position, reason: "Close" });
-    //     cash += amount;
-    //   }
-    // }
-
     // Sell the biggest candidates first, to free up cash for new positions
     for (const candidate of candidatesList.sort((a, b) => b.value - a.value)) {
       const action = candidate.action;
@@ -249,7 +171,6 @@ export const trading = (
           })),
         );
         cash += candidate.value;
-        // closedInstruments.add(candidate.instrument);
       }
     }
 
@@ -257,12 +178,6 @@ export const trading = (
     let maxBuy: number = settings.limit;
     const open: BuyOrder[] = [];
     for (const candidate of candidatesList.sort((a, b) => b.buy - a.buy)) {
-      // console.log(
-      //   "Candidate",
-      //   candidate.instrument.symbol,
-      //   "action",
-      //   candidate.action,
-      // );
       if (hasFuture(candidate.instrument, tick, futureDays)) {
         const action = candidate.action;
         if (action === "Open" || action === "Increase") {
@@ -276,41 +191,6 @@ export const trading = (
         }
       }
     }
-
-    // console.log({ positions: portfolio.positions.length, close: close.length });
-    // close.forEach((order) =>
-    //   console.log(order.position.instrument.symbol, order.reason)
-    // );
-
-    // Instruments to buy
-    // const open: BuyOrder[] = [];
-    // // console.log({ isTrading });
-    // if (isTradingDay && open.length < settings.limit) {
-    //   const maxPositionAmount = (cash + portfolio.value(tick)) *
-    //     settings.position_size;
-    //   for (const instrument of instruments) {
-    //     // console.log(
-    //     //   instrument.symbol,
-    //     //   "hasFuture",
-    //     //   hasFuture(instrument, tick, futureDays),
-    //     // );
-    //     if (hasFuture(instrument, tick, futureDays)) {
-    //       const timing: number = timer(instrument, tick);
-    //       // if (timing < 0) console.log(instrument.symbol, "timing", timing);
-    //       if (timing < 0) {
-    //         const rating: number = ranker(instrument, tick);
-    //         // console.log(instrument.symbol, "rating", rating);
-    //         if (rating > 0) {
-    //           const amount = maxPositionAmount * -timing * rating;
-    //           // TODO: Confirm if target amount for instrument is exceeded by existing positions
-    //           // TODO: Round to nearest increment
-    //           // TODO: Minimum position size
-    //           open.push({ instrument, amount });
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
 
     // Confirm that we are not trying to open and close the same instrument on the same tick
     const closeInstruments = new Set(close.map((o) => o.position.instrument));

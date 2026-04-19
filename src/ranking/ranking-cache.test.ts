@@ -3,8 +3,7 @@ import { InvestorRanking } from "./investor-ranking.ts";
 import { HeapBackend } from "@sauber/journal";
 import { RankingCache } from "📚/ranking/ranking-cache.ts";
 import { investor } from "📚/ranking/testdata.ts";
-// import { Timeline } from "📚/tick/mod.ts";
-import { Tick } from "@sauber/backtest";
+import { Tick } from "📚/tick/mod.ts";
 
 const repo = new HeapBackend();
 // const ticker = new Timeline(chartStart);

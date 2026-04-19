@@ -106,10 +106,6 @@ Deno.test("Buy Orders", () => {
 });
 
 Deno.test("Sell Orders", () => {
-  // First date in market (tick=0), and day of week
-  // const startDate: DateFormat = today();
-  // const startWeekday: number = new Date(startDate).getDay();
-
   // Weekday where trading happens
   const weekday = 1; // Monday
 
@@ -141,49 +137,16 @@ Deno.test("Sell Orders", () => {
   );
   const portfolio = new Portfolio(positions);
 
-  // Confirm instrument start and end dates
-  // positions.forEach((position) =>
-  //   console.log(
-  //     "Instrument",
-  //     position.instrument.symbol,
-  //     "[",
-  //     position.instrument.start,
-  //     ";",
-  //     position.instrument.end,
-  //     "] open",
-  //     position.start,
-  //   )
-  // );
-
   // Date and weekday when last positions was open
   const lastOpenTick = Math.max(
     ...portfolio.positions.map((position) => position.start),
   );
-  // const lastOpenDate = new Date();
-  // lastOpenDate.setDate(new Date(startDate).getDate() + lastOpenTick);
-  const lastOpenDate = timeline.date(lastOpenTick);
+
   const lastOpenWeekday: number = timeline.weekday(lastOpenTick);
 
   // Number of days until the next trading day after most recent position open
   const daysUntilTrading: number = 1 + (8 - weekday - lastOpenWeekday) % 7;
   const tradingTick = lastOpenTick + daysUntilTrading;
-  const tradingDate = timeline.date(tradingTick);
-  // tradingDate.setDate(new Date(startDate).getDate() + tradingTick);
-  // const tradingWeekday: number = tradingDate.getDay();
-  const tradingWeekday = timeline.weekday(tradingTick);
-
-  // console.log({
-  //   startDate,
-  //   // startWeekday,
-  //   weekday,
-  //   lastOpenTick,
-  //   lastOpenDate,
-  //   lastOpenWeekday,
-  //   daysUntilTrading,
-  //   tradingTick,
-  //   tradingDate,
-  //   tradingWeekday,
-  // });
 
   const orders: Order[] = strategy(tradingTick, 1000, [], portfolio);
   assertEquals(orders.length, portfolio.positions.length);

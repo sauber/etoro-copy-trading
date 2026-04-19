@@ -23,7 +23,6 @@ import { DateFormat } from "📚/tick/mod.ts";
 const path: string = Deno.args[0];
 const repo = makeRepository(path);
 const community: Community = new TestCommunity(repo);
-// const chartStart: DateFormat = await community.chartStart();
 const timeline = await community.timeline();
 const chartStart: DateFormat = timeline.date(0);
 
@@ -38,12 +37,10 @@ const ranker: Rater = await loadRanker(repo);
 
 // Load training data
 const training_count: number = 800;
-// const instruments: Instruments = (await investors(training_count))
 const trainingMarket: Market = new Market((await investors(training_count))
   .filter((instrument) => instrument.series.length >= 200));
 console.log("Testing Instruments loaded:", trainingMarket.length);
 const spread = 0.001;
-// const exchange: Exchange = new Exchange(instruments, spread);
 const trainingModel = new Optimize(trainingMarket, ranker, chartStart, spread);
 
 // Load Validation data
@@ -51,7 +48,6 @@ const validation_count: number = 80;
 const validationMarket: Market = new Market((await investors(validation_count))
   .filter((instrument) => instrument.series.length >= 200));
 console.log("Validation Instruments loaded:", validationMarket.length);
-// const validation: Exchange = new Exchange(instruments, spread);
 const validationModel = new Optimize(
   validationMarket,
   ranker,

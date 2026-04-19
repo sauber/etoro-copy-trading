@@ -6,9 +6,10 @@ import {
   assertLessOrEqual,
   assertNotEquals,
 } from "@std/assert";
-import { Model } from "📚/ranking/model.ts";
+
+import { Model } from "./model.ts";
 import type { Input, Inputs, Output, Outputs } from "./types.ts";
-import { input_labels } from "📚/ranking/types.ts";
+import { input_labels } from "./types.ts";
 
 /** Generate a random set of input */
 function input(): Input {

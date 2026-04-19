@@ -20,9 +20,6 @@ const tick: Tick = await loader.tradingTick();
 const ranking: Rater = await loadRanker(repo);
 const timing: Rater = await loadTimer(repo);
 
-// Strategy Context
-// const situation: StrategyContext = await loader.strategyContext();
-
 // Settings
 const settings: ParameterData = await loader.settings();
 const tradingTick: Tick = await loader.tradingTick();
@@ -68,15 +65,6 @@ const table: Table = new Table(
 );
 table.render();
 
-// const classifier = new Classifier(
-//   situation,
-//   ranker,
-//   timer,
-//   settings.position_size,
-// );
-// const records = classifier.records;
-// // console.log(records);
-
 const investors = candidates({
   instruments,
   positions: portfolio.positions,
@@ -86,17 +74,6 @@ const investors = candidates({
   target: value * settings.position_size,
   stoploss: settings.stoploss,
 });
-// const df = DataFrame.fromRecords(records);
-// df
-//   .select((r) => r["Action"] != undefined)
-//   .sort("Timing", false)
-//   .sort("Rank", false)
-//   .sort("Value")
-//   .sort("Sell")
-//   .sort("Buy", false)
-//   .scale("Gain", 100).rename({ "Gain": "Gain%" })
-//   .digits(2)
-//   .print("Candidates");
 
 const pct = (amount: number): number =>
   parseFloat((100 * amount).toPrecision(3));
