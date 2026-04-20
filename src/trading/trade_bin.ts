@@ -16,8 +16,10 @@ const repo = makeRepository(path);
 let loader: Context | null = new Context(repo);
 const tick: Tick = await loader.tradingTick();
 
+const ticks_required = path.match(/testdata/) ? 15 : 180;
+
 // Models
-const ranking: Rater = await loadRanker(repo);
+const ranking: Rater = await loadRanker(repo, ticks_required);
 const timing: Rater = await loadTimer(repo);
 
 // Settings

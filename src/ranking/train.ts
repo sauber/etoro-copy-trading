@@ -92,6 +92,9 @@ export class Train {
       this._data = new TrainingData(this.tick_count).generate(
         this.investors,
       );
+      if ( this._data.length == 0) {
+        throw new Error("Error: No training data generated, cannot train model. Lower tick_count.");
+      }
     }
     return this._data;
   }

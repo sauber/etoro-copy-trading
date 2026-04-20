@@ -27,8 +27,11 @@ export function createRanker(ranking: Ranking): Rater {
 }
 
 /** Load model from repo and create ranker */
-export async function loadRanker(repo: Backend): Promise<Rater> {
-  const rankingModel = new InvestorRanking(repo);
+export async function loadRanker(
+  repo: Backend,
+  ticks_required: number,
+): Promise<Rater> {
+  const rankingModel = new InvestorRanking(repo, ticks_required);
   await rankingModel.load();
   const cacher: Ranking = new RankingCache(rankingModel);
   const ranker: Rater = createRanker(cacher);

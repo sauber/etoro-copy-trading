@@ -7,7 +7,7 @@ import { Tick } from "📚/tick/mod.ts";
 
 const repo = new HeapBackend();
 // const ticker = new Timeline(chartStart);
-const rank = new InvestorRanking(repo).generate();
+const rank = new InvestorRanking(repo, 15).generate();
 
 Deno.test("Instance", () => {
   const cache = new RankingCache(rank);

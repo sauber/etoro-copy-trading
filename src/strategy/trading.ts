@@ -245,10 +245,13 @@ export async function saveSettings(
 }
 
 /** Strategy with parameters and models loaded from repository */
-export async function loadStrategy(repo: Backend): Promise<Strategy> {
+export async function loadStrategy(
+  repo: Backend,
+  ticks_required: number,
+): Promise<Strategy> {
   const [settings, ranker, timer] = await Promise.all([
     loadSettings(repo),
-    loadRanker(repo),
+    loadRanker(repo, ticks_required),
     loadTimer(repo),
   ]);
 

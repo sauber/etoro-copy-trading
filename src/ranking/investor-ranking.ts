@@ -20,6 +20,7 @@ export class InvestorRanking implements Ranking {
   // TODO: model should be private
   constructor(
     private readonly repo: Backend,
+    private readonly tick_count: number,
   ) {
     this.asset = new Asset<NetworkData>(InvestorRanking.assetName, this.repo);
   }
@@ -59,7 +60,7 @@ export class InvestorRanking implements Ranking {
     if (!this.model) throw new Error("Error: Model not defined, cannot train.");
     const community: Community = new Community(this.repo);
     const investors = await community.all();
-    const train = new Train(this.model, investors);
+    const train = new Train(this.model, investors, { tick_count: this.tick_count });
     const dashboard: Dashboard = train.dashboard;
     const baseline: number = train.validate();
     train.run(dashboard);
