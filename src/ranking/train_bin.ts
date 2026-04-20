@@ -7,7 +7,9 @@ import { Backend } from "@sauber/journal";
 const path: string = Deno.args[0];
 const repo: Backend = makeRepository(path);
 
-const ranking: InvestorRanking = new InvestorRanking(repo);
+const tick_required = path.match(/testdata/) ? 15 : 180;
+
+const ranking: InvestorRanking = new InvestorRanking(repo, tick_required);
 if (!(await ranking.load())) {
   console.log("New model generated");
   ranking.generate();
