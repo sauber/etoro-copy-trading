@@ -5,4 +5,3 @@
 - Split context.ts into smaller files, and remove stale code
 - Combine candiate.ts and orders.ts into one file
 - Rewrite Candidate class as function
-- Create fast indicators instead of using npm module
