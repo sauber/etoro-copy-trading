@@ -1,5 +1,4 @@
 import { assertAlmostEquals, assertEquals } from "@std/assert";
-import { Candidate } from "./candidate.ts";
 import {
   Amount,
   Instrument,
@@ -7,6 +6,7 @@ import {
   OpenPosition,
 } from "@sauber/backtest";
 import { DELAY } from "📚/strategy/mod.ts";
+import { createCandidate } from "./candidate.ts";
 
 const amount: Amount = 500;
 const instrument: Instrument = makeInstrument(100);
@@ -20,7 +20,7 @@ const positions: OpenPosition[] = [
 ];
 
 Deno.test("Candidate - Skip action when no positions and no buy opportunity", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions: [],
     target: 1000,
@@ -33,7 +33,7 @@ Deno.test("Candidate - Skip action when no positions and no buy opportunity", ()
 });
 
 Deno.test("Candidate - Open action when no positions and buy opportunity", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions: [],
     target: 1000,
@@ -45,7 +45,7 @@ Deno.test("Candidate - Open action when no positions and buy opportunity", () =>
 });
 
 Deno.test("Candidate - Take profit action when position exists and timing positive", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 1000,
@@ -57,7 +57,7 @@ Deno.test("Candidate - Take profit action when position exists and timing positi
 });
 
 Deno.test("Candidate - Increase action when position exists and buy opportunity", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 2000,
@@ -69,7 +69,7 @@ Deno.test("Candidate - Increase action when position exists and buy opportunity"
 });
 
 Deno.test("Candidate - Keep action when position exists and no opportunity", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 1000,
@@ -81,7 +81,7 @@ Deno.test("Candidate - Keep action when position exists and no opportunity", () 
 });
 
 Deno.test("Candidate - Calculate gain", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 1000,
@@ -97,7 +97,7 @@ Deno.test("Candidate - Calculate gain", () => {
 });
 
 Deno.test("Candidate - Calculate value", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 1000,
@@ -113,7 +113,7 @@ Deno.test("Candidate - Calculate value", () => {
 });
 
 Deno.test("Candidate - Calculate buying gap", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 1000,
@@ -125,7 +125,7 @@ Deno.test("Candidate - Calculate buying gap", () => {
 });
 
 Deno.test("Candidate - Calculate no-buying gap", () => {
-  const candidate = new Candidate({
+  const candidate = createCandidate({
     instrument,
     positions,
     target: 1000,

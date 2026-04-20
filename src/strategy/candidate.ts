@@ -1,6 +1,6 @@
 import { Amount, Instrument, OpenPosition } from "@sauber/backtest";
 import { Tick } from "📚/tick/mod.ts";
-import { DELAY } from "📚/strategy/mod.ts";
+import { DELAY } from "./trading.ts";
 
 /** Export data examples
  * TODO: Field names and types need to be finalized
@@ -44,109 +44,104 @@ export type CandidateParameters = {
 };
 
 /** Combination of instrument and and existing open positions in instrument */
-export class Candidate {
-  public readonly instrument: Instrument;
-  public readonly positions: OpenPosition[] = [];
-  public readonly target: Amount;
-  public readonly timing: number;
-  private readonly tick: Tick;
-  private readonly stoploss: number;
+export type Candidate = {
+  readonly instrument: Instrument;
+  readonly positions: OpenPosition[];
+  readonly target: Amount;
+  readonly timing: number;
+  readonly tick: Tick;
+  readonly stoploss: number;
+  readonly start: Tick | undefined;
+  readonly quantity: number;
+  readonly invested: Amount;
+  readonly value: Amount;
+  readonly gain: number;
+  readonly gap: Amount;
+  readonly buy: Amount;
+  readonly ticksSinceOpen: number | undefined;
+  readonly action: Actions;
+  readonly drawdown: number | undefined;
+  readonly isBuy: boolean;
+  readonly isSell: boolean;
+};
 
-  /** Tick of first position opened */
-  public readonly start: Tick | undefined;
+/** Combination of instrument and and existing open positions in instrument */
+/** Function version of Candidate that returns a plain object with all computed properties */
+export function createCandidate(
+  p: CandidateParameters,
+): Candidate {
+  const instrument = p.instrument;
+  const positions = p.positions;
+  const target = p.target;
+  const timing = p.timing;
+  const tick = p.tick - DELAY; // Prices are delayed
+  const stoploss = p.stoploss;
 
-  /** Total amount of units opened */
-  public readonly quantity: number;
+  let start: Tick | undefined = undefined;
+  let ticksSinceOpen: number | undefined = undefined;
+  let drawdown: number | undefined = undefined;
 
-  /** Total amount invested */
-  public readonly invested: Amount;
-
-  /** Total value at tick */
-  public readonly value: Amount;
-
-  /** Amount of under-investent. Negative if over-invested. */
-  public readonly gap: Amount;
-
-  /** Ratio of profit from invested */
-  public readonly gain: number;
-
-  /** How much to invest at this tick */
-  public readonly buy: Amount;
-
-  /** How many ticks since first open */
-  public readonly ticksSinceOpen: number | undefined;
-
-  /** Reason for buy or sell */
-  public readonly action: Actions;
-
-  /** Currect ratio of max drawdown since first open */
-  public readonly drawdown: number | undefined;
-
-  /** Is the candidate valid for buying */
-  public readonly isBuy: boolean = false;
-
-  /** Is the candidate valid for selling */
-  public readonly isSell: boolean = false;
-
-  /** How much to invest at this tick, or close all positions */
-  constructor(p: CandidateParameters) {
-    // Object.assign(this, p);
-    this.instrument = p.instrument;
-    this.positions = p.positions;
-    this.target = p.target;
-    this.timing = p.timing;
-    this.tick = p.tick - DELAY; // Prices are delayed
-    this.stoploss = p.stoploss;
-
-    // First position opened at tick, and how many ticks since then
-    if (this.positions.length > 0) {
-      this.start = Math.min(
-        ...this.positions.map((position) => position.start),
-      );
-      this.ticksSinceOpen = this.tick - this.start;
-      // Drawdown since first open, 0: price is max, 1: price is 0
-      this.drawdown = 1 - this.instrument.price(this.tick) /
-          Math.max(...this.instrument.slice(this.start, this.tick).series);
-    }
-
-    // Value and profit of positions
-    this.quantity = this.positions.reduce(
-      (sum, position) => position.quantity + sum,
-      0,
-    );
-    this.invested = this.positions.reduce(
-      (sum, position) => sum + position.invested,
-      0,
-    );
-    this.value = this.quantity * this.instrument.price(this.tick);
-    this.gain = this.invested === 0
-      ? 0
-      : (this.value - this.invested) / this.invested;
-
-    // How much to invest at this tick
-    this.gap = this.target - this.value;
-    this.buy = Math.max(0, this.gap * -this.timing);
-
-    // Action to take at this tick
-    if (this.positions.length == 0) {
-      if (this.buy > 0) {
-        this.action = "Open";
-      } else if (this.drawdown && (1 - this.drawdown) < this.stoploss) {
-        this.action = "Trail";
-      } else {
-        this.action = "Skip";
-      }
-    } else {
-      if (this.timing > 0) {
-        this.action = "Take";
-      } else if (this.buy > 0) {
-        this.action = "Increase";
-      } else {
-        this.action = "Keep";
-      }
-    }
-
-    if (this.action === "Open" || this.action === "Increase") this.isBuy = true;
-    if (this.action === "Take" || this.action === "Trail") this.isSell = true;
+  if (positions.length > 0) {
+    start = Math.min(...positions.map((position) => position.start));
+    ticksSinceOpen = tick - start;
+    drawdown = 1 - instrument.price(tick) /
+        Math.max(...instrument.slice(start, tick).series);
   }
+
+  const quantity = positions.reduce(
+    (sum, position) => position.quantity + sum,
+    0,
+  );
+  const invested = positions.reduce(
+    (sum, position) => sum + position.invested,
+    0,
+  );
+  const value = quantity * instrument.price(tick);
+  const gain = invested === 0 ? 0 : (value - invested) / invested;
+
+  const gap = target - value;
+  const buy = Math.max(0, gap * -timing);
+
+  let action: Actions;
+  if (positions.length == 0) {
+    if (buy > 0) {
+      action = "Open";
+    } else if (drawdown && (1 - drawdown) < stoploss) {
+      action = "Trail";
+    } else {
+      action = "Skip";
+    }
+  } else {
+    if (timing > 0) {
+      action = "Take";
+    } else if (buy > 0) {
+      action = "Increase";
+    } else {
+      action = "Keep";
+    }
+  }
+
+  const isBuy = action === "Open" || action === "Increase";
+  const isSell = action === "Take" || action === "Trail";
+
+  return {
+    instrument,
+    positions,
+    target,
+    timing,
+    tick,
+    stoploss,
+    start,
+    quantity,
+    invested,
+    value,
+    gain,
+    gap,
+    buy,
+    ticksSinceOpen,
+    action,
+    drawdown,
+    isBuy,
+    isSell,
+  } as const;
 }

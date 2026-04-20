@@ -6,7 +6,7 @@ import {
   OpenPosition,
 } from "@sauber/backtest";
 import { Tick } from "📚/tick/mod.ts";
-import { Candidate } from "📚/strategy/candidate.ts";
+import { Candidate, createCandidate } from "📚/strategy/candidate.ts";
 
 // Instrument combiuned with positions in instrument
 type Bundled = { instrument: Instrument; positions: OpenPosition[] };
@@ -115,7 +115,7 @@ export const candidates = ({
   stoploss,
 }: Parameters): Candidate[] =>
   bundle(instruments, positions).map((item: Bundled) =>
-    new Candidate({
+    createCandidate({
       instrument: item.instrument,
       positions: item.positions,
       target: target * ranking(item.instrument, tick),
