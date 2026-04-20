@@ -1,4 +1,3 @@
-import { Input, Rater, trading } from "📚/strategy/trading.ts";
 import {
   assertArrayIncludes,
   assertEquals,
@@ -17,7 +16,10 @@ import {
   Strategy,
   Tick,
 } from "@sauber/backtest";
+
 import { DateFormat, Timeline } from "📚/tick/mod.ts";
+
+import { DELAY, Input, Rater, trading } from "./trading.ts";
 
 // Calculate a dummy ranking score based on length of username.
 export const test_ranking: Rater = (instr: Instrument, _tick: Tick) => {
@@ -130,7 +132,7 @@ Deno.test("Sell Orders", () => {
   ) =>
     new OpenPosition(
       instrument,
-      instrument.start,
+      instrument.start + DELAY,
       100,
       100 / instrument.price(instrument.start),
     )

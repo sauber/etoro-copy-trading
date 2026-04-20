@@ -1,8 +1,10 @@
-import { EMA, RSI } from "@debut/indicators";
+// import { EMA } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
 import { assert } from "@std/assert";
 import { EWO } from "📚/indicator/ewo.ts";
 import { HMA } from "📚/indicator/hma.ts";
+import { RSI } from "📚/indicator/rsi.ts";
+import { EMA } from "📚/indicator/ema.ts";
 import { Limits } from "./indicator.ts";
 
 export const limits: Limits = {
@@ -66,13 +68,13 @@ function v8ichi(series: Series, values: Input, symbol: string): Series {
   if (series.length < required_length) return new Float32Array(series.length); // Not enough data, return neutral signals
 
   // Indicators
-  const ma_buy = new EMA(ma_buy_period);
-  const ma_sell = new EMA(ma_sell_period);
+  const ma_buy = EMA(series, ma_buy_period);
+  const ma_sell = EMA(series, ma_sell_period);
 
   // RSIs
-  const rsi_fast = new RSI(rsi_fast_period);
-  const rsi_std = new RSI(rsi_period);
-  const rsi_slow = new RSI(rsi_slow_period);
+  const rsi_fast = RSI(series, rsi_fast_period);
+  const rsi_std = RSI(series, rsi_period);
+  const rsi_slow = RSI(series, rsi_slow_period);
 
   // Pre-calculate HMA for the entire series
   const series_array = Array.from(series);
@@ -86,13 +88,13 @@ function v8ichi(series: Series, values: Input, symbol: string): Series {
   const ewo_full = EWO(series_array, ewo_fast_period, ewo_slow_period);
   assert(ewo_full.length === series_array.length, "EWO length mismatch");
 
-  const signals = series.map((price, index) => {
+  const signals = series.map((price: number, index: number) => {
     // Update indicators
-    const v_ma_buy = ma_buy.nextValue(price);
-    const v_ma_sell = ma_sell.nextValue(price);
-    const v_rsi_fast = rsi_fast.nextValue(price);
-    const v_rsi = rsi_std.nextValue(price);
-    const v_rsi_slow = rsi_slow.nextValue(price);
+    const v_ma_buy = ma_buy[index];
+    const v_ma_sell = ma_sell[index];
+    const v_rsi_fast = rsi_fast[index];
+    const v_rsi = rsi_std[index];
+    const v_rsi_slow = rsi_slow[index];
     const raw_ewo = ewo_full[index];
     const v_hma = hma_full[index];
 

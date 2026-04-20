@@ -10,14 +10,15 @@ import {
   Tick,
 } from "@sauber/backtest";
 import { Backend } from "@sauber/journal";
+
 import { Config } from "📚/config/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { CachedSignal, Settings, Signal } from "📚/signal/mod.ts";
-import { candidates, MultiPosition } from "📚/strategy/orders.ts";
-import { Candidate } from "📚/strategy/candidate.ts";
-import { Weekday } from "📚/tick/mod.ts";
-import { Timeline } from "📚/tick/timeline.ts";
+import { Timeline, Weekday } from "📚/tick/mod.ts";
 import { Community } from "📚/community/mod.ts";
+
+import { candidates, MultiPosition } from "./orders.ts";
+import { Candidate } from "./candidate.ts";
 
 // Count of days investor data is behind trading date
 export const DELAY = 2;
@@ -118,6 +119,14 @@ export const trading = (
       instruments.filter((instrument) => instrument.start <= (tick - DELAY)),
     );
 
+    // console.log(
+    //   "Instruments available at tick:",
+    //   tick,
+    //   ":",
+    //   instrumentSet.size,
+    //   Array.from(instrumentSet).map((i: Instrument) => i.start),
+    // );
+
     // Positions to close
     const close: SellOrder[] = [];
 
@@ -146,6 +155,15 @@ export const trading = (
     // No more decisions to open or close if not trading day, but still close positions that hit stoploss
     if (!isTradingDay) return close;
 
+    // console.log(
+    //   "Instruments available at tick:",
+    //   tick,
+    //   ":",
+    //   instrumentSet.size,
+    //   Array.from(instrumentSet).map((i: Instrument) => i.start),
+    // );
+    // console.log({ remainingPositions });
+
     const totalValue = cash + portfolio.value(tick);
     const target = totalValue * settings.position_size;
     const candidatesList: Candidate[] = candidates({
@@ -165,7 +183,7 @@ export const trading = (
       const action = candidate.action;
       if ((action === "Take" || action === "Trail") && maxSell-- > 0) {
         close.push(
-          ...candidate.positions.map((position) => ({
+          ...candidate.positions.map((position: OpenPosition) => ({
             position,
             reason: action,
           })),

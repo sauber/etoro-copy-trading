@@ -1,36 +1,29 @@
-import { EMA } from "@debut/indicators";
 import { Series } from "@sauber/backtest";
 
-/** Elliot Wave Oscillator */
 /**
- * Calculates the Elliott Wave Oscillator (EWO).
- * The EWO is the difference between a fast and a slow Exponential Moving Average (EMA) relative to price.
- * @param {number[]} data - The array of numbers to calculate the EWO for.
- * @param {number} fastPeriod - The period for the fast EMA. Default is 5.
- * @param {number} slowPeriod - The period for the slow EMA. Default is 35.
- * @returns {number[]} The array of EWO values.
+ * Calculates the Elliott Wave Oscillator using EMA.
+ * * @param prices - Series of input prices
+ * @param shortPeriod - The short EMA period (default: 5)
+ * @param longPeriod - The long EMA period (default: 34)
+ * @returns Series containing the EWO values
  */
-export function EWO(
-  data: number[] | Series,
-  fastPeriod = 5,
-  slowPeriod = 35,
-): number[] | Series {
-  if (slowPeriod < fastPeriod) {
-    throw new Error(
-      "Slow period must be greater than or equal to fast period.",
-    );
-  }
-  if (data.length < slowPeriod) {
-    throw new Error(
-      `Insufficient data to calculate EWO. Needs at least ${slowPeriod} data points, got ${data.length}`,
-    );
-  }
+export const EWO = (
+  prices: Series | number[],
+  shortPeriod: number = 5,
+  longPeriod: number = 34,
+): Series | number[] => {
+  const kShort: number = 2 / (shortPeriod + 1);
+  const kLong: number = 2 / (longPeriod + 1);
 
-  // EMA fast and slow indicators
-  const fast = new EMA(fastPeriod);
-  const slow = new EMA(slowPeriod);
+  // Initialize EMAs with the first price point
+  let emaShort: number = prices[0];
+  let emaLong: number = prices[0];
 
-  // return ewo;
-  return data.map((price) => (fast.nextValue(price) - slow.nextValue(price))// / price * 100
-  );
-}
+  return prices.map((currentPrice: number, i: number) => {
+    // Update Exponential Moving Averages
+    emaShort = (currentPrice - emaShort) * kShort + emaShort;
+    emaLong = (currentPrice - emaLong) * kLong + emaLong;
+
+    return (i < longPeriod - 1) ? NaN : emaShort - emaLong;
+  });
+};

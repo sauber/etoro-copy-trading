@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertAlmostEquals, assertEquals, assertThrows } from "@std/assert";
 import { EWO } from "./ewo.ts";
 
 Deno.test("EWO - Basic Calculation", () => {
@@ -10,9 +10,9 @@ Deno.test("EWO - Basic Calculation", () => {
   assertEquals(ewo[1], NaN);
   assertEquals(ewo[2], NaN);
   assertEquals(ewo[3], NaN);
-  assertEquals(ewo[4], 1.5);
-  assertEquals(ewo[5], 1.5);
-  assertEquals(ewo[9], 1.5);
+  assertAlmostEquals(ewo[4], 1.11, 0.01);
+  assertAlmostEquals(ewo[5], 1.23, 0.01);
+  assertAlmostEquals(ewo[9], 1.45, 0.01);
 });
 
 Deno.test("EWO - Defaults", () => {
@@ -20,18 +20,5 @@ Deno.test("EWO - Defaults", () => {
   const data = Array.from({ length: n }, (_, i) => i + 1);
   const ewo = EWO(data);
   assertEquals(ewo.length, n);
-  assertEquals(ewo[n - 1], 15);
-});
-
-Deno.test("EWO - Validation", () => {
-  assertThrows(
-    () => EWO([1, 2, 3], 5, 2),
-    Error,
-    "Slow period must be greater than or equal to fast period.",
-  );
-  assertThrows(
-    () => EWO([1, 2], 2, 5),
-    Error,
-    "Insufficient data to calculate EWO. Needs at least 5 data points, got 2",
-  );
+  assertAlmostEquals(ewo[n - 1], 12.8, 0.1);
 });
