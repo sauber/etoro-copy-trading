@@ -18,20 +18,6 @@ import { Input, Rater, validation } from "./parameters.ts";
 import { checkConflicts } from "./conflict.ts";
 import { multiposition } from "./multiposition.ts";
 
-// Confirm tick is certain weekday
-// tick: Current tick in simulation
-// start: On which weekday is tick=0
-// weekday: The weekday for tick to match
-const isWeekday = (tick: Tick, start: Tick, weekday: number): boolean =>
-  (start + tick) % 7 === weekday;
-
-// Confirm if instrument has number of ticks in the future
-const hasFuture = (
-  instrument: Instrument,
-  tick: Tick,
-  futureDays: number,
-): boolean => instrument.end >= tick + futureDays;
-
 /** Trading strategy */
 export const trading = (
   // Loaded limit, position_size, weekday, stoploss
@@ -53,7 +39,8 @@ export const trading = (
     instruments: Instrument[],
     portfolio: Portfolio,
   ): Order[] => {
-    const isTradingDay = isWeekday(tick, startWeekDay, settings.weekday);
+    // Is tick on trading day of week?
+    const isTradingDay = (startWeekDay + tick) % 7 === settings.weekday;
     // Combined positions of same instrument
     const positions = multiposition(portfolio.positions, tick);
 
@@ -65,9 +52,10 @@ export const trading = (
     // Container for positions to close
     const close: SellOrder[] = [];
 
-    // Confirm if any positions should be closed due to stoploss
+    // Positions not closed by stoploss
     const remainingPositions: OpenPosition[] = [];
 
+    // Confirm if any positions should be closed due to stoploss
     for (const multiPosition of positions) {
       const value: Amount = multiPosition.value;
       if (value < multiPosition.invested * settings.stoploss) {
@@ -120,7 +108,7 @@ export const trading = (
     let maxBuy: number = settings.limit;
     const open: BuyOrder[] = [];
     for (const candidate of candidatesList.sort((a, b) => b.buy - a.buy)) {
-      if (hasFuture(candidate.instrument, tick, futureDays)) {
+      if (candidate.instrument.end >= tick + futureDays) {
         const action: Action = candidate.action;
         if (action === "Open" || action === "Increase") {
           if (candidate.buy <= cash) {
