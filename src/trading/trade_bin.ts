@@ -6,7 +6,7 @@ import { makeRepository } from "📚/repository/mod.ts";
 import { Context, ParameterData } from "./context.ts";
 import { DateFormat, Tick, Timeline } from "📚/tick/mod.ts";
 import { Amount, Instrument, Portfolio } from "@sauber/backtest";
-import { candidates } from "📚/strategy/orders.ts";
+import { candidates } from "📚/strategy/candidates.ts";
 
 const start: number = performance.now();
 

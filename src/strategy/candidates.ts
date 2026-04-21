@@ -1,72 +1,13 @@
-import {
-  Amount,
-  ClosedPosition,
-  ClosingReason,
-  Instrument,
-  OpenPosition,
-} from "@sauber/backtest";
+import { Amount, Instrument, OpenPosition } from "@sauber/backtest";
 import { Tick } from "📚/tick/mod.ts";
 import { Candidate, createCandidate } from "📚/strategy/candidate.ts";
+import { Rater, Symbol } from "📚/strategy/parameters.ts";
 
 // Instrument combiuned with positions in instrument
 type Bundled = { instrument: Instrument; positions: OpenPosition[] };
-type Symbol = string;
-
-/** Bundle of multiple positions */
-export class MultiPosition implements OpenPosition {
-  public readonly start: Tick;
-  public readonly instrument: Instrument;
-  public readonly invested: Amount;
-  public readonly quantity: number;
-
-  constructor(public readonly positions: OpenPosition[]) {
-    this.start = Math.min(...positions.map((p) => p.start));
-    this.instrument = positions[0].instrument;
-    this.invested = positions.reduce((sum, p) => sum + p.invested, 0);
-    this.quantity = positions.reduce((sum, p) => sum + p.quantity, 0);
-  }
-
-  public value(tick: Tick): Amount {
-    return this.instrument.price(tick) * this.quantity;
-  }
-
-  /** Close combined position */
-  public close(
-    end: Tick,
-    reason: ClosingReason,
-    profit: Amount,
-  ): ClosedPosition {
-    return {
-      instrument: this.instrument,
-      start: this.start,
-      invested: this.invested,
-      quantity: this.quantity,
-      end,
-      reason,
-      profit,
-    };
-  }
-
-  /** Close each position */
-  public closeAll(
-    end: Tick,
-    reason: ClosingReason,
-    profit: Amount,
-  ): ClosedPosition[] {
-    return this.positions.map((position) => ({
-      instrument: position.instrument,
-      start: position.start,
-      invested: position.invested,
-      quantity: position.quantity,
-      reason,
-      end,
-      profit: position.quantity / this.quantity * profit,
-    }));
-  }
-}
 
 // Combine instrument and positions
-export function bundle(
+function bundle(
   instruments: Instrument[],
   positions: OpenPosition[],
 ): Array<Bundled> {
@@ -84,18 +25,15 @@ export function bundle(
   return Object.values(bundle);
 }
 
-// Calculate timing and rating for instrument at given tick
-export type Ranker = (instrument: Instrument, tick: number) => number;
-
 type Parameters = {
   /** List of instruments to consider for trading */
   readonly instruments: Instrument[];
   /** List of currently open positions */
   readonly positions: OpenPosition[];
   /** Function to rank instruments by expected return */
-  readonly ranking: Ranker;
+  readonly ranking: Rater;
   /** Function to rank instruments by timing */
-  readonly timing: Ranker;
+  readonly timing: Rater;
   /** Target amount to invest per position */
   readonly target: Amount;
   /** Current tick */

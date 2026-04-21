@@ -9,63 +9,19 @@ import {
   Strategy,
   Tick,
 } from "@sauber/backtest";
-import { Backend } from "@sauber/journal";
+import { Weekday } from "📚/tick/mod.ts";
 
-import { Config } from "📚/config/mod.ts";
-import { loadRanker } from "📚/ranking/mod.ts";
-import { CachedSignal, Settings, Signal } from "📚/signal/mod.ts";
-import { Timeline, Weekday } from "📚/tick/mod.ts";
-import { Community } from "📚/community/mod.ts";
-
-import { candidates, MultiPosition } from "./orders.ts";
+import { candidates } from "./candidates.ts";
 import { Candidate } from "./candidate.ts";
-
-// Count of days investor data is behind trading date
-export const DELAY = 2;
-
-/** Minimum, maximum, default value and type of parameter */
-export type Range = {
-  min: number;
-  max: number;
-  default: number;
-  int?: boolean;
-};
-
-/** Short name of instrument */
-type Symbol = string;
-
-/** Collection of ranges */
-export type Limits = Record<string, Range>;
-
-export type Rater = (instrument: Instrument, tick: Tick) => number;
-
-export const strategyParameters: Limits = {
-  weekday: { min: 1, max: 5, default: 1, int: true },
-  position_size: { min: 0.005, max: 0.2, default: 0.07 },
-  stoploss: { min: 0.85, max: 0.95, default: 0.85 },
-  limit: { min: 1, max: 15, default: 3, int: true },
-};
-export type Input = Record<keyof typeof strategyParameters, number>;
-
-/** Assert that parameters are within limits */
-function validation(settings: Input): boolean {
-  const limits = strategyParameters;
-  for (const [name, limit] of Object.entries(limits)) {
-    const value = settings[name];
-    if (value === undefined) throw new Error(`Missing parameter ${name}`);
-    if (value < limit.min || value > limit.max) {
-      throw new Error(
-        `Parameter ${name} out of range [${limit.min}, ${limit.max}]: ${value}`,
-      );
-    }
-  }
-  return true;
-}
+import { DELAY } from "./delay.ts";
+import { Input, Rater, validation } from "./parameters.ts";
+import { checkConflicts } from "./conflict.ts";
+import { multiposition } from "./multiposition.ts";
 
 // Confirm tick is certain weekday
 // tick: Current tick in simulation
 // start: On which weekday is tick=0
-// weekday: Confirm if tick is on weekday
+// weekday: The weekday for tick to match
 const isWeekday = (tick: Tick, start: Tick, weekday: number): boolean =>
   (start + tick) % 7 === weekday;
 
@@ -75,14 +31,6 @@ const hasFuture = (
   tick: Tick,
   futureDays: number,
 ): boolean => instrument.end >= tick + futureDays;
-
-// Value of position at tick
-// const positionValue = (position: Position, tick: Tick): number =>
-//   position.instrument.price(tick) * position.quantity;
-
-// Value of portfolio at tick
-// const portfolioValue = (portfolio: Portfolio, tick: Tick): number =>
-//   portfolio.reduce((sum, position) => sum + positionValue(position, tick), 0);
 
 /** Trading strategy */
 export const trading = (
@@ -107,62 +55,36 @@ export const trading = (
   ): Order[] => {
     const isTradingDay = isWeekday(tick, startWeekDay, settings.weekday);
     // Combined positions of same instrument
-    const bundle: Record<Symbol, MultiPosition> = {};
-    for (const position of portfolio.positions) {
-      const symbol: Symbol = position.instrument.symbol;
-      if (!(symbol in bundle)) bundle[symbol] = new MultiPosition([position]);
-      else bundle[symbol].positions.push(position);
-    }
+    const positions = multiposition(portfolio.positions, tick);
 
     // List of available instruments as Set
     const instrumentSet = new Set<Instrument>(
       instruments.filter((instrument) => instrument.start <= (tick - DELAY)),
     );
 
-    // console.log(
-    //   "Instruments available at tick:",
-    //   tick,
-    //   ":",
-    //   instrumentSet.size,
-    //   Array.from(instrumentSet).map((i: Instrument) => i.start),
-    // );
-
-    // Positions to close
+    // Container for positions to close
     const close: SellOrder[] = [];
 
     // Confirm if any positions should be closed due to stoploss
     const remainingPositions: OpenPosition[] = [];
 
-    // for (const position of portfolio.positions) {
-    Object.entries(bundle).forEach(([_symbol, multiPosition]) => {
-      const value: Amount = multiPosition.value(tick);
+    for (const multiPosition of positions) {
+      const value: Amount = multiPosition.value;
       if (value < multiPosition.invested * settings.stoploss) {
         // Close all individual positions, if combined positions as a whole below stoploss
         for (const position of multiPosition.positions) {
           close.push({ position, reason: "Loss" });
         }
         // Instrument no longer available for opening
-        instrumentSet.delete(multiPosition.instrument);
+        instrumentSet.delete(multiPosition.positions[0].instrument);
       } else {
         // Positions not automatically closed by stoploss, so still available
-        // Only available if price date is in range
-        // if (multiPosition.start >= (tick + DELAY)) {
         remainingPositions.push(...multiPosition.positions);
-        // }
       }
-    });
+    }
 
     // No more decisions to open or close if not trading day, but still close positions that hit stoploss
     if (!isTradingDay) return close;
-
-    // console.log(
-    //   "Instruments available at tick:",
-    //   tick,
-    //   ":",
-    //   instrumentSet.size,
-    //   Array.from(instrumentSet).map((i: Instrument) => i.start),
-    // );
-    // console.log({ remainingPositions });
 
     const totalValue = cash + portfolio.value(tick);
     const target = totalValue * settings.position_size;
@@ -181,14 +103,16 @@ export const trading = (
     // Sell the biggest candidates first, to free up cash for new positions
     for (const candidate of candidatesList.sort((a, b) => b.value - a.value)) {
       const action = candidate.action;
-      if ((action === "Take" || action === "Trail") && maxSell-- > 0) {
-        close.push(
-          ...candidate.positions.map((position: OpenPosition) => ({
-            position,
-            reason: action,
-          })),
-        );
-        cash += candidate.value;
+      if ((action === "Take" || action === "Trail")) {
+        if (maxSell-- > 0) {
+          close.push(
+            ...candidate.positions.map((position: OpenPosition) => ({
+              position,
+              reason: action,
+            })),
+          );
+          cash += candidate.value;
+        }
       }
     }
 
@@ -199,107 +123,24 @@ export const trading = (
       if (hasFuture(candidate.instrument, tick, futureDays)) {
         const action = candidate.action;
         if (action === "Open" || action === "Increase") {
-          if (candidate.buy <= cash && maxBuy-- > 0) {
-            cash -= candidate.buy;
-            open.push({
-              instrument: candidate.instrument,
-              amount: candidate.buy,
-            });
+          if (candidate.buy <= cash) {
+            if (maxBuy-- > 0) {
+              cash -= candidate.buy;
+              open.push({
+                instrument: candidate.instrument,
+                amount: candidate.buy,
+              });
+            }
           }
         }
       }
     }
 
     // Confirm that we are not trying to open and close the same instrument on the same tick
-    const closeInstruments = new Set(close.map((o) => o.position.instrument));
-    const openInstruments = new Set(open.map((o) => o.instrument));
-    const conflictingInstruments = [...closeInstruments].filter((i) =>
-      openInstruments.has(i)
-    );
-
-    if (conflictingInstruments.length > 0) {
-      console.warn(
-        "Conflicting buy and sell orders for same instruments:",
-      );
-      conflictingInstruments.forEach((i) => {
-        const symbol = i.symbol;
-        close.filter((o) => o.position.instrument.symbol === symbol).map((o) =>
-          console.log(o.reason, symbol, o.position.start)
-        );
-        open.filter((o) => o.instrument.symbol === symbol).map((o) =>
-          console.log("Buy", symbol, o.amount)
-        );
-      });
-      throw new Error(
-        "Error: Conflicting buy and sell orders for same instruments at tick " +
-          tick,
-      );
-    }
+    checkConflicts(open, close);
 
     return [...close, ...open];
   };
 
   return strategy;
 };
-
-const assetName = "trading";
-
-/** Load strategy parameter values from repository */
-export async function loadSettings(repo: Backend): Promise<Input> {
-  const config = new Config(repo);
-  const settings = await config.get(assetName) as Input;
-  if (!validation(settings)) return {};
-  return settings;
-}
-
-/** Save strategy parameter values to repository */
-export async function saveSettings(
-  repo: Backend,
-  settings: Input,
-): Promise<void> {
-  if (!validation(settings)) return;
-  const config = new Config(repo);
-  await config.set(assetName, settings);
-}
-
-/** Strategy with parameters and models loaded from repository */
-export async function loadStrategy(
-  repo: Backend,
-  ticks_required: number,
-): Promise<Strategy> {
-  const [settings, ranker, timer] = await Promise.all([
-    loadSettings(repo),
-    loadRanker(repo, ticks_required),
-    loadTimer(repo),
-  ]);
-
-  const community = new Community(repo);
-  const timeline: Timeline = await community.timeline();
-  const startWeekday: Weekday = timeline.weekday(0);
-
-  return trading(settings, ranker, timer, startWeekday, 180);
-}
-
-/** Create a prediction wrapper */
-function createRater(signal: Signal): Rater {
-  const timer = (instrument: Instrument, tick: Tick) => {
-    const effective: Tick = tick - DELAY;
-    const value = instrument.has(effective)
-      ? signal.predict(instrument, effective)
-      : 0;
-    return value;
-  };
-  return timer;
-}
-
-/** Create instance of signal from specific settings */
-export function createTimer(params: Settings): Rater {
-  const signal: Signal = CachedSignal.import(params);
-  return createRater(signal);
-}
-
-/** Create instance of signal from saved settings */
-export async function loadTimer(repo: Backend): Promise<Rater> {
-  const signal: Signal = await CachedSignal.load(repo);
-  return createRater(signal);
-}

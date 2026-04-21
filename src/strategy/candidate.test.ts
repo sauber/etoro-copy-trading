@@ -5,7 +5,7 @@ import {
   makeInstrument,
   OpenPosition,
 } from "@sauber/backtest";
-import { DELAY } from "📚/strategy/mod.ts";
+import { DELAY } from "./delay.ts";
 import { createCandidate } from "./candidate.ts";
 
 const amount: Amount = 500;

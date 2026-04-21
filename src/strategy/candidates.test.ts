@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { Instrument, makeInstrument } from "@sauber/backtest";
-import { candidates } from "./orders.ts";
-import { DELAY } from "📚/strategy/mod.ts";
+import { candidates } from "📚/strategy/candidates.ts";
+import { DELAY } from "./delay.ts";
 
 Deno.test("candidates - returns empty array when no instruments", () => {
   const result = candidates({

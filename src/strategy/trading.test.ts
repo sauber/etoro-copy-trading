@@ -19,7 +19,9 @@ import {
 
 import { DateFormat, Timeline } from "📚/tick/mod.ts";
 
-import { DELAY, Input, Rater, trading } from "./trading.ts";
+import { trading } from "./trading.ts";
+import { Input, Rater } from "./parameters.ts";
+import { DELAY } from "./delay.ts";
 
 // Calculate a dummy ranking score based on length of username.
 export const test_ranking: Rater = (instr: Instrument, _tick: Tick) => {
@@ -93,7 +95,7 @@ Deno.test("Buy Orders", () => {
   );
   const market: Market = makeMarket(3, 700);
   const chartStart: Tick = Math.max(...market.instruments.map((i) => i.start));
-  const tradingday: Tick = timeline.nextWeekday(chartStart, p.weekday);
+  const tradingday: Tick = timeline.nextWeekday(chartStart + 2, p.weekday);
   const initialCash: number = 1000;
   const orders: Order[] = strategy(
     tradingday,
@@ -101,6 +103,14 @@ Deno.test("Buy Orders", () => {
     market.instruments,
     new Portfolio(),
   );
+
+  // Occasionally only two orders are generated instead of three. Not sure what the reason is. So dump out debug data if that happens.
+  if (orders.length !== market.instruments.length) {
+    console.log("Trading tick:", tradingday);
+    console.log("Market instruments:", market.instruments);
+    console.log("Generated orders:", orders);
+  }
+
   assertEquals(orders.length, market.instruments.length);
   orders.filter((o) => "amount" in o).forEach((o: BuyOrder) =>
     assertEquals(o.amount, initialCash * position_size)
@@ -151,6 +161,13 @@ Deno.test("Sell Orders", () => {
   const tradingTick = lastOpenTick + daysUntilTrading;
 
   const orders: Order[] = strategy(tradingTick, 1000, [], portfolio);
+
+  // Occasionally only two orders are generated instead of three. Not sure what the reason is. So dump out debug data if that happens.
+  if (orders.length !== portfolio.positions.length) {
+    console.log("Trading tick:", tradingTick);
+    console.log("Portfolio positions:", portfolio.positions);
+    console.log("Generated orders:", orders);
+  }
   assertEquals(orders.length, portfolio.positions.length);
   assertArrayIncludes(
     portfolio.positions,

@@ -4,3 +4,4 @@
 - deno task trade should look for investers only in latest folder
 - Split context.ts into smaller files, and remove stale code
 - Combine candiate.ts and orders.ts into one file
+- In trade_bin.ts calculate and display available cash

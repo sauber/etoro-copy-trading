@@ -1,17 +1,11 @@
-import { Amount, Instrument, OpenPosition } from "@sauber/backtest";
+import {
+  Amount,
+  ClosingReason,
+  Instrument,
+  OpenPosition,
+} from "@sauber/backtest";
 import { Tick } from "📚/tick/mod.ts";
-import { DELAY } from "./trading.ts";
-
-/** Export data examples
- * TODO: Field names and types need to be finalized
-| UserName   | Open       | Days | Gain | Rank | Timing | Score | Value |  Buy | Sell | Action   |
-|=======================================|=======================|=====================|==========|
-| MilanIvann | 2025-01-01 |   10 |  10% |  0.7 |   -0.7 |   0.5 |  4000 | 3000 |      | Increase |
-| SanjaySoni |            |      |      |  1.0 |   -1.0 |   1.0 |       | 6000 |      | Open     |
-| Robier     |            |      |      | -0.6 |   -0.3 |  -0.2 |       |      |      | Ignore   |
-| SCoudreau  | 2024-12-01 |   30 |  20% | -0.7 |   -0.7 |  -0.5 |  3000 |      |      | Keep     |
-| AndrewJW   | 2024-11-01 |   40 |  30% |  0.4 |    0.7 |  -0.7 |  5000 |      | 5000 | Take    |
-*/
+import { DELAY } from "./delay.ts";
 
 // Actions to take
 // Skip -- No position and no buy opportunity
@@ -20,7 +14,8 @@ import { DELAY } from "./trading.ts";
 // Keep -- Position exists and no buy or sell opportunity
 // Take -- Sell opportunity for existing positions
 // Trail -- Position exists and price has dropped below stop loss level
-export type Actions = "Skip" | "Open" | "Increase" | "Keep" | "Take" | "Trail";
+
+type Action = ClosingReason | "Open" | "Increase" | "Keep" | "Skip";
 
 /** Required parameters for creating a candidate */
 export type CandidateParameters = {
@@ -59,7 +54,7 @@ export type Candidate = {
   readonly gap: Amount;
   readonly buy: Amount;
   readonly ticksSinceOpen: number | undefined;
-  readonly action: Actions;
+  readonly action: Action;
   readonly drawdown: number | undefined;
   readonly isBuy: boolean;
   readonly isSell: boolean;
@@ -102,7 +97,7 @@ export function createCandidate(
   const gap = target - value;
   const buy = Math.max(0, gap * -timing);
 
-  let action: Actions;
+  let action: Action = "Skip";
   if (positions.length == 0) {
     if (buy > 0) {
       action = "Open";
