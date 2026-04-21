@@ -139,6 +139,7 @@ export const trading = (
     // Confirm that we are not trying to open and close the same instrument on the same tick
     checkConflicts(open, close);
 
+    // First close, then open, to free up cash for new positions
     return [...close, ...open];
   };
 
