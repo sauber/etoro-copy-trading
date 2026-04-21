@@ -15,7 +15,7 @@ import { DELAY } from "./delay.ts";
 // Take -- Sell opportunity for existing positions
 // Trail -- Position exists and price has dropped below stop loss level
 
-type Action = ClosingReason | "Open" | "Increase" | "Keep" | "Skip";
+export type Action = ClosingReason | "Open" | "Increase" | "Keep" | "Skip";
 
 /** Required parameters for creating a candidate */
 export type CandidateParameters = {

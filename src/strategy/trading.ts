@@ -12,7 +12,7 @@ import {
 import { Weekday } from "📚/tick/mod.ts";
 
 import { candidates } from "./candidates.ts";
-import { Candidate } from "./candidate.ts";
+import { Action, Candidate } from "./candidate.ts";
 import { DELAY } from "./delay.ts";
 import { Input, Rater, validation } from "./parameters.ts";
 import { checkConflicts } from "./conflict.ts";
@@ -121,7 +121,7 @@ export const trading = (
     const open: BuyOrder[] = [];
     for (const candidate of candidatesList.sort((a, b) => b.buy - a.buy)) {
       if (hasFuture(candidate.instrument, tick, futureDays)) {
-        const action = candidate.action;
+        const action: Action = candidate.action;
         if (action === "Open" || action === "Increase") {
           if (candidate.buy <= cash) {
             if (maxBuy-- > 0) {
