@@ -90,13 +90,13 @@ export const trading = (
     let maxSell: number = settings.limit;
     // Sell the biggest candidates first, to free up cash for new positions
     for (const candidate of candidatesList.sort((a, b) => b.value - a.value)) {
-      const action = candidate.action;
-      if ((action === "Take" || action === "Trail")) {
+      const reason: Action = candidate.action;
+      if ((reason === "Take" || reason === "Trail")) {
         if (maxSell-- > 0) {
           close.push(
             ...candidate.positions.map((position: OpenPosition) => ({
               position,
-              reason: action,
+              reason,
             })),
           );
           cash += candidate.value;
