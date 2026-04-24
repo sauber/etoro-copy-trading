@@ -80,14 +80,15 @@ const investors = candidates({
 const pct = (amount: number): number =>
   parseFloat((100 * amount).toPrecision(3));
 
-const records = investors.map((i) => ({
+const records = investors.map((i: Candidate) => ({
   Name: i.instrument.symbol,
   Ranking: parseFloat(ranking(i.instrument, tick).toPrecision(2)),
-  Timing: parseFloat(i.timing.toPrecision(2)),
-  Action: i.action,
   Invested: i.invested > 0 ? money(i.invested) : undefined,
+  Days: i.ticksSinceOpen,
   Value: i.invested > 0 ? money(i.value) : undefined,
   "Gain%": i.invested > 0 ? pct(i.gain) : undefined,
+  Timing: parseFloat(i.timing.toPrecision(2)),
+  Action: i.action,
   Buy: i.isBuy ? money(i.buy) : undefined,
 }));
 
