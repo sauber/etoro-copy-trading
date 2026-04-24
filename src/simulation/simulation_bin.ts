@@ -76,7 +76,7 @@ console.log(transaction_table.toString());
 
 // Plot cash and total value
 console.log("[ Simulation performance ]");
-console.log(simulationPlot(simulation));
+console.log(simulationPlot(simulation.cash, simulation.value));
 console.log(
   "Start:",
   timeline.date(market.start),

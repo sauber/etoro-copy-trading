@@ -26,10 +26,9 @@
     "@sauber/ratelimit": "jsr:@sauber/ratelimit@^0.1.1",
     "@sauber/statistics": "jsr:@sauber/statistics@^0.5.0",
     "@sauber/table": "jsr:@sauber/table@^0.1.0",
-    "@sauber/widgets": "jsr:@sauber/widgets@^0.5.2",
+    "@sauber/widgets": "jsr:@sauber/widgets@^0.6.1",
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@std/fmt": "jsr:@std/fmt@^1.0.9",
-    "asciichart": "npm:asciichart@^1.5.25",
     "asciiplot": "npm:asciiplot@^1.0.0",
     "📚/": "./src/"
   }
