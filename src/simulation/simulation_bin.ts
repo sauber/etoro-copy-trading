@@ -6,22 +6,24 @@ import {
   Strategy,
 } from "@sauber/backtest";
 import { Backend } from "@sauber/journal";
-import { Table } from "@sauber/table";
 
 import { loadStrategy } from "📚/strategy/mod.ts";
 import { Names, TestCommunity } from "📚/community/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
-import { DateFormat } from "📚/tick/mod.ts";
 
-import { simulationPlot } from "./plot.ts";
+import { simulationPlot } from "./chart.ts";
 import { score } from "./score.ts";
+import { displayTransactions } from "./transactions.ts";
+import { displayOpenPositions } from "./positions.ts";
+import { evaluation } from "./evaluation.ts";
 
 // Repo
 const path: string = Deno.args[0];
 const repo: Backend = makeRepository(path);
 
 // Strategy
-const strategy: Strategy = await loadStrategy(repo);
+const ticks_required: number = 90;
+const strategy: Strategy = await loadStrategy(repo, ticks_required);
 
 // Exchange of test investors
 const community = new TestCommunity(repo);
@@ -38,41 +40,11 @@ const simulation = new Backtest(market, strategy, initial_cash, spread, spread);
 console.log("Simulation starts");
 simulation.run();
 
-// Formatter for amount value
-const currency = (x: number): number => parseFloat(x.toFixed(2));
+// Translate ticks to dates
+const timeline = await community.timeline();
 
 // Display transactions
-const timeline = await community.timeline();
-const transactions = simulation.transactions;
-const rows: Array<
-  [DateFormat, DateFormat, number, string, number, number, string]
-> = transactions.map((
-  t,
-) => [
-  // Open date
-  timeline.date(t.start),
-  // Close date
-  timeline.date(t.end),
-  // Number of days open
-  t.end - t.start,
-  t.instrument.symbol,
-  currency(t.invested),
-  currency(t.profit),
-  t.reason,
-]);
-const transaction_table = new Table();
-transaction_table.title = "Closed Positions";
-transaction_table.headers = [
-  "Open",
-  "Close",
-  "Days",
-  "Investor",
-  "Invested",
-  "Profit",
-  "Reason",
-];
-transaction_table.rows = rows;
-console.log(transaction_table.toString());
+console.log(displayTransactions(simulation.transactions, timeline));
 
 // Plot cash and total value
 console.log("[ Simulation performance ]");
@@ -84,54 +56,10 @@ console.log(
   timeline.date(market.end),
 );
 
-// // Display positions still open
-const open_table = new Table();
-open_table.title = "Open Positions";
-open_table.headers = [
-  "Open",
-  "Investor",
-  "Invested",
-  "Value",
-  "Unrealized",
-];
-open_table.rows = simulation.portfolio.positions.map((p) => [
-  // Open date
-  timeline.date(p.start),
-  // Investor username
-  p.instrument.symbol,
-  // Invested
-  currency(p.invested),
-  // Current value
-  currency(p.value(market.end)),
-  // Profit
-  currency(p.value(market.end) - p.invested),
-]);
-console.log(open_table.toString());
-
-// // Evaluation
-const pct = (x: number): string => parseFloat((100 * x).toPrecision(3)) + "%";
-const profit = simulation.value[simulation.value.length - 1] / initial_cash - 1;
-const years: number = (market.end - market.start + 1) / 365;
-const annual_return: number = (1 + profit) ** (1 / years) - 1;
-
-const average_invested = simulation.invested.map((invested, index) => {
-  const value = simulation.value[index];
-  return invested === 0 ? 0 : invested / value;
-}).reduce((sum, x) => sum + x, 0) / simulation.invested.length;
-
-const win_ratio = simulation.transactions.filter((t) => t.profit > 0).length /
-  simulation.transactions.length;
-const reward: number = score(simulation);
-
+// Display positions still open
 console.log(
-  "Trades:",
-  simulation.transactions.length,
-  "APY:",
-  pct(annual_return),
-  "Average invested:",
-  pct(average_invested),
-  "Win Ratio:",
-  pct(win_ratio),
-  "Score",
-  pct(reward),
+  displayOpenPositions(simulation.portfolio.positions, timeline, market.end),
 );
+
+// Evaluation
+console.log(evaluation(simulation));
