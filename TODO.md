@@ -2,5 +2,4 @@
 - Define minimum profit to avoid selling at loss
 - Externalize loading raw data from eToro API
 - deno task trade should look for investers only in latest folder
-- Split context.ts into smaller files, and remove stale code
 - In trade_bin.ts calculate and display available cash

@@ -1,8 +1,10 @@
 import { Instrument, makeInstrument, OpenPosition } from "@sauber/backtest";
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
-import { multiposition } from "📚/strategy/multiposition.ts";
+
 import { Tick } from "📚/tick/mod.ts";
-import { DELAY } from "📚/trading/context.ts";
+
+import { multiposition } from "./multiposition.ts";
+import { DELAY } from "./delay.ts";
 
 const instrument1: Instrument = makeInstrument(100);
 const instrument2: Instrument = makeInstrument(200);

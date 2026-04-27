@@ -1,21 +1,27 @@
 import { Table } from "@cliffy/table";
 import { DataFrame } from "@sauber/dataframe";
-import { loadTimer, Rater } from "📚/strategy/mod.ts";
+import { Amount, Instrument, Portfolio } from "@sauber/backtest";
+
+import { Candidate, candidates, loadTimer, Rater } from "📚/strategy/mod.ts";
 import { loadRanker } from "📚/ranking/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
-import { Context, ParameterData } from "./context.ts";
 import { DateFormat, Tick, Timeline } from "📚/tick/mod.ts";
-import { Amount, Instrument, Portfolio } from "@sauber/backtest";
-import { candidates } from "📚/strategy/candidates.ts";
+import { Community } from "📚/community/mod.ts";
+import { Instruments } from "📚/trading/instruments.ts";
+import { Account } from "📚/account/mod.ts";
+import { Investor } from "📚/investor/mod.ts";
+
+import { Settings, settings } from "./settings.ts";
+import { loadPortfolio } from "./portfolio.ts";
+import { tradingTick } from "./tradingday.ts";
 
 const start: number = performance.now();
 
 // Repo
 const path: string = Deno.args[0];
 const repo = makeRepository(path);
-let loader: Context | null = new Context(repo);
-const tick: Tick = await loader.tradingTick();
 
+// TODO: Should only be needed when training
 const ticks_required = path.match(/testdata/) ? 15 : 180;
 
 // Models
@@ -23,14 +29,29 @@ const ranking: Rater = await loadRanker(repo, ticks_required);
 const timing: Rater = await loadTimer(repo);
 
 // Settings
-const settings: ParameterData = await loader.settings();
-const tradingTick: Tick = await loader.tradingTick();
-const timeline: Timeline = await loader.timeline();
-const tradingDate: DateFormat = timeline.date(tradingTick);
-const username: string = await loader.username();
+const config: Settings = await settings(repo);
+
+// Account
+const account = new Account(repo);
+const value: Amount = await account.value();
+const username: string = await account.username();
+
+// Community
+const community = new Community(repo);
+const tick: Tick = await tradingTick(community, config.weekday);
+let loader: Instruments | null = new Instruments(repo, tick);
 const instruments: Instrument[] = await loader.tradingInstruments();
-const value: Amount = await loader.value();
-const portfolio: Portfolio = await loader.portfolio();
+const timeline: Timeline = await community.timeline();
+const tradingDate: DateFormat = timeline.date(tick);
+
+// Portfolio
+const investor: Investor = await loader.investor(username);
+const portfolio: Portfolio = await loadPortfolio(
+  investor,
+  tick,
+  value,
+  loader,
+);
 
 // Loading finished, free cache memory
 loader = null;
@@ -55,14 +76,14 @@ const table: Table = new Table(
     "Investors",
     instruments.length,
   ],
-  ["Account", username, "Position Size", settings.position_size],
+  ["Account", username, "Position Size", config.position_size],
   [
     "Trading Day",
-    weekday[settings.weekday],
+    weekday[config.weekday],
     "Trading Date",
-    tradingDate + ` (tick ${tradingTick})`,
+    tradingDate + ` (tick ${tick})`,
   ],
-  ["Stoploss", settings.stoploss, "Limit", settings.limit],
+  ["Stoploss", config.stoploss, "Limit", config.limit],
   ["Amount", money(value), "Cash", "TBD"],
 );
 table.render();
@@ -73,8 +94,8 @@ const investors = candidates({
   ranking,
   timing,
   tick,
-  target: value * settings.position_size,
-  stoploss: settings.stoploss,
+  target: value * config.position_size,
+  stoploss: config.stoploss,
 });
 
 const pct = (amount: number): number =>
