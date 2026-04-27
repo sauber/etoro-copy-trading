@@ -12,7 +12,6 @@ import { Names, TestCommunity } from "📚/community/mod.ts";
 import { makeRepository } from "📚/repository/mod.ts";
 
 import { simulationPlot } from "./chart.ts";
-import { score } from "./score.ts";
 import { displayTransactions } from "./transactions.ts";
 import { displayOpenPositions } from "./positions.ts";
 import { evaluation } from "./evaluation.ts";
