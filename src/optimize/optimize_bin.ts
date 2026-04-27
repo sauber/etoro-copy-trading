@@ -14,10 +14,9 @@ import {
   Rater,
   saveSettings as saveStrategy,
 } from "📚/strategy/mod.ts";
+import { DateFormat } from "📚/tick/mod.ts";
 
 import { Optimize } from "./optimize.ts";
-import { exit } from "node:process";
-import { DateFormat } from "📚/tick/mod.ts";
 
 // Repo
 const path: string = Deno.args[0];
@@ -33,7 +32,8 @@ async function investors(count: number): Promise<Instrument[]> {
 }
 
 // Ranking Model
-const ranker: Rater = await loadRanker(repo);
+const ticks_required = path.match(/testdata/) ? 15 : 180;
+const ranker: Rater = await loadRanker(repo, ticks_required);
 
 // Load training data
 const training_count: number = 800;
@@ -125,7 +125,7 @@ console.log("Best score:", bestScore);
 // No improvements found
 if (initialScore >= finalScore && initialScore >= bestScore) {
   console.log("No improvements found.");
-  exit(0);
+  Deno.exit(1);
 }
 
 const savingModel = (finalScore > bestScore) ? trainingModel : validationModel;
