@@ -19,6 +19,7 @@ const start: number = performance.now();
 
 // Repo
 const path: string = Deno.args[0];
+const overrideDate: string | undefined = Deno.args[1];
 const repo = makeRepository(path);
 
 // TODO: Should only be needed when training
@@ -38,7 +39,7 @@ const username: string = await account.username();
 
 // Community
 const community = new Community(repo);
-const tick: Tick = await tradingTick(community, config.weekday);
+const tick: Tick = await tradingTick(community, config.weekday, overrideDate);
 let loader: Instruments | null = new Instruments(repo, tick);
 const instruments: Instrument[] = await loader.tradingInstruments();
 const timeline: Timeline = await community.timeline();

@@ -1,13 +1,20 @@
-import { Tick, Timeline } from "📚/tick/mod.ts";
+import { DateFormat, Tick, Timeline } from "📚/tick/mod.ts";
 import { Community } from "📚/community/mod.ts";
 
 /** On which tick will trading happen */
 export const tradingTick = async (
   community: Community,
   weekday: number,
+  overrideDate?: DateFormat,
 ): Promise<Tick> => {
   // Last tick of community
-  const communityEnd: Tick = await community.end();
+  let communityEnd: Tick;
+  if (overrideDate) {
+    const timeline: Timeline = await community.timeline();
+    communityEnd = timeline.tick(overrideDate);
+  } else {
+    communityEnd = await community.end();
+  }
 
   // Which day of week is the last tick?
   const timeline: Timeline = await community.timeline();
