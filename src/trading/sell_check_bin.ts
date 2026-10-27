@@ -75,12 +75,19 @@ table.render();
 
 const startWeekday = timeline.weekday(0);
 const sells = portfolio.positions.flatMap((position) => {
+  const latest_gain =
+    (position.value(tick) - position.invested) / position.invested;
+  const latest_gain_pct = Number.isFinite(latest_gain)
+    ? parseFloat((100 * latest_gain).toPrecision(3))
+    : 0;
+
   const hits: Array<{
     Symbol: string;
-    Open: DateFormat;
     Date: DateFormat;
-    Tick: Tick;
-    Timing: number;
+    Reason: "Take" | "Trail";
+    Days: number;
+    GainAtDatePct: number;
+    GainLatestPct: number;
   }> = [];
 
   for (let t = position.start; t <= tick; t++) {
@@ -88,15 +95,31 @@ const sells = portfolio.positions.flatMap((position) => {
     if (!isTradingDay) continue;
 
     const signal = timing(position.instrument, t);
-    if (signal > 0) {
-      hits.push({
-        Symbol: position.instrument.symbol,
-        Open: timeline.date(position.start),
-        Date: timeline.date(t),
-        Tick: t,
-        Timing: parseFloat(signal.toPrecision(3)),
-      });
-    }
+    const price = position.instrument.price(t);
+    const max_since_open = Math.max(...position.instrument.slice(position.start, t).series);
+    const drawdown = max_since_open > 0 ? 1 - (price / max_since_open) : 0;
+    const trail = drawdown > 0 && (1 - drawdown) < config.stoploss;
+    const reason: "Take" | "Trail" | null = trail
+      ? "Trail"
+      : signal > 0
+      ? "Take"
+      : null;
+
+    if (!reason) continue;
+
+    const gain_at_date = (position.value(t) - position.invested) / position.invested;
+    const gain_at_date_pct = Number.isFinite(gain_at_date)
+      ? parseFloat((100 * gain_at_date).toPrecision(3))
+      : 0;
+
+    hits.push({
+      Symbol: position.instrument.symbol,
+      Date: timeline.date(t),
+      Reason: reason,
+      Days: t - position.start,
+      GainAtDatePct: gain_at_date_pct,
+      GainLatestPct: latest_gain_pct,
+    });
   }
 
   return hits;
@@ -108,6 +131,4 @@ if (sells.length === 0) {
 }
 
 const df = DataFrame.fromRecords(sells);
-df.select((r) => r.Tick >= 0).sort("Tick", false).print(
-  "Sell opportunities for held positions",
-);
+df.sort("Date", false).print("Sell opportunities for held positions");
