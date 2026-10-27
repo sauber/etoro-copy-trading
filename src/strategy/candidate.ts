@@ -101,13 +101,13 @@ export function createCandidate(
   if (positions.length == 0) {
     if (buy > 0) {
       action = "Open";
-    } else if (drawdown && (1 - drawdown) < stoploss) {
-      action = "Trail";
     } else {
       action = "Skip";
     }
   } else {
-    if (timing > 0) {
+    if (drawdown && (1 - drawdown) < stoploss) {
+      action = "Trail";
+    } else if (timing > 0) {
       action = "Take";
     } else if (buy > 0) {
       action = "Increase";
