@@ -5,6 +5,7 @@
     "investor": "deno run --allow-read=../etoro-data/data src/trading/investor_bin.ts ../etoro-data/data",
     "optimize": "deno run --allow-read=../etoro-data/data src/optimize/optimize_bin.ts ../etoro-data/data",
     "profile": "deno run --allow-read=testdata --cpu-prof-flamegraph src/optimize/optimize_bin.ts testdata",
+    "sell-check": "deno run --allow-read=../etoro-data/data src/trading/sell_check_bin.ts ../etoro-data/data",
     "simulation": "deno run --allow-read=../etoro-data/data src/simulation/simulation_bin.ts ../etoro-data/data",
     "scrape": "deno run --allow-read=../etoro-data/data --allow-write=/workspaces/etoro-data/data --allow-net=www.etoro.com src/refresh/refresh_bin.ts ../etoro-data/data",
     "test": "deno test --allow-write=tmp,testdata --allow-read=tmp,testdata,src/neural --allow-net=www.etoro.com,jsonplaceholder.typicode.com,github.com,objects.githubusercontent.com,deno.com",
@@ -28,7 +29,7 @@
     "@sauber/table": "jsr:@sauber/table@^0.1.0",
     "@sauber/widgets": "jsr:@sauber/widgets@^0.6.1",
     "@std/assert": "jsr:@std/assert@^1.0.19",
-    "@std/fmt": "jsr:@std/fmt@^1.0.9",
+    "@std/fmt": "jsr:@std/fmt@^0.9.0",
     "asciiplot": "npm:asciiplot@^1.0.0",
     "📚/": "./src/"
   }
