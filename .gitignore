@@ -24,3 +24,6 @@ tmp/
 
 # Workbook training file
 training_data.csv
+
+# Trading recommendations
+trade/

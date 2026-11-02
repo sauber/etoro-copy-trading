@@ -183,9 +183,9 @@ export class Community {
       const investor: Investor = await assembly.investor();
       assertGreaterOrEqual(investor.start, 0);
       assertGreater(investor.end, investor.start);
-      console.log(
-        `Loaded investor ${username} with chart range [${investor.start};${investor.end}]`,
-      );
+      // console.log(
+      //   `Loaded investor ${username} with chart range [${investor.start};${investor.end}]`,
+      // );
       this._loaded[key] = investor;
     }
     return this._loaded[key];
