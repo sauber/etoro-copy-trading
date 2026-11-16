@@ -82,7 +82,14 @@ export class Refresh {
     }
 
     // Load from web
-    const data: DataFormat = await download();
+    let data: DataFormat;
+    try {
+      data = await download();
+    } catch (error) {
+      console.error(`Error: Download failed for ${assetname}`);
+      console.error(error);
+      return false;
+    }
     ++this.fetchCount;
 
     // Validate content
